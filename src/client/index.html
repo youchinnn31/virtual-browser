@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>仮想Webブラウザ</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      img {
+        width: 100%;
+        vertical-align: bottom;
+      }
+      #nav * {
+        font-size: 2em;
+      }
+    </style>
+    <script src="index.js" defer></script>
+  </head>
+  <body>
+    <h1>仮想Webブラウザ</h1>
+    <div id="nav">
+      <label for="url-input">URL:</label>
+      <input id="url-input" type="url" name="url" />
+      <button id="url-button" type="submit">送信</button>
+      <button id="up-button">↑</button>
+      <button id="down-button">↓</button>
+    </div>
+    <img id="browser" />
+  </body>
+</html>
