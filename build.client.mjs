@@ -2,7 +2,7 @@
 import * as esbuild from "esbuild";
 
 await esbuild.build({
-  entryPoints: ["src/client/index.ts"],
+  entryPoints: ["src/client/index.ts", "src/client/evaluation.ts"],
   bundle: true,
   minify: true,
   outdir: "dist/client",

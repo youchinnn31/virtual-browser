@@ -7,7 +7,7 @@
       body {
         margin: 0;
       }
-      img {
+      canvas {
         width: 100%;
         vertical-align: bottom;
       }
@@ -16,6 +16,8 @@
       }
     </style>
     <script src="index.js" defer></script>
+    <!-- <script src="web-vitals.umd.cjs" defer></script> -->
+    <script src="lcp.js" defer></script>
   </head>
   <body>
     <h1>仮想Webブラウザ</h1>
@@ -23,9 +25,7 @@
       <label for="url-input">URL:</label>
       <input id="url-input" type="url" name="url" />
       <button id="url-button" type="submit">送信</button>
-      <button id="up-button">↑</button>
-      <button id="down-button">↓</button>
     </div>
-    <img id="browser" />
+    <canvas id="browser"></canvas>
   </body>
 </html>
