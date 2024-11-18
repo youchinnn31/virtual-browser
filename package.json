@@ -5,12 +5,13 @@
   "main": "index.js",
   "scripts": {
     "all": "npm-run-all lint build start",
-    "build": "npm-run-all clean build:* copy",
+    "build": "npm-run-all clean:* build:* copy",
     "build:client": "node build.client.mjs",
     "build:server": "node build.server.mjs",
-    "clean": "rimraf dist",
+    "clean:dist": "rimraf dist",
+    "clean:db": "rimraf *.db",
     "copy": "npm-run-all copy:*",
-    "copy:html": "cpr --filter=.*\\.ts$ src/client dist/client",
+    "copy:client": "cpr --filter=.*\\.ts$ src/client dist/client",
     "fix": "npm-run-all fix:*",
     "fix:prettier": "prettier --write .",
     "lint": "npm-run-all --continue-on-error lint:*",
@@ -25,6 +26,8 @@
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@types/express": "^5.0.0",
+    "@types/sqlite3": "^3.1.11",
+    "@types/ws": "^8.5.13",
     "cpr": "^3.0.1",
     "esbuild": "^0.24.0",
     "eslint": "^9.13.0",
@@ -38,8 +41,15 @@
   },
   "dependencies": {
     "axios": "^1.7.7",
+    "chrome-launcher": "^1.1.2",
+    "ejs": "^3.1.10",
     "express": "^4.21.1",
+    "lighthouse": "^12.2.2",
     "playwright": "^1.48.1",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "web-vitals": "^4.2.4",
+    "ws": "^8.18.0"
   }
 }
