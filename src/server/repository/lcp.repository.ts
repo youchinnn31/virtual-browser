@@ -17,13 +17,13 @@ export class LcpRepository {
   /**
    * LCPテーブルに保存する
    */
-  async save(lcp: number, url: string, urlId: number): Promise<void> {
+  async save(lcp: number, selector: string, urlId: number): Promise<void> {
     this.db.run(
       // "INSERT INTO lcp(lcp_metric, url_id) VALUES(JSON($lcp_metric), $url_id)",
-      "INSERT INTO lcp(lcp, url, url_id) VALUES($lcp, $url , $url_id)",
+      "INSERT INTO lcp(lcp, selector, url_id) VALUES($lcp, $selector , $url_id)",
       {
         $lcp: lcp,
-        $url: url,
+        $selector: selector,
         $url_id: urlId,
       },
     );

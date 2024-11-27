@@ -9,7 +9,7 @@
     "build:client": "node build.client.mjs",
     "build:server": "node build.server.mjs",
     "clean:dist": "rimraf dist",
-    "clean:db": "rimraf *.db",
+    "tmp:db": "rimraf *.db",
     "copy": "npm-run-all copy:*",
     "copy:client": "cpr --filter=.*\\.ts$ src/client dist/client",
     "fix": "npm-run-all fix:*",
@@ -40,7 +40,6 @@
     "typescript-eslint": "^8.10.0"
   },
   "dependencies": {
-    "axios": "^1.7.7",
     "chrome-launcher": "^1.1.2",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
@@ -49,7 +48,6 @@
     "sharp": "^0.33.5",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
-    "web-vitals": "^4.2.4",
     "ws": "^8.18.0"
   }
 }

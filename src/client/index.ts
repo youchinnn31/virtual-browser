@@ -43,14 +43,19 @@ const getBrowser = (): HTMLCanvasElement => {
  * @param y y座標
  */
 const renderSite = async (blob: Blob, x: number, y: number): Promise<void> => {
-  const ctx: CanvasRenderingContext2D | null = browser.getContext("2d");
+  const ctx: CanvasRenderingContext2D = browser.getContext("2d")!;
   const image: HTMLImageElement = new Image();
   const imgUrl: string = URL.createObjectURL(blob);
 
   image.addEventListener("load", () => {
-    endTime = performance.now();
-    console.log(endTime - startTime);
     ctx?.drawImage(image, x, y);
+    endTime = performance.now();
+    const data = {
+      action: "lcp",
+      lcp: endTime - startTime,
+    };
+    console.log(endTime - startTime);
+    webSocket.send(JSON.stringify(data));
   });
   image.src = imgUrl;
 };
@@ -100,8 +105,8 @@ webSocket.onmessage = (event) => {
   renderSite(blob, res.x, res.y);
 };
 
-// webSocket.addEventListener("open", () => {
-//   const clickEvent = new Event("click");
-//   const urlButton = document.getElementById("url-button") as HTMLButtonElement;
-//   urlButton.dispatchEvent(clickEvent);
-// });
+webSocket.addEventListener("open", () => {
+  const clickEvent = new Event("click");
+  const urlButton = document.getElementById("url-button") as HTMLButtonElement;
+  urlButton.dispatchEvent(clickEvent);
+});

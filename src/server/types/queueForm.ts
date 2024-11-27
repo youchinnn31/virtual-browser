@@ -8,8 +8,6 @@ import { LcpMetric } from "./lcpMetric";
 export interface QueueForm {
   /** LCPメトリック */
   lcpMetric: LcpMetric;
-  // /** LCPコンテンツのセレクタ */
-  // selector: string;
-  /** アクセスurl */
+  /** ページのURL */
   url: string;
 }
