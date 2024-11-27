@@ -1,4 +1,4 @@
-// "use strict";
+"use strict";
 
 import express, { Express } from "express";
 import path from "path";
@@ -20,16 +20,18 @@ import { WSRequest } from "./types/wsRequest";
 import { WSResponse } from "./types/wsResponse";
 import { UrlRepository } from "./repository/url.repository";
 import { LcpRepository } from "./repository/lcp.repository";
-import { Queue } from "./queue";
-import { QueueForm } from "./types/queueForm";
+// import { Queue } from "./queue";
+// import { QueueForm } from "./types/queueForm";
 
 const PORT: number = 3000; // 仮想ブラウザのPORT番号
-const QUALITY: number = 100; // SSのクオリティ
-// const httpRegex: RegExp = /^(?:https?:\/\/)?(?:[^/]+)(\/.*)/;
+const QUALITY: number = 50; // SSのクオリティ
+// const TARGET_SIZE: number = (128 / 8) * 1000 * 4;
+// const DEFAULT_HEIGHT: number = 2000;
+// const DEFAULT_WIDTH: number = 1000;
 
 const responses: Array<Response> = [];
 const db = new sqlite3.Database("./json.db");
-const SubStack: Array<QueueForm> = [];
+// const SubStack: Array<QueueForm> = [];
 
 /**
  * 仮想ブラウザの処理
@@ -53,14 +55,13 @@ async function main(): Promise<void> {
       "CREATE TABLE IF NOT EXISTS url(id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT UNIQUE, image_lcp INTEGER NOT NULL)",
     );
     db.run(
-      // "CREATE TABLE IF NOT EXISTS lcp(id INTEGER PRIMARY KEY AUTOINCREMENT, lcp_metric JSON, url_id INTEGER, FOREIGN KEY (url_id) REFERENCES url(id))",
-      "CREATE TABLE IF NOT EXISTS lcp(id INTEGER PRIMARY KEY AUTOINCREMENT, lcp INTEGER NOT NULL, url TEXT, url_id INTEGER, FOREIGN KEY (url_id) REFERENCES url(id))",
+      "CREATE TABLE IF NOT EXISTS lcp(id INTEGER PRIMARY KEY AUTOINCREMENT, lcp INTEGER NOT NULL, selector TEXT, url_id INTEGER, FOREIGN KEY (url_id) REFERENCES url(id))",
     );
   });
 
   const urlRepository: UrlRepository = new UrlRepository(db);
   const lcpRepository: LcpRepository = new LcpRepository(db);
-  const queue: Queue = new Queue(urlRepository, lcpRepository);
+  // const queue: Queue = new Queue(urlRepository, lcpRepository);
 
   // headlessブラウザの起動
   const browser: Browser = await playwright.chromium.launch({
@@ -77,11 +78,7 @@ async function main(): Promise<void> {
   // pageインスタンスの生成
   const page: Page = await context.newPage();
 
-  // cacheを無効化?
-  // page.route("**", (route) => route.continue());
-
   // LCP測定用のJSを注入
-  // await page.addInitScript({ path: "./web-vitals.umd.cjs" });
   await page.addInitScript({ path: "./lcp.js" });
 
   // LCP情報を取得したら配列に格納する
@@ -96,11 +93,10 @@ async function main(): Promise<void> {
       //   url: page.url(),
       // });
 
-      SubStack.push({
-        lcpMetric: JSON.parse(msg.text()),
-        // lcpMetric: JSON.parse(msg.text()),
-        url: page.url(),
-      });
+      // SubStack.push({
+      //   lcpMetric: JSON.parse(msg.text()),
+      //   url: page.url(),
+      // });
     }
   });
 
@@ -158,20 +154,16 @@ async function main(): Promise<void> {
 
       //  初回アクセスかどうかの確認
       const urlEntity: UrlEntity = await urlRepository.findByUrl(currentUrl);
-      // if (urlEntity && urlEntity.image_lcp > 4000) {
-      if (urlEntity) {
+      if (urlEntity && urlEntity.image_lcp > 4000) {
+        // if (urlEntity) {
         const lcps: Array<LcpEntity> = await lcpRepository.findAllByUrlId(
           urlEntity.id,
         );
 
         // 各LCPコンテンツに対して処理する
-        let count = 0;
+        // let count = 0;
         for (const lcp of lcps!) {
-          // const metric: LcpMetric = await JSON.parse(lcp.lcp_metric); // LCPコンテンツのデータ
-          // const lcpUrl: string = metric.entries[0]!.url; // LCPコンテンツのURL
-          const lcpUrl: string = lcp.url; // LCPコンテンツのURL
-
-          // const path: string | undefined = lcpUrl.match(httpRegex)![1];
+          const lcpUrl: string = lcp.selector; // LCPコンテンツのURL
 
           // LCPコンテンツを特定
           const lcpLocator: Locator[] = await page.locator(lcpUrl).all();
@@ -181,12 +173,21 @@ async function main(): Promise<void> {
             // await lcpLocator[0]!.scrollIntoViewIfNeeded();
             const lcpBoundingBox = await lcpLocator[0]!.boundingBox();
             if (lcpBoundingBox) {
-              count += 1;
-              console.log(lcpUrl);
+              // count += 1;
               const screenshot: Buffer = await lcpLocator[0]!.screenshot({
                 type: "jpeg",
                 quality: QUALITY,
               });
+              // const img = sharp(screenshot);
+              // const metadata = await img.metadata();
+              // let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
+              // while (screenshot.length > TARGET_SIZE) {
+              //   resizedWidth = Math.trunc(resizedWidth / 2);
+              //   screenshot = await sharp(screenshot)
+              //     .resize(Math.trunc(resizedWidth), null)
+              //     .webp()
+              //     .toBuffer();
+              // }
 
               // レスポンスデータ
               const res: WSResponse = {
@@ -195,9 +196,10 @@ async function main(): Promise<void> {
                 x: lcpBoundingBox!.x,
                 y: lcpBoundingBox!.y,
               };
-              setTimeout(() => {
-                ws.send(JSON.stringify(res));
-              }, 2000 * count);
+              ws.send(JSON.stringify(res));
+              // setTimeout(() => {
+              //   ws.send(JSON.stringify(res));
+              // }, 2000 * count);
             } else {
               console.log("見つからへんかった?");
             }
@@ -205,7 +207,6 @@ async function main(): Promise<void> {
             console.log("lengthが0未満");
           }
         }
-        // TODO: LCP以外の差分だけを送信するようにしたい
         const screenshot = await page.screenshot({
           type: "jpeg",
           quality: QUALITY,
@@ -217,18 +218,29 @@ async function main(): Promise<void> {
           x: 0,
           y: 0,
         };
-        setTimeout(
-          () => {
-            ws.send(JSON.stringify(res));
-          },
-          2000 * (count + 1),
-        );
+        // setTimeout(
+        //   () => {
+        //     ws.send(JSON.stringify(res));
+        //   },
+        //   2000 * (count + 1),
+        // );
+        ws.send(JSON.stringify(res));
         responses.splice(0, 0);
       } else {
         const screenshot = await page.screenshot({
           type: "jpeg",
           quality: QUALITY,
         });
+        // const img = sharp(screenshot);
+        // const metadata = await img.metadata();
+        // let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
+        // while (screenshot.length > TARGET_SIZE) {
+        //   resizedWidth = Math.trunc(resizedWidth / 2);
+        //   screenshot = await sharp(screenshot)
+        //     .resize(Math.trunc(resizedWidth), null)
+        //     .webp()
+        //     .toBuffer();
+        // }
 
         const res: WSResponse = {
           url: currentUrl,
@@ -238,9 +250,9 @@ async function main(): Promise<void> {
         };
         ws.send(JSON.stringify(res));
         await urlRepository.save(currentUrl);
-        while (SubStack.length > 0) {
-          await queue.enqueue(SubStack.pop()!);
-        }
+        // while (SubStack.length > 0) {
+        //   await queue.enqueue(SubStack.pop()!);
+        // }
       }
     };
 
@@ -248,9 +260,12 @@ async function main(): Promise<void> {
      * クライアントから送られてきたLCPを保存
      */
     const processSentLcp = async (req: WSRequest): Promise<void> => {
-      const accesedUrl: string = req.url;
+      const accesedUrl: string = page.url();
       const imageLcp: number = req.lcp;
-      await urlRepository.updateImageLcpByUrl(accesedUrl, imageLcp);
+      const urlEntity: UrlEntity = await urlRepository.findByUrl(accesedUrl);
+      if (urlEntity.image_lcp < 0) {
+        await urlRepository.updateImageLcpByUrl(accesedUrl, imageLcp);
+      }
     };
   });
 }

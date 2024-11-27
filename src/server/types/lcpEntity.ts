@@ -6,10 +6,10 @@
 export interface LcpEntity {
   /** プライマリキー */
   id: number;
-  /** */
+  /** LCP時間 */
   lcp: number;
-  /** */
-  url: string;
-  // /** LCP情報のJSON文字列 */
-  // lcp_metric: string;
+  /** LCPコンテンツのセレクタ */
+  selector: string;
+  /** urlテーブルの外部キー */
+  urlId: number;
 }

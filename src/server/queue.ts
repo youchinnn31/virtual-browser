@@ -6,7 +6,7 @@ import { UrlRepository } from "./repository/url.repository";
 import { LcpRepository } from "./repository/lcp.repository";
 
 /**
- *
+ * Queue
  */
 export class Queue {
   /** データ保存用Queue */
@@ -51,24 +51,15 @@ export class Queue {
     }
 
     this.isProcessing = false;
-
-    // if (this.queue.length > 0) {
-    //   await this.processQueue();
-    // }
   }
 
   /**
    * LCPテーブルにLCP情報を保存
    */
   private async saveToDB(value: QueueForm): Promise<void> {
-    // const url: string | undefined = value.lcpMetric.entries[0]?.url;
     const url: string = value.lcpMetric.selector;
     await this.urlRepository.save(value.url);
     const urlEntity: UrlEntity = await this.urlRepository.findByUrl(value.url);
     await this.lcpRepository.save(value.lcpMetric.lcp, url!, urlEntity.id);
-    // await this.lcpRepository.save(
-    //   JSON.stringify(value.lcpMetric),
-    //   urlEntity.id!,
-    // );
   }
 }
