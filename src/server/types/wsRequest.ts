@@ -5,7 +5,7 @@
  */
 export interface WSRequest {
   /** ユーザの操作 */
-  action: "init" | "click" | "lcp";
+  action: "init" | "scroll" | "click" | "lcp" | "userAgent";
   /** リクエストURL or アクセスしているURL */
   url: string;
   /** ビューポートのwidth */
@@ -20,4 +20,6 @@ export interface WSRequest {
   y: number;
   /** 測定したLCP時間 */
   lcp: number;
+  /** スクロール量 */
+  scrollAmount: number;
 }

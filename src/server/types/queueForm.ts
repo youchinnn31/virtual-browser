@@ -1,13 +1,13 @@
 "use strict";
 
-import { LcpMetric } from "./lcpMetric";
-
 /**
- * Queueの入れるコンテンツ
+ * Queueに入れるコンテンツ
  */
 export interface QueueForm {
-  /** LCPメトリック */
-  lcpMetric: LcpMetric;
-  /** ページのURL */
-  url: string;
+  /** LCPの値 */
+  lcp: number;
+  /** LCPのセレクタ */
+  selector: string;
+  /** ページのId */
+  urlId: number;
 }

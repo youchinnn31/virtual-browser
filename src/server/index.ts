@@ -1,37 +1,29 @@
 "use strict";
 
-import express, { Express } from "express";
 import path from "path";
-import playwright, {
-  Browser,
-  BrowserContext,
-  Locator,
-  Page,
-  Response,
-} from "playwright";
+import fs from "fs";
+
+import express, { Express } from "express";
+import puppeteer from "puppeteer";
+import sharp from "sharp";
+
 import sqlite3 from "sqlite3";
 import WebSocket, { WebSocketServer } from "ws";
-// import sharp from "sharp";
 
 import { LcpEntity } from "./types/lcpEntity";
 import { UrlEntity } from "./types/urlEntity";
-// import { LcpMetric } from "./types/lcpMetric";
 import { WSRequest } from "./types/wsRequest";
 import { WSResponse } from "./types/wsResponse";
 import { UrlRepository } from "./repository/url.repository";
 import { LcpRepository } from "./repository/lcp.repository";
-// import { Queue } from "./queue";
-// import { QueueForm } from "./types/queueForm";
+import { LcpInfo } from "./types/lcpInfo";
 
 const PORT: number = 3000; // 仮想ブラウザのPORT番号
-const QUALITY: number = 50; // SSのクオリティ
-// const TARGET_SIZE: number = (128 / 8) * 1000 * 4;
-// const DEFAULT_HEIGHT: number = 2000;
-// const DEFAULT_WIDTH: number = 1000;
+const DEFAULT_WIDTH: number = 1000;
+const TARGET_SIZE: number = (128 / 8) * 1000 * 4;
 
-const responses: Array<Response> = [];
 const db = new sqlite3.Database("./json.db");
-// const SubStack: Array<QueueForm> = [];
+const lcpFile = fs.readFileSync("./lcp.js", "utf8");
 
 /**
  * 仮想ブラウザの処理
@@ -39,11 +31,12 @@ const db = new sqlite3.Database("./json.db");
 async function main(): Promise<void> {
   const app: Express = express();
 
-  app.use(express.json());
   app.use(express.static(path.resolve("dist/client")));
-
+  app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
   app.set("views", process.cwd() + "/views");
+
   app.get("/evaluation", (req, res) => {
     const url = req.query["url"];
     res.render("index.ejs", { url });
@@ -52,7 +45,7 @@ async function main(): Promise<void> {
   // テーブルの作成
   db.serialize(() => {
     db.run(
-      "CREATE TABLE IF NOT EXISTS url(id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT UNIQUE, image_lcp INTEGER NOT NULL)",
+      "CREATE TABLE IF NOT EXISTS url(id INTEGER PRIMARY KEY, url TEXT UNIQUE, image_lcp INTEGER NOT NULL, access_num INTEGER NOT NULL)",
     );
     db.run(
       "CREATE TABLE IF NOT EXISTS lcp(id INTEGER PRIMARY KEY AUTOINCREMENT, lcp INTEGER NOT NULL, selector TEXT, url_id INTEGER, FOREIGN KEY (url_id) REFERENCES url(id))",
@@ -61,48 +54,32 @@ async function main(): Promise<void> {
 
   const urlRepository: UrlRepository = new UrlRepository(db);
   const lcpRepository: LcpRepository = new LcpRepository(db);
-  // const queue: Queue = new Queue(urlRepository, lcpRepository);
 
   // headlessブラウザの起動
-  const browser: Browser = await playwright.chromium.launch({
-    headless: true,
-  });
-
-  // headlessブラウザをモバイル用にする
-  const context: BrowserContext = await browser.newContext({
-    userAgent:
-      "Mozilla/5.0 (Linux; Android 15; Pixel 8 Pro Build/AP41.240925.009; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0.6778.22 Mobile Safari/537.36",
-    isMobile: true,
+  const browser = await puppeteer.launch({
+    headless: "new",
+    ignoreHTTPSErrors: true,
+    args: ["--lang=ja"],
   });
 
   // pageインスタンスの生成
-  const page: Page = await context.newPage();
-
-  // LCP測定用のJSを注入
-  await page.addInitScript({ path: "./lcp.js" });
+  const page = await browser.newPage();
+  await page.setBypassCSP(true);
+  await page.setExtraHTTPHeaders({
+    "Accept-Language": "ja-JP",
+  });
+  await page.evaluateOnNewDocument(lcpFile);
 
   // LCP情報を取得したら配列に格納する
   page.on("console", async (msg) => {
     if (msg.type() === "trace") {
-      console.log(msg.text());
-      // const urlEntity: UrlEntity = await urlRepository.findByUrl(page.url());
-      // await lcpRepository.save(JSON.parse(msg.text()), urlEntity.id);
-
-      // await queue.enqueue({
-      //   lcpMetric: JSON.parse(msg.text()),
-      //   url: page.url(),
-      // });
-
-      // SubStack.push({
-      //   lcpMetric: JSON.parse(msg.text()),
-      //   url: page.url(),
-      // });
+      const lcpInfo: LcpInfo = JSON.parse(msg.text());
+      await urlRepository.save(lcpInfo.url);
+      const urlEntity: UrlEntity = await urlRepository.findByUrl(lcpInfo.url);
+      if (urlEntity.access_num === 1) {
+        await lcpRepository.save(lcpInfo.lcp, lcpInfo.selector, urlEntity.id);
+      }
     }
-  });
-
-  // レスポンス情報を配列に格納
-  page.on("response", async (res) => {
-    responses.push(res);
   });
 
   // サーバのリッスン
@@ -111,7 +88,24 @@ async function main(): Promise<void> {
   });
 
   // WSサーバのインスタンス
-  const wss: WebSocketServer = new WebSocketServer({ server });
+  const wss: WebSocketServer = new WebSocketServer({
+    server,
+    perMessageDeflate: {
+      zlibDeflateOptions: {
+        chunkSize: 1024,
+        memLevel: 7,
+        level: 3,
+      },
+      zlibInflateOptions: {
+        chunkSize: 10 * 1024,
+      },
+      clientNoContextTakeover: true,
+      serverNoContextTakeover: true,
+      serverMaxWindowBits: 10,
+      concurrencyLimit: 10,
+      threshold: 1024,
+    },
+  });
 
   // WSサーバの処理
   wss.on("connection", (ws: WebSocket) => {
@@ -129,6 +123,14 @@ async function main(): Promise<void> {
           await processSentLcp(req);
           break;
         }
+        case "scroll": {
+          await scrollBrowser(req);
+          break;
+        }
+        case "userAgent": {
+          await setUserAgent(req);
+          break;
+        }
         default: {
           console.log("default");
           break;
@@ -138,68 +140,68 @@ async function main(): Promise<void> {
 
     const init = async (req: WSRequest): Promise<void> => {
       const requestURl: string = req.url;
-      const width: number = req.width;
-      const height: number = req.height;
-      const userAgent: string = req.userAgent;
 
-      await page.setExtraHTTPHeaders({
-        "User-Agent": userAgent,
-      });
-      await page.setViewportSize({ height, width });
       await page.goto(requestURl, {
-        waitUntil: "load",
-        timeout: 0,
+        waitUntil: "networkidle2",
       });
+      await urlRepository.save(page.url());
+
+      await urlRepository.incrementAccessNumByUrl(page.url());
+
       const currentUrl: string = page.url();
 
       //  初回アクセスかどうかの確認
       const urlEntity: UrlEntity = await urlRepository.findByUrl(currentUrl);
-      if (urlEntity && urlEntity.image_lcp > 4000) {
-        // if (urlEntity) {
+      if (urlEntity && urlEntity.image_lcp > 1) {
         const lcps: Array<LcpEntity> = await lcpRepository.findAllByUrlId(
           urlEntity.id,
         );
 
         // 各LCPコンテンツに対して処理する
-        // let count = 0;
         for (const lcp of lcps!) {
-          const lcpUrl: string = lcp.selector; // LCPコンテンツのURL
+          const lcpSelector: string = lcp.selector; // LCPコンテンツのURL
 
-          // LCPコンテンツを特定
-          const lcpLocator: Locator[] = await page.locator(lcpUrl).all();
+          // let lcpContent;
+          // if (lcpSelector.includes(":has-text")) {
+          //   const elements = await page.$$(lcpSelector.split(":has-text")[0]!);
+          //   for (const element of elements) {
+          //     const text = await element.evaluate((el) => el.textContent);
+          //     if (lcpSelector.split(":has-text")[1] == text) {
+          //       lcpContent = element;
+          //       break;
+          //     }
+          //   }
+          // } else {
+          //   // LCPコンテンツを特定
+          //   lcpContent = await page.$(lcpSelector);
+          // }
+          const [lcpContent] = await page.$x(lcpSelector);
           // コンテンツが特定出来た場合
-          if (lcpLocator.length > 0) {
-            // TODO: なんかエラーはくことがある?rakutenのサイト
-            // await lcpLocator[0]!.scrollIntoViewIfNeeded();
-            const lcpBoundingBox = await lcpLocator[0]!.boundingBox();
+          if (lcpContent) {
+            console.log(lcpSelector);
+            const lcpBoundingBox = await lcpContent.boundingBox();
             if (lcpBoundingBox) {
-              // count += 1;
-              const screenshot: Buffer = await lcpLocator[0]!.screenshot({
-                type: "jpeg",
-                quality: QUALITY,
+              let screenshot: Buffer = await lcpContent.screenshot({
+                type: "webp",
               });
-              // const img = sharp(screenshot);
-              // const metadata = await img.metadata();
-              // let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
-              // while (screenshot.length > TARGET_SIZE) {
-              //   resizedWidth = Math.trunc(resizedWidth / 2);
-              //   screenshot = await sharp(screenshot)
-              //     .resize(Math.trunc(resizedWidth), null)
-              //     .webp()
-              //     .toBuffer();
-              // }
+              const img = sharp(screenshot);
+              const metadata = await img.metadata();
+              let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
+              while (screenshot.length > TARGET_SIZE) {
+                resizedWidth = Math.trunc(resizedWidth / 2);
+                screenshot = await sharp(screenshot)
+                  .resize(Math.trunc(resizedWidth), null)
+                  .toBuffer();
+              }
 
               // レスポンスデータ
               const res: WSResponse = {
                 url: currentUrl,
                 img: screenshot,
-                x: lcpBoundingBox!.x,
-                y: lcpBoundingBox!.y,
+                x: lcpBoundingBox.x,
+                y: lcpBoundingBox.y,
               };
               ws.send(JSON.stringify(res));
-              // setTimeout(() => {
-              //   ws.send(JSON.stringify(res));
-              // }, 2000 * count);
             } else {
               console.log("見つからへんかった?");
             }
@@ -207,10 +209,19 @@ async function main(): Promise<void> {
             console.log("lengthが0未満");
           }
         }
-        const screenshot = await page.screenshot({
-          type: "jpeg",
-          quality: QUALITY,
+        await page.evaluate(() => {
+          window.scrollTo(0, 0);
         });
+        let screenshot: Buffer = await page.screenshot({ type: "webp" });
+        const img = sharp(screenshot);
+        const metadata = await img.metadata();
+        let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
+        while (screenshot.length > TARGET_SIZE) {
+          resizedWidth = Math.trunc(resizedWidth / 2);
+          screenshot = await sharp(screenshot)
+            .resize(Math.trunc(resizedWidth), null)
+            .toBuffer();
+        }
 
         const res: WSResponse = {
           url: currentUrl,
@@ -218,29 +229,19 @@ async function main(): Promise<void> {
           x: 0,
           y: 0,
         };
-        // setTimeout(
-        //   () => {
-        //     ws.send(JSON.stringify(res));
-        //   },
-        //   2000 * (count + 1),
-        // );
         ws.send(JSON.stringify(res));
-        responses.splice(0, 0);
       } else {
-        const screenshot = await page.screenshot({
-          type: "jpeg",
-          quality: QUALITY,
-        });
-        // const img = sharp(screenshot);
-        // const metadata = await img.metadata();
-        // let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
-        // while (screenshot.length > TARGET_SIZE) {
-        //   resizedWidth = Math.trunc(resizedWidth / 2);
-        //   screenshot = await sharp(screenshot)
-        //     .resize(Math.trunc(resizedWidth), null)
-        //     .webp()
-        //     .toBuffer();
-        // }
+        let screenshot = await page.screenshot({ type: "webp" });
+        const img = sharp(screenshot);
+        const metadata = await img.metadata();
+        let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
+        while (screenshot.length > TARGET_SIZE) {
+          resizedWidth = Math.trunc(resizedWidth / 2);
+          screenshot = await sharp(screenshot)
+            .resize(Math.trunc(resizedWidth), null)
+            .webp()
+            .toBuffer();
+        }
 
         const res: WSResponse = {
           url: currentUrl,
@@ -249,10 +250,6 @@ async function main(): Promise<void> {
           y: 0,
         };
         ws.send(JSON.stringify(res));
-        await urlRepository.save(currentUrl);
-        // while (SubStack.length > 0) {
-        //   await queue.enqueue(SubStack.pop()!);
-        // }
       }
     };
 
@@ -265,6 +262,49 @@ async function main(): Promise<void> {
       const urlEntity: UrlEntity = await urlRepository.findByUrl(accesedUrl);
       if (urlEntity.image_lcp < 0) {
         await urlRepository.updateImageLcpByUrl(accesedUrl, imageLcp);
+      }
+    };
+
+    /**
+     * クライアントがスクロール時の処理
+     */
+    const scrollBrowser = async (req: WSRequest): Promise<void> => {
+      await page.evaluate((scrollAmount) => {
+        window.scrollBy(0, scrollAmount);
+      }, req.scrollAmount);
+      let screenshot: Buffer = await page.screenshot({ type: "webp" });
+      const img = sharp(screenshot);
+      const metadata = await img.metadata()
+      let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
+      while (screenshot.length > TARGET_SIZE) {
+        resizedWidth = Math.trunc(resizedWidth / 2);
+        screenshot = await sharp(screenshot)
+          .resize(Math.trunc(resizedWidth), null)
+          .toBuffer();
+      }
+
+      const res: WSResponse = {
+        url: page.url(),
+        img: screenshot,
+        x: 0,
+        y: 0,
+      };
+      ws.send(JSON.stringify(res));
+    };
+
+    /**
+     * モバイル端末情報を設定する
+     */
+    const setUserAgent = async (req: WSRequest): Promise<void> => {
+      const height: number = req.height;
+      const width: number = req.width;
+      await page.setViewport({
+        height,
+        width,
+        isMobile: true,
+      });
+      if ((await browser.userAgent()) !== req.userAgent) {
+        await page.setUserAgent(req.userAgent);
       }
     };
   });
