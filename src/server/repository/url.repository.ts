@@ -18,9 +18,10 @@ export class UrlRepository {
    * URLテーブルに保存する
    */
   async save(url: string): Promise<void> {
-    this.db.run("INSERT OR IGNORE INTO url(url, image_lcp) VALUES($url, -1)", {
-      $url: url,
-    });
+    this.db.run(
+      "INSERT OR IGNORE INTO url(url, image_lcp, access_num) VALUES($url, -1, 1)",
+      { $url: url },
+    );
   }
 
   /**
@@ -60,11 +61,20 @@ export class UrlRepository {
   }
 
   /**
-   * UrlEntityをurlからimage_lcpを更新
+   * urlからimage_lcpを更新
    */
   async updateImageLcpByUrl(url: string, imageLcp: number): Promise<void> {
     this.db.run("UPDATE url SET image_lcp = $image_lcp WHERE url = $url", {
       $image_lcp: imageLcp,
+      $url: url,
+    });
+  }
+
+  /**
+   * urlからacces_numを+1する
+   */
+  async incrementAccessNumByUrl(url: string): Promise<void> {
+    this.db.run("UPDATE url SET access_num = access_num + 1 WHERE url = $url", {
       $url: url,
     });
   }

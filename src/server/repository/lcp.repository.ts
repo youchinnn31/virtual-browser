@@ -19,7 +19,6 @@ export class LcpRepository {
    */
   async save(lcp: number, selector: string, urlId: number): Promise<void> {
     this.db.run(
-      // "INSERT INTO lcp(lcp_metric, url_id) VALUES(JSON($lcp_metric), $url_id)",
       "INSERT INTO lcp(lcp, selector, url_id) VALUES($lcp, $selector , $url_id)",
       {
         $lcp: lcp,

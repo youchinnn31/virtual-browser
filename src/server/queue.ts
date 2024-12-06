@@ -1,8 +1,6 @@
 "use strict";
 
 import { QueueForm } from "./types/queueForm";
-import { UrlEntity } from "./types/urlEntity";
-import { UrlRepository } from "./repository/url.repository";
 import { LcpRepository } from "./repository/lcp.repository";
 
 /**
@@ -14,14 +12,12 @@ export class Queue {
   /** Queueの処理状態を管理 */
   private isProcessing = false;
 
-  private urlRepository: UrlRepository;
   private lcpRepository: LcpRepository;
 
   /**
    * コンストラクタ
    */
-  constructor(urlRepository: UrlRepository, lcpRepository: LcpRepository) {
-    this.urlRepository = urlRepository;
+  constructor(lcpRepository: LcpRepository) {
     this.lcpRepository = lcpRepository;
   }
 
@@ -57,9 +53,8 @@ export class Queue {
    * LCPテーブルにLCP情報を保存
    */
   private async saveToDB(value: QueueForm): Promise<void> {
-    const url: string = value.lcpMetric.selector;
-    await this.urlRepository.save(value.url);
-    const urlEntity: UrlEntity = await this.urlRepository.findByUrl(value.url);
-    await this.lcpRepository.save(value.lcpMetric.lcp, url!, urlEntity.id);
+    // await this.urlRepository.save(value.url);
+    // const urlEntity: UrlEntity = await this.urlRepository.findByUrl(value.url);
+    await this.lcpRepository.save(value.lcp, value.selector, value.urlId);
   }
 }
