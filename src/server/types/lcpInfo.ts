@@ -8,6 +8,6 @@ export interface LcpInfo {
   lcp: number;
   /** 現在のurl */
   url: string;
-  /** セレクタ */
-  selector: string;
+  /** lcpコンテンツのxpath */
+  xpath: string;
 }

@@ -48,7 +48,7 @@ async function main(): Promise<void> {
       "CREATE TABLE IF NOT EXISTS url(id INTEGER PRIMARY KEY, url TEXT UNIQUE, image_lcp INTEGER NOT NULL, access_num INTEGER NOT NULL)",
     );
     db.run(
-      "CREATE TABLE IF NOT EXISTS lcp(id INTEGER PRIMARY KEY AUTOINCREMENT, lcp INTEGER NOT NULL, selector TEXT, url_id INTEGER, FOREIGN KEY (url_id) REFERENCES url(id))",
+      "CREATE TABLE IF NOT EXISTS lcp(id INTEGER PRIMARY KEY AUTOINCREMENT, lcp INTEGER NOT NULL, xpath TEXT, url_id INTEGER, FOREIGN KEY (url_id) REFERENCES url(id))",
     );
   });
 
@@ -68,6 +68,7 @@ async function main(): Promise<void> {
   await page.setExtraHTTPHeaders({
     "Accept-Language": "ja-JP",
   });
+
   await page.evaluateOnNewDocument(lcpFile);
 
   // LCP情報を取得したら配列に格納する
@@ -77,7 +78,7 @@ async function main(): Promise<void> {
       await urlRepository.save(lcpInfo.url);
       const urlEntity: UrlEntity = await urlRepository.findByUrl(lcpInfo.url);
       if (urlEntity.access_num === 1) {
-        await lcpRepository.save(lcpInfo.lcp, lcpInfo.selector, urlEntity.id);
+        await lcpRepository.save(lcpInfo.lcp, lcpInfo.xpath, urlEntity.id);
       }
     }
   });
@@ -144,6 +145,12 @@ async function main(): Promise<void> {
       await page.goto(requestURl, {
         waitUntil: "networkidle2",
       });
+
+      // const a = await page.evaluate(() => {
+      //   return window.LargestContentfulPaint;
+      // });
+      // console.log(a);
+
       await urlRepository.save(page.url());
 
       await urlRepository.incrementAccessNumByUrl(page.url());
@@ -152,33 +159,19 @@ async function main(): Promise<void> {
 
       //  初回アクセスかどうかの確認
       const urlEntity: UrlEntity = await urlRepository.findByUrl(currentUrl);
-      if (urlEntity && urlEntity.image_lcp > 1) {
+      if (urlEntity && urlEntity.image_lcp > 0) {
         const lcps: Array<LcpEntity> = await lcpRepository.findAllByUrlId(
           urlEntity.id,
         );
 
         // 各LCPコンテンツに対して処理する
         for (const lcp of lcps!) {
-          const lcpSelector: string = lcp.selector; // LCPコンテンツのURL
+          const lcpXpath: string = lcp.xpath; // LCPコンテンツのxpath
+          const [lcpContent] = await page.$x(lcpXpath); // xpathから特定
 
-          // let lcpContent;
-          // if (lcpSelector.includes(":has-text")) {
-          //   const elements = await page.$$(lcpSelector.split(":has-text")[0]!);
-          //   for (const element of elements) {
-          //     const text = await element.evaluate((el) => el.textContent);
-          //     if (lcpSelector.split(":has-text")[1] == text) {
-          //       lcpContent = element;
-          //       break;
-          //     }
-          //   }
-          // } else {
-          //   // LCPコンテンツを特定
-          //   lcpContent = await page.$(lcpSelector);
-          // }
-          const [lcpContent] = await page.$x(lcpSelector);
           // コンテンツが特定出来た場合
           if (lcpContent) {
-            console.log(lcpSelector);
+            console.log(lcpXpath);
             const lcpBoundingBox = await lcpContent.boundingBox();
             if (lcpBoundingBox) {
               let screenshot: Buffer = await lcpContent.screenshot({
@@ -274,7 +267,7 @@ async function main(): Promise<void> {
       }, req.scrollAmount);
       let screenshot: Buffer = await page.screenshot({ type: "webp" });
       const img = sharp(screenshot);
-      const metadata = await img.metadata()
+      const metadata = await img.metadata();
       let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
       while (screenshot.length > TARGET_SIZE) {
         resizedWidth = Math.trunc(resizedWidth / 2);

@@ -1,16 +1,15 @@
 "use strict";
 
-let LCP = 0;
 const observer = new PerformanceObserver((list) => {
   const entries = list.getEntries();
   const lastEntry = entries[entries.length - 1];
   const xpath = getElementXPath(lastEntry.element);
-  LCP = lastEntry.startTime;
+  const lcp = lastEntry.startTime;
   console.trace(
     JSON.stringify({
       url: location.href,
-      lcp: LCP,
-      selector: xpath,
+      lcp: lcp,
+      xpath: xpath,
     }),
   );
 });

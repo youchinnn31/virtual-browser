@@ -8,8 +8,8 @@ export interface LcpEntity {
   id: number;
   /** LCP時間 */
   lcp: number;
-  /** LCPコンテンツのセレクタ */
-  selector: string;
+  /** LCPコンテンツのxpath */
+  xpath: string;
   /** urlテーブルの外部キー */
   urlId: number;
 }
