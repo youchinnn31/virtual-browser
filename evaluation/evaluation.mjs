@@ -2,8 +2,9 @@
 
 import child_process from "child_process";
 import fs from "fs";
-import { resolve } from "path";
 import puppeteer from "puppeteer";
+
+const FILE_PATH = "./first.json";
 
 const urlList = [
   "https://www.google.com/",
@@ -78,23 +79,22 @@ const netSpeedList = [
 ];
 
 async function measure() {
-  const result = [];
-  // for (let i = 0; i < netSpeedList.length; i++) {
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < netSpeedList.length; i++) {
+    // for (let i = 0; i < 1; i++) {
     for (let j = 0; j < urlList.length; j++) {
       for (let k = 0; k < 1; k++) {
-        let i = 3;
+        const result = JSON.parse(fs.readFileSync(FILE_PATH, "utf-8"));
         // 1回目用
-        // await new Promise((resolve, reject) => {
-        //   child_process.exec("rm ../json.db", (err) => {
-        //     if (err) reject(err);
-        //     child_process.spawn("npm", ["start"]);
-        //     resolve();
-        //   });
-        // });
+        await new Promise((resolve, reject) => {
+          child_process.exec("rm ../json.db", (err) => {
+            if (err) reject(err);
+            child_process.spawn("npm", ["start"]);
+            resolve();
+          });
+        });
 
         // 2回目用
-        child_process.spawn("npm", ["start"]);
+        // child_process.spawn("npm", ["start"]);
 
         const browser = await puppeteer.launch({
           headless: false,
@@ -124,10 +124,6 @@ async function measure() {
         const lcp = await new Promise((resolve) => {
           page.on("console", async (msg) => {
             if (msg.type() === "trace") {
-              // await page.screenshot({
-              //   type: "webp",
-              //   path: "./a.webp"
-              // });
               resolve(msg.text());
             }
           });
@@ -139,14 +135,14 @@ async function measure() {
           lcp: lcp,
         };
         console.log(data);
-        result.push(data);
+        await result.push(data);
+        fs.writeFileSync(FILE_PATH, JSON.stringify(result));
 
         await browser.close();
         child_process.exec("kill -9 $(lsof -ti :3000)");
       }
     }
   }
-  fs.writeFileSync("./result.json", JSON.stringify(result));
 }
 
 measure().catch((error) => {
