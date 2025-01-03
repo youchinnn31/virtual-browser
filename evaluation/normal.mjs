@@ -93,16 +93,19 @@ async function measure() {
             mobile: true,
             disabled: true,
           },
-          emulatedUserAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+          emulatedUserAgent:
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
           throttlingMethod: "devtools",
           throttling: {
             requestLatencyMs: netSpeedList[i].config.latency,
-            downloadThroughputKbps: netSpeedList[i].config.downloadThroughput * 8 / 1000,
-            uploadThroughputKbps: netSpeedList[i].config.uploadThroughput * 8 / 1000,
+            downloadThroughputKbps:
+              (netSpeedList[i].config.downloadThroughput * 8) / 1000,
+            uploadThroughputKbps:
+              (netSpeedList[i].config.uploadThroughput * 8) / 1000,
           },
           onlyAudits: ["largest-contentful-paint"],
-          port: chrome.port
-        }
+          port: chrome.port,
+        };
 
         const runnerResult = await lighthouse(urlList[j], options);
         const report = JSON.parse(runnerResult.report);
@@ -110,7 +113,7 @@ async function measure() {
         const data = {
           url: urlList[j],
           speep: netSpeedList[i].speed,
-          lcp: lcp
+          lcp: lcp,
         };
         await result.push(data);
         fs.writeFileSync("./normal.json", JSON.stringify(result));
