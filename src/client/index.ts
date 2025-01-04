@@ -137,9 +137,9 @@ webSocket.addEventListener("open", () => {
   webSocket.send(JSON.stringify(data));
 
   // 下記コードを有効にすると評価用になる
-  // const clickEvent = new Event("click");
-  // const urlButton = document.getElementById("url-button") as HTMLButtonElement;
-  // setTimeout(() => {
-  //   urlButton.dispatchEvent(clickEvent);
-  // }, 1000);
+  const clickEvent = new Event("click");
+  const urlButton = document.getElementById("url-button") as HTMLButtonElement;
+  setTimeout(() => {
+    urlButton.dispatchEvent(clickEvent);
+  }, 1000);
 });

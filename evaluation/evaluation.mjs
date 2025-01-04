@@ -82,16 +82,18 @@ async function measure() {
   for (let i = 0; i < netSpeedList.length; i++) {
     // for (let i = 0; i < 1; i++) {
     for (let j = 0; j < urlList.length; j++) {
-      for (let k = 0; k < 1; k++) {
+      for (let k = 0; k < 25; k++) {
         const result = JSON.parse(fs.readFileSync(FILE_PATH, "utf-8"));
         // 1回目用
-        await new Promise((resolve, reject) => {
-          child_process.exec("rm ../json.db", (err) => {
-            if (err) reject(err);
-            child_process.spawn("npm", ["start"]);
-            resolve();
-          });
-        });
+        child_process.exec("rm ../json.db");
+        const process2 = child_process.spawn("npm", ["run", "start"]);
+        // await new Promise((resolve, reject) => {
+        //   child_process.exec("rm ../json.db", (err) => {
+        //     if (err) reject(err);
+        //     child_process.spawn("npm", ["start"]);
+        //     resolve();
+        //   });
+        // });
 
         // 2回目用
         // child_process.spawn("npm", ["start"]);
@@ -139,6 +141,7 @@ async function measure() {
         fs.writeFileSync(FILE_PATH, JSON.stringify(result));
 
         await browser.close();
+        process2.kill();
         child_process.exec("kill -9 $(lsof -ti :3000)");
       }
     }
