@@ -1,0 +1,18 @@
+[
+  {
+    "url": "https://www.google.com/",
+    "speed": 128,
+    "lcp": "3055.399999999907"
+  },
+  { "url": "https://www.google.com/", "speed": 128, "lcp": "3050.5" },
+  {
+    "url": "https://www.google.com/",
+    "speed": 128,
+    "lcp": "3335.1999999999534"
+  },
+  {
+    "url": "https://www.google.com/",
+    "speed": 128,
+    "lcp": "2966.6999999999534"
+  }
+]

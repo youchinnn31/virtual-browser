@@ -3,6 +3,7 @@
 // 測定用変数
 let startTime = 0;
 let endTime = 0;
+let lcp = 0;
 
 /**
  * 送信ボダン要素の取得
@@ -51,11 +52,15 @@ const renderSite = async (blob: Blob, x: number, y: number): Promise<void> => {
   image.addEventListener("load", () => {
     ctx?.drawImage(image, x, y);
     endTime = performance.now();
-    const data = {
-      action: "lcp",
-      lcp: endTime - startTime,
-    };
-    webSocket.send(JSON.stringify(data));
+    if (lcp === 0) {
+      lcp = endTime - startTime;
+      console.trace(lcp);
+      const data = {
+        action: "lcp",
+        lcp: lcp,
+      };
+      webSocket.send(JSON.stringify(data));
+    }
   });
   image.src = imgUrl;
 };
@@ -67,8 +72,9 @@ const urlInput: HTMLInputElement = getUrlInput();
 
 // 送信ボダンが押されたときの処理
 urlButton.addEventListener("click", () => {
+  lcp = 0;
+  startTime = performance.now();
   (async () => {
-    startTime = performance.now();
     const url: string = urlInput.value;
 
     const data: object = {
@@ -131,7 +137,9 @@ webSocket.addEventListener("open", () => {
   webSocket.send(JSON.stringify(data));
 
   // 下記コードを有効にすると評価用になる
-  // const clickEvent = new Event("click");
-  // const urlButton = document.getElementById("url-button") as HTMLButtonElement;
-  // urlButton.dispatchEvent(clickEvent);
+  const clickEvent = new Event("click");
+  const urlButton = document.getElementById("url-button") as HTMLButtonElement;
+  setTimeout(() => {
+    urlButton.dispatchEvent(clickEvent);
+  }, 1000);
 });

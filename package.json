@@ -9,7 +9,7 @@
     "build:client": "node build.client.mjs",
     "build:server": "node build.server.mjs",
     "clean:dist": "rimraf dist",
-    "clean:db": "rimraf *.db",
+    "aa:db": "rimraf *.db",
     "copy": "npm-run-all copy:*",
     "copy:client": "cpr --filter=.*\\.ts$ src/client dist/client",
     "fix": "npm-run-all fix:*",
