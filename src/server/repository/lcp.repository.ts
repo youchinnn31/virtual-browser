@@ -29,7 +29,7 @@ export class LcpRepository {
   }
 
   /**
-   * LcpEntity[]をurlIdから取得
+   * urlIdからLcpEntity[]を取得
    */
   async findAllByUrlId(urlId: number): Promise<Array<LcpEntity>> {
     return new Promise((resolve, reject) => {
