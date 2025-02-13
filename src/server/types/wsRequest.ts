@@ -5,7 +5,7 @@
  */
 export interface WSRequest {
   /** ユーザの操作 */
-  action: "init" | "scroll" | "click" | "lcp" | "userAgent";
+  action: "image" | "scroll" | "click" | "lcp" | "init";
   /** リクエストURL or アクセスしているURL */
   url: string;
   /** ビューポートのwidth */
