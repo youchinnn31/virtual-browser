@@ -1,0 +1,1325 @@
+[
+  {
+    "speed": 128,
+    "inputUrl": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/",
+    "viewport_trials_ms": [
+      3785.1,
+      3794.9,
+      3789.5,
+      3709.8,
+      3712.1
+    ],
+    "lcp_render_trials_ms": [
+      2682.1,
+      2694.3,
+      2672.5,
+      2674,
+      2485.8
+    ],
+    "viewport_median_ms": 3785.1,
+    "lcp_render_median_ms": 2674
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://www.yahoo.co.jp/",
+    "viewport_trials_ms": [
+      12338.4,
+      12353.9,
+      12424.5,
+      12446,
+      12540.9
+    ],
+    "lcp_render_trials_ms": [
+      5116.1,
+      4926.4,
+      4850,
+      4835.5,
+      4934.1
+    ],
+    "viewport_median_ms": 12424.5,
+    "lcp_render_median_ms": 4926.4
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://m.youtube.com/",
+    "dbUrl": "https://www.youtube.com/?app=desktop",
+    "viewport_trials_ms": [
+      5022.1,
+      4364.3,
+      4486.2,
+      4103.7,
+      4361.1
+    ],
+    "lcp_render_trials_ms": [
+      4554.6,
+      4174.9,
+      4287.8,
+      4362.9,
+      4463.3
+    ],
+    "viewport_median_ms": 4364.3,
+    "lcp_render_median_ms": 4362.9
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "viewport_trials_ms": [
+      10623.6,
+      9407.5,
+      10073.6,
+      10989,
+      9619.3
+    ],
+    "lcp_render_trials_ms": [
+      2979.8,
+      2954.1,
+      2806.8,
+      4136.2,
+      2724.6
+    ],
+    "viewport_median_ms": 10073.6,
+    "lcp_render_median_ms": 2954.1
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "viewport_trials_ms": [
+      15949.6,
+      15786.2,
+      16054.8,
+      16064,
+      16135.1
+    ],
+    "lcp_render_trials_ms": [
+      12592.4,
+      12484.4,
+      15778.7,
+      16146.9,
+      15887.7
+    ],
+    "viewport_median_ms": 16054.8,
+    "lcp_render_median_ms": 15778.7
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "viewport_trials_ms": [
+      10155.9,
+      10051.1,
+      10078.3,
+      10069.5,
+      10905.9
+    ],
+    "lcp_render_trials_ms": [
+      7891.3,
+      7889.4,
+      8001.6,
+      7988,
+      8014.4
+    ],
+    "viewport_median_ms": 10078.3,
+    "lcp_render_median_ms": 7988
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "viewport_trials_ms": [
+      5824.3,
+      5635.6,
+      5443,
+      5448.5,
+      5549.3
+    ],
+    "lcp_render_trials_ms": [
+      4703.7,
+      4794.1,
+      4698,
+      4788.2,
+      4880.5
+    ],
+    "viewport_median_ms": 5549.3,
+    "lcp_render_median_ms": 4788.2
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "viewport_trials_ms": [
+      18485.6,
+      18485.6,
+      18391.5,
+      17833.5,
+      18404.7
+    ],
+    "lcp_render_trials_ms": [
+      13424.2,
+      13340.4,
+      13420.8,
+      13431.4,
+      13332.7
+    ],
+    "viewport_median_ms": 18404.7,
+    "lcp_render_median_ms": 13420.8
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "viewport_trials_ms": [
+      2265.5,
+      2384,
+      2288.3,
+      2292.4,
+      2265.9
+    ],
+    "lcp_render_trials_ms": [
+      2364.4,
+      2549.7,
+      2276.8,
+      2655.9,
+      2276.5
+    ],
+    "viewport_median_ms": 2288.3,
+    "lcp_render_median_ms": 2364.4
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "viewport_trials_ms": [
+      8504.3,
+      7268.6,
+      16375.9,
+      11038.4,
+      9816.8
+    ],
+    "lcp_render_trials_ms": [
+      3342.8,
+      3346.8,
+      3350.5,
+      3353.1,
+      3356.8
+    ],
+    "viewport_median_ms": 9816.8,
+    "lcp_render_median_ms": 3350.5
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "viewport_trials_ms": [
+      6353,
+      6253.8,
+      6275.7,
+      7686.5,
+      6352.4
+    ],
+    "lcp_render_trials_ms": [
+      8036.1,
+      8160.3,
+      7964.6,
+      6556.9,
+      6459.5
+    ],
+    "viewport_median_ms": 6352.4,
+    "lcp_render_median_ms": 7964.6
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "viewport_trials_ms": [
+      11259.4,
+      10420.3,
+      11183.9,
+      9770.6,
+      9475
+    ],
+    "lcp_render_trials_ms": [
+      4051.1,
+      5356.8,
+      4127.2,
+      4131.6,
+      4037.8
+    ],
+    "viewport_median_ms": 10420.3,
+    "lcp_render_median_ms": 4127.2
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "viewport_trials_ms": [
+      5360.9,
+      5368.6,
+      5374.3,
+      5360.4,
+      5356.2
+    ],
+    "lcp_render_trials_ms": [
+      2356.8,
+      2359,
+      2358.5,
+      2340.3,
+      2358.6
+    ],
+    "viewport_median_ms": 5360.9,
+    "lcp_render_median_ms": 2358.5
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "viewport_trials_ms": [
+      9677.5,
+      10620.6,
+      10605.3,
+      10236.6,
+      10140.5
+    ],
+    "lcp_render_trials_ms": [
+      3751.4,
+      3961.4,
+      3860.7,
+      3766,
+      3865.7
+    ],
+    "viewport_median_ms": 10236.6,
+    "lcp_render_median_ms": 3860.7
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "viewport_trials_ms": [
+      8674.7,
+      10742.1,
+      10083.3,
+      8692.8,
+      9164.1
+    ],
+    "lcp_render_trials_ms": [
+      9360.3,
+      9329,
+      9071.4,
+      9354.5,
+      9454.7
+    ],
+    "viewport_median_ms": 9164.1,
+    "lcp_render_median_ms": 9354.5
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "viewport_trials_ms": [
+      3377.2,
+      3304,
+      3205.4,
+      3284.8,
+      3200.4
+    ],
+    "lcp_render_trials_ms": [
+      1714.9,
+      1708.3,
+      1703.9,
+      1713.8,
+      1800.8
+    ],
+    "viewport_median_ms": 3284.8,
+    "lcp_render_median_ms": 1713.8
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://m.facebook.com/",
+    "dbUrl": "https://www.facebook.com/?_rdr",
+    "viewport_trials_ms": [
+      3793,
+      3901.5,
+      3704.9,
+      3706.8,
+      3710.7
+    ],
+    "lcp_render_trials_ms": [
+      2023.1,
+      2107.5,
+      2018.6,
+      2025.8,
+      2018
+    ],
+    "viewport_median_ms": 3710.7,
+    "lcp_render_median_ms": 2023.1
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "viewport_trials_ms": [
+      9127.8,
+      9791.5,
+      10069.1,
+      10169.8,
+      9125.6
+    ],
+    "lcp_render_trials_ms": [
+      3411.2,
+      3409.5,
+      3405.6,
+      3418.6,
+      4430.3
+    ],
+    "viewport_median_ms": 9791.5,
+    "lcp_render_median_ms": 3411.2
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "viewport_trials_ms": [
+      10624.7,
+      10811,
+      10043.9,
+      9589.2,
+      10814.2
+    ],
+    "lcp_render_trials_ms": [
+      2840.6,
+      2645.4,
+      2087.1,
+      3111.2,
+      2275.6
+    ],
+    "viewport_median_ms": 10624.7,
+    "lcp_render_median_ms": 2645.4
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "viewport_trials_ms": [
+      9859.1,
+      9939.3,
+      11532.9,
+      9934.4,
+      11455.6
+    ],
+    "lcp_render_trials_ms": [
+      3183.2,
+      3102.7,
+      3009,
+      4869.6,
+      4682.4
+    ],
+    "viewport_median_ms": 9939.3,
+    "lcp_render_median_ms": 3183.2
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.nhk.or.jp/",
+    "dbUrl": "https://www.nhk.or.jp/",
+    "viewport_trials_ms": [
+      7763.5,
+      10766.4,
+      7764.7,
+      8578,
+      8509.8
+    ],
+    "lcp_render_trials_ms": [
+      1651.1,
+      6807.9,
+      5126.1,
+      10548.5,
+      4856.7
+    ],
+    "viewport_median_ms": 8509.8,
+    "lcp_render_median_ms": 5126.1
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://fc2.com/",
+    "dbUrl": "https://fc2.com/",
+    "viewport_trials_ms": [
+      6611.5,
+      6890.5,
+      6607.6,
+      6609,
+      6792.9
+    ],
+    "lcp_render_trials_ms": [
+      1729.8,
+      1728.8,
+      1732.7,
+      1729.6,
+      1917.4
+    ],
+    "viewport_median_ms": 6611.5,
+    "lcp_render_median_ms": 1729.8
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://shopping.yahoo.co.jp/",
+    "viewport_trials_ms": [
+      19583.4,
+      17249.1,
+      18651.5,
+      18561.4,
+      17335.9
+    ],
+    "lcp_render_trials_ms": [
+      15465.5,
+      14986.1,
+      16118.8,
+      15926.8,
+      15644.6
+    ],
+    "viewport_median_ms": 18561.4,
+    "lcp_render_median_ms": 15644.6
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://ads.nicovideo.jp/bannertext?bannerid=96501&frameId=&zoneid=639",
+    "viewport_trials_ms": [
+      14462,
+      13610.3,
+      13438.8,
+      14182.8,
+      12037.2
+    ],
+    "lcp_render_trials_ms": [
+      13717.2,
+      13894.8,
+      15585.3,
+      12318.4,
+      14475.2
+    ],
+    "viewport_median_ms": 13610.3,
+    "lcp_render_median_ms": 13894.8
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://blog.jp/",
+    "dbUrl": "https://blog.jp/",
+    "viewport_trials_ms": [
+      3977.1,
+      3985.8,
+      3972.7,
+      3979.1,
+      3987.9
+    ],
+    "lcp_render_trials_ms": [
+      2287.2,
+      2375.7,
+      2380.7,
+      2295,
+      2290.3
+    ],
+    "viewport_median_ms": 3979.1,
+    "lcp_render_median_ms": 2295
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.cmoa.jp/",
+    "dbUrl": "https://www.cmoa.jp/",
+    "viewport_trials_ms": [
+      13780.2,
+      13608.8,
+      13682.5,
+      13688.8,
+      13679.1
+    ],
+    "lcp_render_trials_ms": [
+      10124.9,
+      10220.8,
+      10126.2,
+      10114.8,
+      10114.6
+    ],
+    "viewport_median_ms": 13682.5,
+    "lcp_render_median_ms": 10124.9
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/",
+    "viewport_trials_ms": [
+      4239.3,
+      4354.3,
+      4089,
+      4063.5,
+      4354.6
+    ],
+    "lcp_render_trials_ms": [
+      2861.7,
+      2752,
+      2780.4,
+      2864.8,
+      2941
+    ],
+    "viewport_median_ms": 4239.3,
+    "lcp_render_median_ms": 2861.7
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://weathernews.jp/",
+    "viewport_trials_ms": [
+      5129.6,
+      4853.6,
+      5041.4,
+      4942.8,
+      4936.7
+    ],
+    "lcp_render_trials_ms": [
+      4936.6,
+      4947.8,
+      5040,
+      4908.2,
+      5033.8
+    ],
+    "viewport_median_ms": 4942.8,
+    "lcp_render_median_ms": 4947.8
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://m.youtube.com/",
+    "dbUrl": "https://weathernews.jp/",
+    "viewport_trials_ms": [
+      5021.2,
+      4378,
+      4106.3,
+      4173.9,
+      4289.7
+    ],
+    "lcp_render_trials_ms": [
+      4361.2,
+      4179.2,
+      4556.3,
+      4645.8,
+      4213.2
+    ],
+    "viewport_median_ms": 4289.7,
+    "lcp_render_median_ms": 4361.2
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "viewport_trials_ms": [
+      9311.5,
+      8851.3,
+      10340,
+      10422.9,
+      8926.9
+    ],
+    "lcp_render_trials_ms": [
+      3860.2,
+      2551.9,
+      2459.4,
+      2451.8,
+      2459.6
+    ],
+    "viewport_median_ms": 9311.5,
+    "lcp_render_median_ms": 2459.6
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "viewport_trials_ms": [
+      14927.1,
+      15869,
+      15876.1,
+      16050.8,
+      15787.7
+    ],
+    "lcp_render_trials_ms": [
+      11557,
+      15859.6,
+      12507,
+      15874,
+      19347.9
+    ],
+    "viewport_median_ms": 15869,
+    "lcp_render_median_ms": 15859.6
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "viewport_trials_ms": [
+      11195.8,
+      10147.8,
+      9983,
+      10169.2,
+      10142.5
+    ],
+    "lcp_render_trials_ms": [
+      7913.5,
+      7801.1,
+      7916.3,
+      7914.7,
+      7893.1
+    ],
+    "viewport_median_ms": 10147.8,
+    "lcp_render_median_ms": 7913.5
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "viewport_trials_ms": [
+      6007.1,
+      5817.6,
+      5535.9,
+      5257.2,
+      5258.7
+    ],
+    "lcp_render_trials_ms": [
+      4511,
+      4506.1,
+      4597.7,
+      4507.6,
+      4596.4
+    ],
+    "viewport_median_ms": 5535.9,
+    "lcp_render_median_ms": 4511
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "viewport_trials_ms": [
+      29551.6,
+      18579.7,
+      18592.8,
+      18380.2,
+      18399.3
+    ],
+    "lcp_render_trials_ms": [
+      13716.8,
+      13430,
+      13426.7,
+      13515.9,
+      13507.8
+    ],
+    "viewport_median_ms": 18579.7,
+    "lcp_render_median_ms": 13507.8
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.google.co.jp/",
+    "dbUrl": "https://weathernews.jp/",
+    "viewport_trials_ms": [
+      3200.3,
+      2931.2,
+      2942.6,
+      2754.3,
+      2757.6
+    ],
+    "lcp_render_trials_ms": [
+      2919.9,
+      3585.7,
+      2953.1,
+      2946.9,
+      2736.6
+    ],
+    "viewport_median_ms": 2931.2,
+    "lcp_render_median_ms": 2946.9
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "viewport_trials_ms": [
+      10651.6,
+      8880.4,
+      8763.2,
+      13482.8,
+      10388.6
+    ],
+    "lcp_render_trials_ms": [
+      3253.5,
+      3263,
+      3257.6,
+      3251.2,
+      3243.1
+    ],
+    "viewport_median_ms": 10388.6,
+    "lcp_render_median_ms": 3253.5
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "viewport_trials_ms": [
+      8134.2,
+      6271.5,
+      7775.8,
+      6184.3,
+      6162.6
+    ],
+    "lcp_render_trials_ms": [
+      6470.9,
+      6476.7,
+      6366.7,
+      6449,
+      6354.3
+    ],
+    "viewport_median_ms": 6271.5,
+    "lcp_render_median_ms": 6449
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "viewport_trials_ms": [
+      10597.6,
+      9594.9,
+      9409.7,
+      10509.9,
+      9779
+    ],
+    "lcp_render_trials_ms": [
+      4160.4,
+      4222.7,
+      3957.2,
+      3953.6,
+      5535.5
+    ],
+    "viewport_median_ms": 9779,
+    "lcp_render_median_ms": 4160.4
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "viewport_trials_ms": [
+      5745,
+      5367,
+      5357.7,
+      5363.4,
+      5368.5
+    ],
+    "lcp_render_trials_ms": [
+      2354.3,
+      2355.4,
+      2352.5,
+      2349.8,
+      2368
+    ],
+    "viewport_median_ms": 5367,
+    "lcp_render_median_ms": 2354.3
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://livedoor.com/lite/",
+    "dbUrl": "https://weathernews.jp/",
+    "viewport_trials_ms": [
+      2622.4,
+      2544,
+      2697.9,
+      3021.7,
+      2259.7
+    ],
+    "lcp_render_trials_ms": [
+      2532.6,
+      3018.2,
+      2164.1,
+      2254.3,
+      2652.5
+    ],
+    "viewport_median_ms": 2622.4,
+    "lcp_render_median_ms": 2532.6
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/",
+    "viewport_trials_ms": [
+      3960.2,
+      3678.8,
+      3884.4,
+      3697.2,
+      3686.8
+    ],
+    "lcp_render_trials_ms": [
+      2678,
+      2672.3,
+      2686,
+      2480.2,
+      2660
+    ],
+    "viewport_median_ms": 3697.2,
+    "lcp_render_median_ms": 2672.3
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://weathernews.jp/",
+    "viewport_trials_ms": [
+      4741.7,
+      4828.2,
+      4738.1,
+      4749.2,
+      4757.9
+    ],
+    "lcp_render_trials_ms": [
+      4942.1,
+      4848,
+      4940.7,
+      4818.1,
+      4760.8
+    ],
+    "viewport_median_ms": 4749.2,
+    "lcp_render_median_ms": 4848
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://m.youtube.com/",
+    "dbUrl": "https://weathernews.jp/",
+    "viewport_trials_ms": [
+      4107.9,
+      4363.5,
+      4556.2,
+      4177,
+      4103
+    ],
+    "lcp_render_trials_ms": [
+      4169.8,
+      4566.5,
+      4184.2,
+      4172.3,
+      4456.4
+    ],
+    "viewport_median_ms": 4177,
+    "lcp_render_median_ms": 4184.2
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "viewport_trials_ms": [
+      10054.3,
+      11171,
+      11172.6,
+      9689.1,
+      11099.6
+    ],
+    "lcp_render_trials_ms": [
+      5199.6,
+      5174.6,
+      4981,
+      3677.6,
+      5174.5
+    ],
+    "viewport_median_ms": 11099.6,
+    "lcp_render_median_ms": 5174.5
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "viewport_trials_ms": [
+      12954.4,
+      15862.4,
+      15962.4,
+      15967.5,
+      15969.8
+    ],
+    "lcp_render_trials_ms": [
+      15867.8,
+      15513.7,
+      12780.1,
+      15879.2,
+      15889.4
+    ],
+    "viewport_median_ms": 15962.4,
+    "lcp_render_median_ms": 15867.8
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "viewport_trials_ms": [
+      11002,
+      10265,
+      10076.4,
+      10162,
+      10069.2
+    ],
+    "lcp_render_trials_ms": [
+      7890.3,
+      8281.4,
+      7988.5,
+      7998.3,
+      7988.7
+    ],
+    "viewport_median_ms": 10162,
+    "lcp_render_median_ms": 7988.7
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "viewport_trials_ms": [
+      5733.6,
+      5629.2,
+      5360.8,
+      5355.5,
+      5352.1
+    ],
+    "lcp_render_trials_ms": [
+      4577.6,
+      4509.2,
+      4696,
+      4508.9,
+      4857.7
+    ],
+    "viewport_median_ms": 5360.8,
+    "lcp_render_median_ms": 4577.6
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "viewport_trials_ms": [
+      18488.4,
+      18022.8,
+      18015.6,
+      18030.2,
+      18125
+    ],
+    "lcp_render_trials_ms": [
+      13704.2,
+      13601.3,
+      13432,
+      13615.4,
+      13898.5
+    ],
+    "viewport_median_ms": 18030.2,
+    "lcp_render_median_ms": 13615.4
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.google.co.jp/",
+    "dbUrl": "https://weathernews.jp/",
+    "viewport_trials_ms": [
+      2666.7,
+      2665.9,
+      2663.9,
+      2661.9,
+      2661.5
+    ],
+    "lcp_render_trials_ms": [
+      2550.3,
+      2659.1,
+      2640.5,
+      2655.3,
+      2355.8
+    ],
+    "viewport_median_ms": 2663.9,
+    "lcp_render_median_ms": 2640.5
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "viewport_trials_ms": [
+      14600.1,
+      9546,
+      10838.6,
+      9162.6,
+      16670.9
+    ],
+    "lcp_render_trials_ms": [
+      3426.2,
+      3254,
+      3355.9,
+      3252.8,
+      3335.3
+    ],
+    "viewport_median_ms": 10838.6,
+    "lcp_render_median_ms": 3335.3
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "viewport_trials_ms": [
+      7973.3,
+      7589.5,
+      7588.5,
+      6273.8,
+      6263
+    ],
+    "lcp_render_trials_ms": [
+      6377,
+      6238.9,
+      6364.6,
+      6262.2,
+      6352.2
+    ],
+    "viewport_median_ms": 7588.5,
+    "lcp_render_median_ms": 6352.2
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "viewport_trials_ms": [
+      11375.5,
+      8466.1,
+      10708.8,
+      9874.3,
+      9849.5
+    ],
+    "lcp_render_trials_ms": [
+      5534.6,
+      4058.2,
+      4412.3,
+      4037.1,
+      5096.6
+    ],
+    "viewport_median_ms": 9874.3,
+    "lcp_render_median_ms": 4412.3
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "viewport_trials_ms": [
+      5643.8,
+      5369.4,
+      5358.1,
+      5362.5,
+      5350
+    ],
+    "lcp_render_trials_ms": [
+      2434.1,
+      2364.6,
+      2538.2,
+      2276.4,
+      2264.9
+    ],
+    "viewport_median_ms": 5362.5,
+    "lcp_render_median_ms": 2364.6
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://livedoor.com/lite/",
+    "dbUrl": "https://weathernews.jp/",
+    "viewport_trials_ms": [
+      2652.2,
+      2070.8,
+      2465.7,
+      2270.3,
+      2649.4
+    ],
+    "lcp_render_trials_ms": [
+      3865.4,
+      3943.5,
+      3761.7,
+      2172.6,
+      2464.8
+    ],
+    "viewport_median_ms": 2465.7,
+    "lcp_render_median_ms": 3761.7
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "viewport_trials_ms": [
+      9352.4,
+      8670.4,
+      7626,
+      8885.3,
+      8508.7
+    ],
+    "lcp_render_trials_ms": [
+      9050.3,
+      9074,
+      9077,
+      8488.7,
+      9171.2
+    ],
+    "viewport_median_ms": 8670.4,
+    "lcp_render_median_ms": 9074
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "viewport_trials_ms": [
+      4115.7,
+      4028.8,
+      3399.4,
+      3307.9,
+      3207.7
+    ],
+    "lcp_render_trials_ms": [
+      1877.3,
+      1799.3,
+      4692.2,
+      1777.3,
+      1876.4
+    ],
+    "viewport_median_ms": 3399.4,
+    "lcp_render_median_ms": 1876.4
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://m.facebook.com/",
+    "dbUrl": "https://weathernews.jp/",
+    "viewport_trials_ms": [
+      2125.1,
+      2014.7,
+      2023.2,
+      2031.9,
+      2116.7
+    ],
+    "lcp_render_trials_ms": [
+      2118.9,
+      2026.4,
+      2018.4,
+      2026.1,
+      2017.3
+    ],
+    "viewport_median_ms": 2031.9,
+    "lcp_render_median_ms": 2026.1
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "viewport_trials_ms": [
+      18402.5,
+      13079.5,
+      11853.2,
+      12874,
+      12318.5
+    ],
+    "lcp_render_trials_ms": [
+      2651.3,
+      2481.6,
+      2569.4,
+      2678.8,
+      2569.9
+    ],
+    "viewport_median_ms": 12874,
+    "lcp_render_median_ms": 2569.9
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "viewport_trials_ms": [
+      13157.8,
+      10807.2,
+      10997.6,
+      11468.3,
+      10616.7
+    ],
+    "lcp_render_trials_ms": [
+      2265.8,
+      2355.6,
+      2361,
+      3492.8,
+      1520.2
+    ],
+    "viewport_median_ms": 10997.6,
+    "lcp_render_median_ms": 2355.6
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "viewport_trials_ms": [
+      11339.5,
+      10953.9,
+      11060.9,
+      9753.5,
+      9656.2
+    ],
+    "lcp_render_trials_ms": [
+      4314.1,
+      4594.1,
+      3186,
+      3743.7,
+      4404.2
+    ],
+    "viewport_median_ms": 10953.9,
+    "lcp_render_median_ms": 4314.1
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://www.nhk.or.jp/",
+    "dbUrl": "https://www.nhk.or.jp/",
+    "viewport_trials_ms": [
+      16656.7,
+      8508.9,
+      7740,
+      5506.4,
+      7758.8
+    ],
+    "lcp_render_trials_ms": [
+      11786.3,
+      8231.4,
+      5321.8,
+      4935.9,
+      7014.2
+    ],
+    "viewport_median_ms": 7758.8,
+    "lcp_render_median_ms": 7014.2
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://fc2.com/",
+    "dbUrl": "https://fc2.com/",
+    "viewport_trials_ms": [
+      7639.9,
+      6790.4,
+      6607.4,
+      6790.8,
+      6604.2
+    ],
+    "lcp_render_trials_ms": [
+      2008.1,
+      1724.8,
+      1725.2,
+      1727.7,
+      1726
+    ],
+    "viewport_median_ms": 6790.4,
+    "lcp_render_median_ms": 1726
+  },
+  {
+    "speed": 128,
+    "inputUrl": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://shopping.yahoo.co.jp/",
+    "viewport_trials_ms": [
+      18062.2,
+      18631.8,
+      18090.8,
+      17799.5,
+      18183.9
+    ],
+    "lcp_render_trials_ms": [
+      16103.6,
+      16122.3,
+      15929,
+      15548.9,
+      15644.6
+    ],
+    "viewport_median_ms": 18090.8,
+    "lcp_render_median_ms": 15929
+  }
+]

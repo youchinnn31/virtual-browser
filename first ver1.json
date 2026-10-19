@@ -1,0 +1,1451 @@
+[
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 3693.2999999970198
+  },
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 3696.5
+  },
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 3793
+  },
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 3785.7000000029802
+  },
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 4064.4000000059605
+  },
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 3134
+  },
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 3038.9000000059605
+  },
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 3033.7000000029802
+  },
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 3128.7999999970198
+  },
+  {
+    "url": "https://www.google.com/",
+    "dbUrl": "https://www.google.com/?zx=1766315223700&no_sw_cr=1",
+    "originLike": "https://www.google.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 3035.2000000029802
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 12444.90000000596
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 11385.29999999702
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 12421
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 12424.29999999702
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 12333.29999999702
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 3529.9000000059605
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 2767.5
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 3618.5
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 2680.8999999910593
+  },
+  {
+    "url": "https://m.yahoo.co.jp/",
+    "dbUrl": "https://m.yahoo.co.jp/",
+    "originLike": "https://m.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 3518.5
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 3690.2999999970198
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 3613.7000000029802
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 3510.199999988079
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 3524.7000000029802
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 3428.5999999940395
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 1557.5
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 1638.2999999970198
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 1544.7999999970198
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 1546.300000011921
+  },
+  {
+    "url": "https://m.youtube.com/",
+    "dbUrl": "https://m.youtube.com/",
+    "originLike": "https://m.youtube.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 1550.9000000059605
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 11833.29999999702
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 11749.59999999404
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 11744.90000000596
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 11741.40000000596
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 11742
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 3203.7999999970198
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 3304.9000000059605
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 3197.7000000029802
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 3207.4000000059605
+  },
+  {
+    "url": "https://news.yahoo.co.jp/",
+    "dbUrl": "https://news.yahoo.co.jp/",
+    "originLike": "https://news.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 3199.3999999910593
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 15873.199999988079
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 16049.59999999404
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 15951.29999999702
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 15952.39999999106
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 16050.60000000894
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 9210.5
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 9373.70000000298
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 9371.59999999404
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 9402.70000000298
+  },
+  {
+    "url": "https://www.amazon.co.jp/",
+    "dbUrl": "https://www.amazon.co.jp/",
+    "originLike": "https://www.amazon.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 9214.5
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 10825.29999999702
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 10705.199999988079
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 11648.40000000596
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 11553.10000000894
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 10892.39999999106
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 7518.5999999940395
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 7429.0999999940395
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 7521.399999991059
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 7429.5
+  },
+  {
+    "url": "https://www.docomo.ne.jp/",
+    "dbUrl": "https://www.docomo.ne.jp/",
+    "originLike": "https://www.docomo.ne.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 7422
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 8336.09999999404
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 7876
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 7800
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 7800.399999991059
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 7779.100000008941
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 4494.100000008941
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 4489.79999999702
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 4407.29999999702
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 4297.5
+  },
+  {
+    "url": "https://x.com/?mx=2",
+    "dbUrl": "https://x.com/?mx=2",
+    "originLike": "https://x.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 4585.800000011921
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 20180.79999999702
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 19885.70000000298
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 20535.79999999702
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 20087.90000000596
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 20081.30000001192
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 14067.699999988079
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 14071.29999999702
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 13978.70000000298
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 14057.5
+  },
+  {
+    "url": "https://www.rakuten.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 14066.699999988079
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 2938.6000000089407
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 2918
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 2930
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 2922.0999999940395
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 3011.2000000029802
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 3016.8999999910593
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 3020.6000000089407
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 3120.4000000059605
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 3304.1000000089407
+  },
+  {
+    "url": "https://www.google.co.jp/",
+    "dbUrl": "https://www.rakuten.co.jp/",
+    "originLike": "https://www.rakuten.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 3026.8999999910593
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 14131.29999999702
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 16671.20000000298
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 13552.60000000894
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 15442.39999999106
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 8129.899999991059
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 9903.89999999106
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 10088.5
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 3621.7999999970198
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 3526.1000000089407
+  },
+  {
+    "url": "https://www.pixiv.net/",
+    "dbUrl": "https://www.pixiv.net/",
+    "originLike": "https://www.pixiv.net%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 3523.1000000089407
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 9070.79999999702
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 9176.79999999702
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 8982.70000000298
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 9082.800000011921
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 9460.79999999702
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 3916.7999999970198
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 3826.8999999910593
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 3726.699999988079
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 3819.5999999940395
+  },
+  {
+    "url": "https://weather.yahoo.co.jp/weather/",
+    "dbUrl": "https://weather.yahoo.co.jp/weather/",
+    "originLike": "https://weather.yahoo.co.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 3734.5999999940395
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 10147.79999999702
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 10423.5
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 10697.20000000298
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 10795.29999999702
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 10421.89999999106
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 3946.9000000059605
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 4691.0999999940395
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 4034.800000011921
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 4605.899999991059
+  },
+  {
+    "url": "https://ameblo.jp/",
+    "dbUrl": "https://ameblo.jp/",
+    "originLike": "https://ameblo.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 3862.6000000089407
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 8179.0999999940395
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 8258.300000011921
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 8063.9000000059605
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 8169.20000000298
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 8250
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 2442.2000000029802
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 2437.7999999970198
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 2372.4000000059605
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 2257.9000000059605
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "dbUrl": "https://www.wikipedia.org/",
+    "originLike": "https://www.wikipedia.org%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 2355.1000000089407
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 12308
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 11534.79999999702
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 13053
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 14069.79999999702
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 12940.20000000298
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 3579.4000000059605
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 3937.0999999940395
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 3401.7999999970198
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 3005.7000000029802
+  },
+  {
+    "url": "https://livedoor.com/lite/",
+    "dbUrl": "https://www.livedoor.com/",
+    "originLike": "https://www.livedoor.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 4401
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 15432.59999999404
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 13938.89999999106
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 14692.800000011921
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 13742.79999999702
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 13744.79999999702
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 9260.10000000894
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 9156.90000000596
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 8028.699999988079
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 8974
+  },
+  {
+    "url": "https://tenki.jp/lite/",
+    "dbUrl": "https://tenki.jp/lite/",
+    "originLike": "https://tenki.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 9328.40000000596
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 4049.6000000089407
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 4044.2000000029802
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 4034.8999999910593
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 4139.0999999940395
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 4125.70000000298
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 2362.6000000089407
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 2360.5
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 2435
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 2273.8999999910593
+  },
+  {
+    "url": "https://www.instagram.com/",
+    "dbUrl": "https://www.instagram.com/",
+    "originLike": "https://www.instagram.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 2356.0999999940395
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 5494.70000000298
+  }
+]

@@ -1,0 +1,1743 @@
+[
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 5586
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 5466.100000008941
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 5465.70000000298
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 5468.600000008941
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 5466.5999999940395
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 3031.0999999940395
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 3031.7000000029802
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 3036.5
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 3136.7999999970198
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 3042.7000000029802
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 10351.20000000298
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 16059.90000000596
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 14926.29999999702
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 15207.59999999404
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 15207.20000000298
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 9582.89999999106
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://m.facebook.com/",
+    "dbUrl": "https://m.facebook.com/",
+    "originLike": "https://m.facebook.com%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://fc2.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://shopping.yahoo.co.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://sp.nicovideo.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://blog.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.cmoa.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://weathernews.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://trilltrill.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://syosetu.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://www.mercari.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "originLike": "https://portal.auone.jp%",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": null
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 17459.79999999702
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 13801.5
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 16338.09999999404
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 14710
+  },
+  {
+    "url": "https://portal.auone.jp/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 16899.70000000298
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 2722.800000011921
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 2623
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 3089.3999999910593
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 2808.2000000029802
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 2717.8999999910593
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://portal.auone.jp/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 2713
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 3012.4000000059605
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 2715.5
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 2717.800000011921
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 2543.7999999970198
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 2545.199999988079
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 2726.7999999970198
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 2639.5999999940395
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 2632.5999999940395
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 2726.9000000059605
+  },
+  {
+    "url": "https://note.com/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 2821.5
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 3633
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 3157.5
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 3425.7000000029802
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 3440.2999999970198
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 3443.5999999940395
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 3547.300000011921
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 3550.5
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 3531.699999988079
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 3535.7000000029802
+  },
+  {
+    "url": "https://sports.yahoo.co.jp/",
+    "dbUrl": "https://note.com/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 3439
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 1,
+    "lcp_ms": 2020.5
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 2,
+    "lcp_ms": 1909
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 3,
+    "lcp_ms": 1809
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 4,
+    "lcp_ms": 1816.7999999970198
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "viewport",
+    "trial": 5,
+    "lcp_ms": 1920.2999999970198
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 1,
+    "lcp_ms": 1814.2999999970198
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 2,
+    "lcp_ms": 1927.7000000029802
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 3,
+    "lcp_ms": 1818.0999999940395
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 4,
+    "lcp_ms": 1910.8999999910593
+  },
+  {
+    "url": "https://www.nhk.or.jp/",
+    "dbUrl": "https://sports.yahoo.co.jp/",
+    "speed": 128,
+    "mode": "lcp",
+    "trial": 5,
+    "lcp_ms": 1928.8999999910593
+  }
+]
