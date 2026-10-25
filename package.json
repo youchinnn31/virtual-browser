@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "evaluate:repeat": "npm run build && node evaluation/repeat.mjs",
     "all": "npm-run-all lint build start",
     "build": "npm-run-all clean:* build:* copy",
     "build:client": "node build.client.mjs",
