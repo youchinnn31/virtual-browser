@@ -47,15 +47,12 @@ test(
       res.setHeader("Cache-Control", "public, max-age=3600");
       if (req.url === "/") {
         visits++;
-        setTimeout(
-          () => {
-            res.setHeader("Content-Type", "text/html");
-            res.end(
-              '<h1 style="font-size:24px">LCP test</h1><img src="/image.svg" width="160" height="100">',
-            );
-          },
-          visits === 1 ? 4200 : 0,
-        );
+        setTimeout(() => {
+          res.setHeader("Content-Type", "text/html");
+          res.end(
+            '<h1 style="font-size:24px">LCP test</h1><img src="/image.svg" width="160" height="100">',
+          );
+        }, 0);
       } else if (req.url === "/image.svg") {
         images++;
         res.setHeader("Content-Type", "image/svg+xml");
@@ -119,7 +116,7 @@ test(
         summary.getCell("C2").value,
         [...samples].sort((a, b) => a - b)[2],
       );
-      assert.ok(summary.getCell("I2").value > 4000);
+      assert.ok(summary.getCell("I2").value < 4000);
       assert.ok(summary.getCell("J2").value > 0);
       for (let i = 2; i <= 6; i++) {
         assert.equal(details.getRow(i).getCell(4).value, i);

@@ -161,8 +161,8 @@ async function main(): Promise<void> {
       const currentUrl: string = page.url();
       const urlEntity: UrlEntity = await urlRepository.findByUrl(currentUrl);
 
-      // 2回目以降のアクセスかつ初回アクセスが4秒以上の時
-      if (urlEntity && urlEntity.image_lcp > 4000) {
+      // 初回の表示時間が収集済みなら、値にかかわらずLCPコンテンツを描画
+      if (urlEntity && urlEntity.image_lcp >= 0) {
         // LCPコンテンツ情報を取得
         const lcps: Array<LcpEntity> = await lcpRepository.findAllByUrlId(
           urlEntity.id,

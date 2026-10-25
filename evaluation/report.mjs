@@ -66,7 +66,7 @@ export async function writeReport(output, rows) {
     ["DB", "URL・通信速度ごとに新規DB。初回収集後は同じDBを保持"],
     [
       "先行描画条件",
-      "既存仕様：初回のimage_lcp > 4000ms。部分画像数0は先行描画なし",
+      "初回のimage_lcp収集後、時間にかかわらず実行。部分画像数0は先行描画なし",
     ],
     [
       "通信制限",
