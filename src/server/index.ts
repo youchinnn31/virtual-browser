@@ -22,7 +22,8 @@ const PORT: number = 3000; // 仮想ブラウザのPORT番号
 const DEFAULT_WIDTH: number = 1000;
 const TARGET_SIZE: number = (128 / 8) * 1000 * 4;
 
-const db = new sqlite3.Database("./json.db");
+const evaluationMode = process.env["LCP_EVALUATION"] === "1";
+const db = new sqlite3.Database(process.env["LCP_DB_PATH"] ?? "./json.db");
 const lcpFile = fs.readFileSync("./lcp.js", "utf8");
 
 /**
@@ -58,6 +59,10 @@ async function main(): Promise<void> {
 
   // pageインスタンスの生成
   const page = await browser.newPage();
+  if (evaluationMode) {
+    await page.setCacheEnabled(false);
+    await page.setBypassServiceWorker(true);
+  }
   await page.setBypassCSP(true);
   await page.setExtraHTTPHeaders({
     "Accept-Language": "ja-JP",
@@ -113,10 +118,13 @@ async function main(): Promise<void> {
       switch (req.action) {
         case "image": {
           await getImage(req);
+          if (evaluationMode) ws.send(JSON.stringify({ action: "complete" }));
           break;
         }
         case "lcp": {
           await processSentLcp(req);
+          if (evaluationMode)
+            ws.send(JSON.stringify({ action: "lcp-received" }));
           break;
         }
         case "scroll": {
@@ -125,6 +133,7 @@ async function main(): Promise<void> {
         }
         case "init": {
           await setConfig(req);
+          if (evaluationMode) ws.send(JSON.stringify({ action: "ready" }));
           break;
         }
         default: {
