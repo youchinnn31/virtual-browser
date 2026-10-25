@@ -46,7 +46,9 @@ test(
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "lcp-crawl-"));
     let visits = 0;
     let images = 0;
+    const userAgents = [];
     const fixture = http.createServer((req, res) => {
+      userAgents.push(req.headers["user-agent"]);
       res.setHeader("Cache-Control", "public, max-age=3600");
       if (req.url === "/") {
         visits++;
@@ -112,6 +114,10 @@ test(
       assert.equal(code, 0, logs);
       assert.equal(visits, 6, "HTTP document cache must be disabled");
       assert.equal(images, 6, "HTTP image cache must be disabled");
+      assert.ok(
+        userAgents.every((ua) => ua?.includes("iPhone; CPU iPhone OS 16_6")),
+        "The proxy must use the iPhone User-Agent on every request",
+      );
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.readFile(output);
       const summary = workbook.getWorksheet("中央値");

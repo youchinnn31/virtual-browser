@@ -47,6 +47,8 @@ npm run evaluate:repeat -- --urls evaluation/urls.json --speeds 128 --output eva
 
 ## 評価条件
 
+User-Agentは旧評価コードと同じiPhone（iOS 16.6 / Safari 16.6）を指定します。クライアントからの初期設定通知を通じて、代理サーバーの仮想ブラウザにも同じUser-Agentを設定します。ブラウザの実体はChromeです。
+
 代理サーバーとクライアントでHTTPキャッシュを無効にし、Service Workerをバイパスします。
 DNSキャッシュ、接続の再利用、対象サイト・CDN側のキャッシュは消去しません。
 通信制限は従来の評価と同様にクライアント側へ適用し、代理サーバーから対象サイトへの通信は制限しません。

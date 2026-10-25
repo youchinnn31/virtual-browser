@@ -126,6 +126,10 @@ export async function writeReport(output, rows) {
       "DNS・接続再利用・対象サイトやCDNのキャッシュは除去対象外",
     ],
     ["画面", "375×667、deviceScaleFactor=2、isMobile=true"],
+    [
+      "User-Agent",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+    ],
   ])
     conditions.addRow(entry);
   for (const sheet of workbook.worksheets) {
