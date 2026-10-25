@@ -49,6 +49,7 @@ async function main(): Promise<void> {
   // DB操作用のレポジトリ
   const urlRepository: UrlRepository = new UrlRepository(db);
   const lcpRepository: LcpRepository = new LcpRepository(db);
+  let requestedUrl = "";
 
   // headlessブラウザの起動
   const browser = await puppeteer.launch({
@@ -75,8 +76,9 @@ async function main(): Promise<void> {
   page.on("console", async (msg) => {
     if (msg.type() === "trace") {
       const lcpInfo: LcpInfo = JSON.parse(msg.text());
-      await urlRepository.save(lcpInfo.url);
-      const urlEntity: UrlEntity = await urlRepository.findByUrl(lcpInfo.url);
+      if (!requestedUrl) return;
+      await urlRepository.save(requestedUrl);
+      const urlEntity: UrlEntity = await urlRepository.findByUrl(requestedUrl);
       if (urlEntity.access_num === 1) {
         await lcpRepository.save(lcpInfo.lcp, lcpInfo.xpath, urlEntity.id);
       }
@@ -148,6 +150,8 @@ async function main(): Promise<void> {
      */
     const getImage = async (req: WSRequest): Promise<void> => {
       const requestURl: string = req.url;
+      requestedUrl = requestURl;
+      await urlRepository.save(requestedUrl);
 
       // Webサイトにアクセス
       await page.goto(requestURl, {
@@ -155,11 +159,10 @@ async function main(): Promise<void> {
       });
 
       // DBにWebサイトの情報を保存
-      await urlRepository.save(page.url());
-      await urlRepository.incrementAccessNumByUrl(page.url());
+      await urlRepository.incrementAccessNumByUrl(requestedUrl);
 
       const currentUrl: string = page.url();
-      const urlEntity: UrlEntity = await urlRepository.findByUrl(currentUrl);
+      const urlEntity: UrlEntity = await urlRepository.findByUrl(requestedUrl);
 
       // 初回の表示時間が収集済みなら、値にかかわらずLCPコンテンツを描画
       if (urlEntity && urlEntity.image_lcp >= 0) {
@@ -246,7 +249,7 @@ async function main(): Promise<void> {
      * @param LCP
      */
     const processSentLcp = async (req: WSRequest): Promise<void> => {
-      const accesedUrl: string = page.url();
+      const accesedUrl: string = requestedUrl;
       const imageLcp: number = req.lcp;
       const urlEntity: UrlEntity = await urlRepository.findByUrl(accesedUrl);
       if (urlEntity.image_lcp < 0) {

@@ -258,7 +258,7 @@ async function main() {
           await page.waitForFunction(() => window.__measurement.ready);
           const warmup = await access(page, url, timeout);
           row.warmup = warmup.lcp;
-          row.collected = await readCollected(row.database, warmup.finalUrl);
+          row.collected = await readCollected(row.database, url);
           for (let trial = 1; trial <= 5; trial++) {
             const sample = await access(page, url, timeout);
             row.samples.push({ trial, access: trial + 1, ...sample });

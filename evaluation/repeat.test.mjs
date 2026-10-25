@@ -47,6 +47,9 @@ test(
       res.setHeader("Cache-Control", "public, max-age=3600");
       if (req.url === "/") {
         visits++;
+        res.writeHead(302, { Location: `/page?visit=${visits}` });
+        res.end();
+      } else if (req.url.startsWith("/page?")) {
         setTimeout(() => {
           res.setHeader("Content-Type", "text/html");
           res.end(
@@ -106,6 +109,12 @@ test(
       const summary = workbook.getWorksheet("中央値");
       const details = workbook.getWorksheet("測定値");
       assert.equal(details.rowCount, 6);
+      for (let i = 2; i <= 6; i++) {
+        assert.equal(
+          details.getRow(i).getCell(7).value,
+          `${url}page?visit=${i}`,
+        );
+      }
       const samples = [4, 5, 6, 7, 8].map(
         (column) => summary.getRow(2).getCell(column).value,
       );
@@ -128,13 +137,14 @@ test(
       await new Promise((resolve, reject) => {
         const db = new sqlite3.Database(path.join(`${output}.data`, "1.db"));
         db.get(
-          "SELECT access_num, image_lcp FROM url WHERE url = ?",
+          "SELECT access_num, image_lcp, (SELECT COUNT(*) FROM url) AS urls FROM url WHERE url = ?",
           [url],
           (error, row) => {
             db.close();
             if (error) return reject(error);
             try {
               assert.equal(row.access_num, 7);
+              assert.equal(row.urls, 1);
               assert.equal(row.image_lcp, summary.getCell("I2").value);
               resolve();
             } catch (failure) {

@@ -18,10 +18,16 @@ export class UrlRepository {
    * URLテーブルに保存する
    */
   async save(url: string): Promise<void> {
-    this.db.run(
-      "INSERT OR IGNORE INTO url(url, image_lcp, access_num) VALUES($url, -1, 1)",
-      { $url: url },
-    );
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "INSERT OR IGNORE INTO url(url, image_lcp, access_num) VALUES($url, -1, 1)",
+        { $url: url },
+        (error) => {
+          if (error) reject(error);
+          else resolve();
+        },
+      );
+    });
   }
 
   /**
