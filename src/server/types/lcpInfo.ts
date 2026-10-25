@@ -4,6 +4,8 @@
  * 仮想ブラウザから受け取るLCP周りの情報
  */
 export interface LcpInfo {
+  /** 初回収集を行ったアクセスの識別子 */
+  collectionId: number;
   /** LCPの値 */
   lcp: number;
   /** 現在のurl */

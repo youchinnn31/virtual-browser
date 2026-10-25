@@ -137,7 +137,7 @@ test(
       await new Promise((resolve, reject) => {
         const db = new sqlite3.Database(path.join(`${output}.data`, "1.db"));
         db.get(
-          "SELECT access_num, image_lcp, (SELECT COUNT(*) FROM url) AS urls FROM url WHERE url = ?",
+          "SELECT access_num, image_lcp, (SELECT COUNT(*) FROM url) AS urls, (SELECT COUNT(*) FROM lcp) AS candidates FROM url WHERE url = ?",
           [url],
           (error, row) => {
             db.close();
@@ -145,6 +145,11 @@ test(
             try {
               assert.equal(row.access_num, 7);
               assert.equal(row.urls, 1);
+              assert.equal(
+                row.candidates,
+                summary.getCell("J2").value,
+                "Only the initial visit may save LCP candidates",
+              );
               assert.equal(row.image_lcp, summary.getCell("I2").value);
               resolve();
             } catch (failure) {

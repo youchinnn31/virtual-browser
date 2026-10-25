@@ -1,20 +1,29 @@
 "use strict";
 
-const observer = new PerformanceObserver((list) => {
-  const entries = list.getEntries();
+function reportEntries(entries) {
+  if (window !== window.top || entries.length === 0) return;
   const lastEntry = entries[entries.length - 1];
   const xpath = getElementXPath(lastEntry.element);
   const lcp = lastEntry.startTime;
   console.trace(
     JSON.stringify({
+      collectionId: window.__lcpCollectionId,
       url: location.href,
       lcp: lcp,
       xpath: xpath,
     }),
   );
-});
+}
+
+const observer = new PerformanceObserver((list) =>
+  reportEntries(list.getEntries()),
+);
 
 observer.observe({ type: "largest-contentful-paint", buffered: true });
+window.__stopLcpCollection = () => {
+  reportEntries(observer.takeRecords());
+  observer.disconnect();
+};
 
 function getElementXPath(element) {
   if (element.id) {

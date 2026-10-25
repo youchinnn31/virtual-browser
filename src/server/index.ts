@@ -50,6 +50,11 @@ async function main(): Promise<void> {
   const urlRepository: UrlRepository = new UrlRepository(db);
   const lcpRepository: LcpRepository = new LcpRepository(db);
   let requestedUrl = "";
+  let navigationId = 0;
+  let observerScriptId: string | undefined;
+  let collection:
+    | { id: number; urlId: number; accepting: boolean; writes: Promise<void> }
+    | undefined;
 
   // headlessブラウザの起動
   const browser = await puppeteer.launch({
@@ -69,20 +74,26 @@ async function main(): Promise<void> {
     "Accept-Language": "ja-JP",
   });
 
-  // LCPコンテンツ取得用JavaScriptを注入
-  await page.evaluateOnNewDocument(lcpFile);
-
-  // LCP情報を取得したらDBに格納する
-  page.on("console", async (msg) => {
-    if (msg.type() === "trace") {
-      const lcpInfo: LcpInfo = JSON.parse(msg.text());
-      if (!requestedUrl) return;
-      await urlRepository.save(requestedUrl);
-      const urlEntity: UrlEntity = await urlRepository.findByUrl(requestedUrl);
-      if (urlEntity.access_num === 1) {
-        await lcpRepository.save(lcpInfo.lcp, lcpInfo.xpath, urlEntity.id);
-      }
+  // アクセス開始時に確定した初回収集だけを保存する
+  page.on("console", (msg) => {
+    if (msg.type() !== "trace") return;
+    let lcpInfo: LcpInfo;
+    try {
+      lcpInfo = JSON.parse(msg.text());
+    } catch {
+      return;
     }
+    const target = collection;
+    if (
+      !target?.accepting ||
+      lcpInfo.collectionId !== target.id ||
+      !Number.isFinite(lcpInfo.lcp) ||
+      typeof lcpInfo.xpath !== "string"
+    )
+      return;
+    target.writes = target.writes.then(() =>
+      lcpRepository.save(lcpInfo.lcp, lcpInfo.xpath, target.urlId),
+    );
   });
 
   // サーバの起動
@@ -152,6 +163,24 @@ async function main(): Promise<void> {
       const requestURl: string = req.url;
       requestedUrl = requestURl;
       await urlRepository.save(requestedUrl);
+      const initialEntity = await urlRepository.findByUrl(requestedUrl);
+      const target = {
+        id: ++navigationId,
+        urlId: initialEntity.id,
+        accepting: initialEntity.image_lcp < 0,
+        writes: Promise.resolve(),
+      };
+      collection = target;
+      if (observerScriptId) {
+        await page.removeScriptToEvaluateOnNewDocument(observerScriptId);
+        observerScriptId = undefined;
+      }
+      if (target.accepting) {
+        const script = await page.evaluateOnNewDocument(
+          `window.__lcpCollectionId = ${target.id};\n${lcpFile}`,
+        );
+        observerScriptId = script.identifier;
+      }
 
       // Webサイトにアクセス
       await page.goto(requestURl, {
@@ -219,6 +248,11 @@ async function main(): Promise<void> {
 
       // スクリーンショットを撮影
       let screenshot = await page.screenshot({ type: "webp" });
+      if (target.accepting) {
+        await page.evaluate("window.__stopLcpCollection?.()");
+        target.accepting = false;
+        await target.writes;
+      }
 
       // 画像を加工
       const img = sharp(screenshot);

@@ -70,9 +70,18 @@ export class UrlRepository {
    * urlからimage_lcpを更新
    */
   async updateImageLcpByUrl(url: string, imageLcp: number): Promise<void> {
-    this.db.run("UPDATE url SET image_lcp = $image_lcp WHERE url = $url", {
-      $image_lcp: imageLcp,
-      $url: url,
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "UPDATE url SET image_lcp = $image_lcp WHERE url = $url",
+        {
+          $image_lcp: imageLcp,
+          $url: url,
+        },
+        (error) => {
+          if (error) reject(error);
+          else resolve();
+        },
+      );
     });
   }
 

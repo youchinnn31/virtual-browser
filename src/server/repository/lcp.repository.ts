@@ -18,14 +18,16 @@ export class LcpRepository {
    * LCPテーブルに保存する
    */
   async save(lcp: number, xpath: string, urlId: number): Promise<void> {
-    this.db.run(
-      "INSERT INTO lcp(lcp, xpath, url_id) VALUES($lcp, $xpath , $url_id)",
-      {
-        $lcp: lcp,
-        $xpath: xpath,
-        $url_id: urlId,
-      },
-    );
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "INSERT INTO lcp(lcp, xpath, url_id) VALUES($lcp, $xpath , $url_id)",
+        { $lcp: lcp, $xpath: xpath, $url_id: urlId },
+        (error) => {
+          if (error) reject(error);
+          else resolve();
+        },
+      );
+    });
   }
 
   /**
