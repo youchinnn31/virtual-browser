@@ -22,6 +22,13 @@ const PORT: number = 3000; // 仮想ブラウザのPORT番号
 const DEFAULT_WIDTH: number = 1000;
 const TARGET_SIZE: number = (128 / 8) * 1000 * 4;
 
+interface LcpRenderResult {
+  xpath: string;
+  lcp: number;
+  status: "sent" | "not-found" | "no-bounding-box" | "error";
+  detail?: string;
+}
+
 const evaluationMode = process.env["LCP_EVALUATION"] === "1";
 const db = new sqlite3.Database(process.env["LCP_DB_PATH"] ?? "./json.db");
 const lcpFile = fs.readFileSync("./lcp.js", "utf8");
@@ -130,8 +137,9 @@ async function main(): Promise<void> {
       const req: WSRequest = JSON.parse(data);
       switch (req.action) {
         case "image": {
-          await getImage(req);
-          if (evaluationMode) ws.send(JSON.stringify({ action: "complete" }));
+          const candidates = await getImage(req);
+          if (evaluationMode)
+            ws.send(JSON.stringify({ action: "complete", candidates }));
           break;
         }
         case "lcp": {
@@ -159,7 +167,8 @@ async function main(): Promise<void> {
      * スクリーンショットを撮影してクライアントに送信
      * @param req リクエスト情報
      */
-    const getImage = async (req: WSRequest): Promise<void> => {
+    const getImage = async (req: WSRequest): Promise<LcpRenderResult[]> => {
+      const results: LcpRenderResult[] = [];
       const requestURl: string = req.url;
       requestedUrl = requestURl;
       await urlRepository.save(requestedUrl);
@@ -203,42 +212,66 @@ async function main(): Promise<void> {
         for (const lcp of lcps!) {
           // XPathからLCPコンテンツを特定
           const lcpXpath: string = lcp.xpath;
-          const [lcpContent] = await page.$x(lcpXpath);
+          try {
+            const [lcpContent] = await page.$x(lcpXpath);
 
-          // コンテンツが特定できた場合
-          if (lcpContent) {
-            // 座標を取得用のBoundingBox
-            const lcpBoundingBox = await lcpContent.boundingBox();
+            // コンテンツが特定できた場合
+            if (lcpContent) {
+              // 座標を取得用のBoundingBox
+              const lcpBoundingBox = await lcpContent.boundingBox();
 
-            // 座標の特定が可能な場合
-            if (lcpBoundingBox) {
-              // 画像を取得
-              let screenshot: Buffer = await lcpContent.screenshot({
-                type: "webp",
-              });
+              // 座標の特定が可能な場合
+              if (lcpBoundingBox) {
+                // 画像を取得
+                let screenshot: Buffer = await lcpContent.screenshot({
+                  type: "webp",
+                });
 
-              // 画像を加工
-              const img = sharp(screenshot);
-              const metadata = await img.metadata();
-              let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
-              while (screenshot.length > TARGET_SIZE) {
-                resizedWidth = Math.trunc(resizedWidth / 2);
-                screenshot = await sharp(screenshot)
-                  .resize(Math.trunc(resizedWidth), null)
-                  .toBuffer();
+                // 画像を加工
+                const img = sharp(screenshot);
+                const metadata = await img.metadata();
+                let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
+                while (screenshot.length > TARGET_SIZE) {
+                  resizedWidth = Math.trunc(resizedWidth / 2);
+                  screenshot = await sharp(screenshot)
+                    .resize(Math.trunc(resizedWidth), null)
+                    .toBuffer();
+                }
+
+                // レスポンスデータ
+                const res: WSResponse = {
+                  kind: "lcp",
+                  xpath: lcpXpath,
+                  url: currentUrl,
+                  img: screenshot,
+                  x: lcpBoundingBox.x,
+                  y: lcpBoundingBox.y,
+                };
+
+                // クライアントにLCP画像と座標を送信
+                ws.send(JSON.stringify(res));
+                results.push({ xpath: lcpXpath, lcp: lcp.lcp, status: "sent" });
+              } else {
+                results.push({
+                  xpath: lcpXpath,
+                  lcp: lcp.lcp,
+                  status: "no-bounding-box",
+                });
               }
-
-              // レスポンスデータ
-              const res: WSResponse = {
-                url: currentUrl,
-                img: screenshot,
-                x: lcpBoundingBox.x,
-                y: lcpBoundingBox.y,
-              };
-
-              // クライアントにLCP画像と座標を送信
-              ws.send(JSON.stringify(res));
+            } else {
+              results.push({
+                xpath: lcpXpath,
+                lcp: lcp.lcp,
+                status: "not-found",
+              });
             }
+          } catch (error) {
+            results.push({
+              xpath: lcpXpath,
+              lcp: lcp.lcp,
+              status: "error",
+              detail: String(error),
+            });
           }
         }
       }
@@ -268,6 +301,7 @@ async function main(): Promise<void> {
 
       // レスポンスデータ
       const res: WSResponse = {
+        kind: "viewport",
         url: currentUrl,
         img: screenshot,
         x: 0,
@@ -276,6 +310,7 @@ async function main(): Promise<void> {
 
       // クライアントにビューポート画像を送信
       ws.send(JSON.stringify(res));
+      return results;
     };
 
     /**

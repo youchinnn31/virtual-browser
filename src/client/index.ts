@@ -47,7 +47,13 @@ const getBrowser = (): HTMLCanvasElement => {
  * @param x X座標
  * @param y y座標
  */
-const renderSite = async (blob: Blob, x: number, y: number): Promise<void> => {
+const renderSite = async (
+  blob: Blob,
+  x: number,
+  y: number,
+  kind: "lcp" | "viewport" = "viewport",
+  xpath?: string,
+): Promise<void> => {
   const ctx: CanvasRenderingContext2D = browser.getContext("2d")!;
   const image: HTMLImageElement = new Image();
   const imgUrl: string = URL.createObjectURL(blob);
@@ -61,6 +67,8 @@ const renderSite = async (blob: Blob, x: number, y: number): Promise<void> => {
       const data = {
         action: "lcp",
         lcp: lcp,
+        renderKind: kind,
+        xpath: xpath,
       };
       webSocket.send(JSON.stringify(data));
     }
@@ -113,7 +121,7 @@ webSocket.onmessage = (event) => {
   const arrayBuffer = new Uint8Array(res.img.data);
   const blob: Blob = new Blob([arrayBuffer.buffer], { type: "image/webp" });
   urlInput.value = res.url;
-  renderSite(blob, res.x, res.y);
+  renderSite(blob, res.x, res.y, res.kind, res.xpath);
 };
 
 // モバイル端末の情報をサーバに送信する

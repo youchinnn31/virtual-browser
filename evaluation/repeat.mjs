@@ -36,7 +36,10 @@ function observeClient() {
         if (data.action) {
           event.stopImmediatePropagation();
           if (data.action === "ready") state.ready = true;
-          if (data.action === "complete") state.complete = true;
+          if (data.action === "complete") {
+            state.complete = true;
+            state.candidates = data.candidates;
+          }
           if (data.action === "lcp-received") state.acknowledged = true;
         } else if (data.img) {
           state.received++;
@@ -46,7 +49,11 @@ function observeClient() {
     }
     send(message) {
       const data = JSON.parse(message);
-      if (data.action === "lcp") window.__measurement.lcp = data.lcp;
+      if (data.action === "lcp") {
+        window.__measurement.lcp = data.lcp;
+        window.__measurement.renderKind = data.renderKind;
+        window.__measurement.firstXpath = data.xpath;
+      }
       return super.send(message);
     }
   };
@@ -88,6 +95,9 @@ async function access(page, url, timeout) {
     lcp: window.__measurement.lcp,
     finalUrl: window.__measurement.finalUrl,
     lcpImages: window.__measurement.received - 1,
+    renderKind: window.__measurement.renderKind,
+    firstXpath: window.__measurement.firstXpath,
+    candidates: window.__measurement.candidates,
   }));
 }
 

@@ -21,6 +21,8 @@ export async function writeReport(output, rows) {
     "初回収集LCP候補数",
     "状態",
     "DBファイル",
+    "先行描画評価",
+    "LCP画像で5回測定した中央値(ms)",
   ]);
   const details = workbook.addWorksheet("測定値");
   details.addRow([
@@ -31,8 +33,25 @@ export async function writeReport(output, rows) {
     "表示時間(ms)",
     "LCP部分画像数",
     "遷移後URL",
+    "最初の描画種別",
+    "最初の画像XPath",
+    "ビューポート描画の理由",
+  ]);
+  const candidates = workbook.addWorksheet("候補処理");
+  candidates.addRow([
+    "URL",
+    "通信速度(kbps)",
+    "アクセス回数",
+    "候補LCP(ms)",
+    "XPath",
+    "処理結果",
+    "詳細",
   ]);
   for (const row of rows) {
+    const eligible =
+      row.status === "ok" &&
+      row.samples.length === 5 &&
+      row.samples.every((sample) => sample.renderKind === "lcp");
     summary.addRow([
       row.url,
       row.speed,
@@ -42,6 +61,12 @@ export async function writeReport(output, rows) {
       row.collected?.candidates ?? null,
       row.status,
       row.database,
+      eligible
+        ? "5回ともLCP画像"
+        : row.samples.length < 5
+          ? "対象外：5回未完了"
+          : "対象外：ビューポート描画または描画種別不明を含む",
+      eligible ? median(row.samples) : null,
     ]);
     for (const sample of row.samples) {
       details.addRow([
@@ -52,7 +77,31 @@ export async function writeReport(output, rows) {
         sample.lcp,
         sample.lcpImages,
         sample.finalUrl,
+        sample.renderKind ?? "unknown",
+        sample.firstXpath ?? "",
+        sample.renderKind === "viewport"
+          ? !sample.candidates?.length
+            ? "no-collected-candidates"
+            : sample.lcpImages > 0
+              ? "viewport-rendered-first"
+              : [
+                  ...new Set(
+                    sample.candidates.map((candidate) => candidate.status),
+                  ),
+                ].join(", ")
+          : "",
       ]);
+      for (const candidate of sample.candidates ?? []) {
+        candidates.addRow([
+          row.url,
+          row.speed,
+          sample.access,
+          candidate.lcp,
+          candidate.xpath,
+          candidate.status,
+          candidate.detail ?? "",
+        ]);
+      }
     }
   }
   const conditions = workbook.addWorksheet("測定条件");

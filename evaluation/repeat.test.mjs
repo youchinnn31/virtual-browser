@@ -16,6 +16,7 @@ test("median excludes incomplete runs and Excel preserves numeric samples", asyn
     lcp,
     trial: i + 1,
     access: i + 2,
+    renderKind: "lcp",
   }));
   assert.equal(median(samples), 30);
   assert.equal(median(samples.slice(0, 4)), null);
@@ -34,6 +35,8 @@ test("median excludes incomplete runs and Excel preserves numeric samples", asyn
   assert.equal(workbook.getWorksheet("中央値").getCell("C2").value, 30);
   assert.equal(workbook.getWorksheet("中央値").getCell("C3").value, null);
   assert.equal(workbook.getWorksheet("中央値").getCell("I2").value, 9999);
+  assert.equal(workbook.getWorksheet("中央値").getCell("N2").value, 30);
+  assert.equal(workbook.getWorksheet("中央値").getCell("N3").value, null);
 });
 
 test(
@@ -52,8 +55,13 @@ test(
       } else if (req.url.startsWith("/page?")) {
         setTimeout(() => {
           res.setHeader("Content-Type", "text/html");
+          const hidden = visits === 3 ? "display:none;" : "";
+          const title =
+            visits === 4
+              ? ""
+              : `<h1 id="title" style="${hidden}font-size:24px">LCP test</h1>`;
           res.end(
-            '<h1 style="font-size:24px">LCP test</h1><img src="/image.svg" width="160" height="100">',
+            `${title}<img id="${visits === 4 ? "different" : "hero"}" style="${hidden}${visits === 4 ? "display:none" : ""}" src="/image.svg" width="160" height="100">`,
           );
         }, 0);
       } else if (req.url === "/image.svg") {
@@ -127,13 +135,38 @@ test(
       );
       assert.ok(summary.getCell("I2").value < 4000);
       assert.ok(summary.getCell("J2").value > 0);
+      assert.match(summary.getCell("M2").value, /対象外/);
+      assert.equal(
+        summary.getCell("N2").value,
+        null,
+        "Mixed rendering is excluded from the LCP-only median",
+      );
+      const candidates = workbook.getWorksheet("候補処理");
+      assert.equal(candidates.rowCount, summary.getCell("J2").value * 5 + 1);
       for (let i = 2; i <= 6; i++) {
         assert.equal(details.getRow(i).getCell(4).value, i);
-        assert.ok(
-          details.getRow(i).getCell(6).value > 0,
-          "LCP partial images were rendered",
-        );
+        if (i === 3 || i === 4) {
+          assert.equal(details.getRow(i).getCell(6).value, 0);
+          assert.equal(details.getRow(i).getCell(8).value, "viewport");
+          assert.equal(
+            details.getRow(i).getCell(10).value,
+            i === 3 ? "no-bounding-box" : "not-found",
+          );
+        } else {
+          assert.ok(details.getRow(i).getCell(6).value > 0);
+          assert.equal(details.getRow(i).getCell(8).value, "lcp");
+          assert.match(details.getRow(i).getCell(9).value, /^id\(/);
+        }
       }
+      const statuses = [];
+      candidates.eachRow((row, index) => {
+        if (index > 1) statuses.push(row.getCell(6).value);
+      });
+      assert.deepEqual([...new Set(statuses)].sort(), [
+        "no-bounding-box",
+        "not-found",
+        "sent",
+      ]);
       await new Promise((resolve, reject) => {
         const db = new sqlite3.Database(path.join(`${output}.data`, "1.db"));
         db.get(
