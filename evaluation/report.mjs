@@ -5,7 +5,7 @@ export function median(samples) {
   return samples.map((sample) => sample.lcp).sort((a, b) => a - b)[2];
 }
 
-export async function writeReport(output, rows) {
+export async function writeReport(output, rows, options = {}) {
   const workbook = new ExcelJS.Workbook();
   const summary = workbook.addWorksheet("中央値");
   summary.addRow([
@@ -105,6 +105,9 @@ export async function writeReport(output, rows) {
     }
   }
   const conditions = workbook.addWorksheet("測定条件");
+  const overriddenConditions = new Set(
+    (options.conditions ?? []).map(([key]) => key),
+  );
   for (const entry of [
     ["項目", "条件"],
     ["測定対象", "URL送信から最初の画像をCanvasに描画するまでの時間"],
@@ -131,7 +134,14 @@ export async function writeReport(output, rows) {
       "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
     ],
   ])
-    conditions.addRow(entry);
+    if (!overriddenConditions.has(entry[0])) conditions.addRow(entry);
+  for (const entry of options.conditions ?? []) conditions.addRow(entry);
+  if (options.controls) {
+    const controls = workbook.addWorksheet("速度制御");
+    controls.addRow(["日時", "操作", "記録"]);
+    for (const entry of options.controls)
+      controls.addRow([entry.at, entry.kind, JSON.stringify(entry.data)]);
+  }
   for (const sheet of workbook.worksheets) {
     sheet.views = [{ state: "frozen", ySplit: 1 }];
     sheet.getRow(1).font = { bold: true };
