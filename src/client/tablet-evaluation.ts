@@ -116,6 +116,10 @@ function connect(token?: string) {
     if (running) {
       discardTrial();
       finish();
+      if (runId) {
+        download.href = `/evaluation/results/${runId}`;
+        download.hidden = false;
+      }
       log(
         "接続が切れました。進行中の試行は無効です。保存完了後、Excelリンクから結果を確認してください。",
       );
@@ -165,7 +169,7 @@ function connect(token?: string) {
         case "evaluation:started":
           runId = data.id;
           download.href = data.download;
-          download.hidden = false;
+          download.hidden = true;
           if (pendingStop) send("evaluation:stop", { reason: pendingStop });
           break;
         case "evaluation:speed-required":
@@ -281,7 +285,7 @@ function connect(token?: string) {
           break;
         case "evaluation:finished":
           download.href = data.download;
-          download.hidden = false;
+          download.hidden = !data.download;
           finish();
           log(`評価終了：${data.status}。Excelをダウンロードできます。`);
           break;

@@ -163,6 +163,43 @@ test(
       );
       assert.equal(stopped.getWorksheet("中央値").getCell("C2").value, null);
       assert.notEqual(stopped.getWorksheet("中央値").getCell("K2").value, "ok");
+      await page.click("#start");
+      await page.waitForSelector("#speed-panel:not([hidden])");
+      await page.click("#speed-confirm");
+      await page.waitForFunction(
+        () =>
+          document.getElementById("history").textContent.includes("アクセス1"),
+        { timeout: 20000 },
+      );
+      await page.setViewport({
+        width: 900,
+        height: 850,
+        deviceScaleFactor: 2,
+        isMobile: true,
+      });
+      await page.waitForFunction(
+        () =>
+          document
+            .getElementById("status")
+            .textContent.includes("評価終了：stopped"),
+        { timeout: 20000 },
+      );
+      await page.click("#start");
+      await page.waitForSelector("#speed-panel:not([hidden])");
+      const shutdownId = (
+        await page.$eval("#download", (element) => element.getAttribute("href"))
+      )
+        .split("/")
+        .at(-1);
+      const exited = once(child, "exit");
+      process.kill(-child.pid, "SIGTERM");
+      const [exitCode] = await exited;
+      assert.equal(exitCode, 0);
+      const shutdown = new ExcelJS.Workbook();
+      await shutdown.xlsx.readFile(
+        path.join(directory, shutdownId, "results.xlsx"),
+      );
+      assert.equal(shutdown.getWorksheet("中央値").rowCount, 1);
       assert.deepEqual(errors, []);
     } finally {
       await browser?.close();

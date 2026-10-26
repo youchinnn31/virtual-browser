@@ -24,6 +24,7 @@ interface Session {
   stopped?: Error;
   pending: Map<string, Waiter>;
   saved: Set<string>;
+  completion?: Promise<void>;
 }
 
 function object(value: unknown): value is Message {
@@ -175,6 +176,25 @@ export function registerTabletEvaluation(
     let state = "complete";
     let originalCharles: CharlesState | undefined;
     try {
+      let revision = process.env["APP_REVISION"] ?? "未記録";
+      if (revision === "未記録") {
+        try {
+          const head = (await fs.readFile(".git/HEAD", "utf8")).trim();
+          revision = head.startsWith("ref: ")
+            ? (
+                await fs.readFile(path.join(".git", head.slice(5)), "utf8")
+              ).trim()
+            : head;
+        } catch {
+          /* A checkout without loose Git refs can supply APP_REVISION. */
+        }
+      }
+      config.versions = {
+        node: process.version,
+        chrome: await browser.version(),
+        revision,
+        charles: process.env["CHARLES_VERSION"] ?? "未設定",
+      };
       session.store = await RunStore.create(root, config);
       const store = session.store;
       if (charles) {
@@ -420,8 +440,12 @@ export function registerTabletEvaluation(
 
   return {
     isBusy: () => !!active,
-    stop: () => {
-      if (active) stop(active, "Server stopping");
+    stop: async () => {
+      const session = active;
+      if (session) {
+        stop(session, "Server stopping");
+        await session.completion;
+      }
     },
     connect(socket: WebSocket, token: string | null = null) {
       if (active && token === active.token && active.reconnecting) {
@@ -467,7 +491,21 @@ export function registerTabletEvaluation(
               saved: new Set(),
             };
             active = session;
-            void execute(session, config);
+            session.completion = execute(session, config).catch(
+              async (error: unknown) => {
+                cancelWaits(session, new Error(String(error)));
+                await session.worker?.close().catch(() => {});
+                await session.store?.close().catch(() => {});
+                if (active === session) active = undefined;
+                send(session, "evaluation:error", {
+                  error: `評価を終了しました：${String(error)}`,
+                });
+                send(session, "evaluation:finished", {
+                  status: "save-failed",
+                  download: "",
+                });
+              },
+            );
             return;
           }
           const session = active;

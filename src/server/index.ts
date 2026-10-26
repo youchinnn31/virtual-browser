@@ -67,6 +67,8 @@ async function main(): Promise<void> {
   // headlessブラウザの起動
   const browser = await puppeteer.launch({
     headless: "new",
+    handleSIGINT: false,
+    handleSIGTERM: false,
     ignoreHTTPSErrors: true,
     args: ["--lang=ja", "--no-proxy-server"],
   });
@@ -105,10 +107,11 @@ async function main(): Promise<void> {
   });
 
   let legacyOperations = 0;
+  let shuttingDown = false;
   const tablet = registerTabletEvaluation(
     app,
     browser,
-    () => legacyOperations === 0,
+    () => legacyOperations === 0 && !shuttingDown,
   );
 
   // サーバの起動
@@ -135,9 +138,34 @@ async function main(): Promise<void> {
       threshold: 1024,
     },
   });
+  const shutdown = async () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    try {
+      await tablet.stop();
+      for (const client of wss.clients) client.terminate();
+      await browser.close();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+      await new Promise<void>((resolve) => db.close(() => resolve()));
+      process.exitCode = 0;
+    } catch (error) {
+      console.error(error);
+      process.exitCode = 1;
+    }
+  };
+  process.once("SIGINT", () => {
+    void shutdown();
+  });
+  process.once("SIGTERM", () => {
+    void shutdown();
+  });
 
   // WebSocketサーバの処理
   wss.on("connection", (ws: WebSocket, request) => {
+    if (shuttingDown) {
+      ws.close(1001, "Server stopping");
+      return;
+    }
     const address = new URL(request.url ?? "/", "http://localhost");
     if (address.pathname === "/evaluation/ws") {
       tablet.connect(ws, address.searchParams.get("token"));
@@ -184,6 +212,9 @@ async function main(): Promise<void> {
             break;
           }
         }
+      } catch (error) {
+        console.error(error);
+        ws.close(1011, "Request failed");
       } finally {
         legacyOperations--;
       }

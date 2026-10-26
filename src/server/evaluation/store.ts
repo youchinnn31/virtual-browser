@@ -9,6 +9,12 @@ export interface RunConfig {
   urls: string[];
   speeds: number[];
   speedMode: "external-unverified" | "charles";
+  versions?: {
+    node: string;
+    chrome: string;
+    revision: string;
+    charles: string;
+  };
 }
 
 export class RunStore {
@@ -205,6 +211,10 @@ export class RunStore {
         ["仮想ブラウザDPR", 1],
         ["速度制御モード", this.config.speedMode],
         ["実行状態", status],
+        ["サーバーNode", this.config.versions?.node ?? "未記録"],
+        ["仮想Chrome", this.config.versions?.chrome ?? "未記録"],
+        ["実装コミット", this.config.versions?.revision ?? "未記録"],
+        ["Charlesバージョン", this.config.versions?.charles ?? "未設定"],
         [
           "注意",
           this.config.speedMode === "external-unverified"
