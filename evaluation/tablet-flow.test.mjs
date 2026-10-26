@@ -31,6 +31,7 @@ test(
       detached: true,
       env: {
         ...process.env,
+        CHARLES_CONFIG: "",
         TABLET_RESULTS_DIR: directory,
         LCP_DB_PATH: path.join(directory, "normal.db"),
       },

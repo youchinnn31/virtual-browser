@@ -1,12 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { randomUUID } from "node:crypto";
+import { randomUUID, randomBytes } from "node:crypto";
 import type { Express } from "express";
 import type { Browser } from "puppeteer";
 import WebSocket from "ws";
 import { TabletWorker } from "./worker";
 import { RunStore, RunConfig } from "./store";
 import type { Sample } from "./types";
+import { CharlesController, CharlesState } from "./charles";
 
 type Message = Record<string, unknown>;
 interface Waiter {
@@ -105,6 +106,7 @@ export function registerTabletEvaluation(
   const root = path.resolve(
     process.env["TABLET_RESULTS_DIR"] ?? "evaluation/results",
   );
+  const charles = CharlesController.fromEnvironment();
   let active: Session | undefined;
   const send = (session: Session, action: string, data: object = {}) => {
     if (session.socket.readyState === WebSocket.OPEN)
@@ -152,7 +154,7 @@ export function registerTabletEvaluation(
       res.set("Cache-Control", "no-store").json({
         urls: JSON.parse(await fs.readFile("evaluation/urls.json", "utf8")),
         speeds: [128, 200, 300, 1024],
-        speedMode: "external-unverified",
+        speedMode: charles ? "charles" : "external-unverified",
       });
     } catch {
       res.status(500).json({ error: "URL一覧を読み込めません。" });
@@ -171,29 +173,43 @@ export function registerTabletEvaluation(
 
   async function execute(session: Session, config: RunConfig) {
     let state = "complete";
+    let originalCharles: CharlesState | undefined;
     try {
       session.store = await RunStore.create(root, config);
       const store = session.store;
+      if (charles) {
+        originalCharles = await charles.status();
+        await store.log("charles-original-state", originalCharles);
+      }
       send(session, "evaluation:started", {
         id: store.id,
         download: `/evaluation/results/${store.id}`,
       });
       for (const speed of config.speeds) {
         if (session.stopped) throw session.stopped;
-        const speedId = randomUUID();
-        const confirmed = wait(
-          session,
-          "evaluation:speed-confirmed",
-          speedId,
-          600000,
-        );
-        send(session, "evaluation:speed-required", {
-          id: speedId,
-          speed,
-          verified: false,
-        });
-        await confirmed;
-        await store.log("external-speed-confirmed", { speed, verified: false });
+        if (charles) {
+          const selected = await charles.select(speed);
+          await store.log("charles-selected", selected);
+        } else {
+          const speedId = randomUUID();
+          const confirmed = wait(
+            session,
+            "evaluation:speed-confirmed",
+            speedId,
+            600000,
+          );
+          send(session, "evaluation:speed-required", {
+            id: speedId,
+            speed,
+            verified: false,
+          });
+          await confirmed;
+          await store.log("external-speed-confirmed", {
+            speed,
+            verified: false,
+          });
+        }
+        if (session.stopped) throw session.stopped;
         session.reconnecting = true;
         const reconnected = wait(
           session,
@@ -203,6 +219,59 @@ export function registerTabletEvaluation(
         );
         send(session, "evaluation:reconnect", { token: session.token });
         await reconnected;
+        if (charles) {
+          const measured: number[] = [];
+          for (let sample = 0; sample < 3; sample++) {
+            if (session.stopped) throw session.stopped;
+            const id = randomUUID();
+            const bytes = 256000;
+            const started = wait(session, "evaluation:probe-start", id, 120000);
+            send(session, "evaluation:probe-ready", {
+              id,
+              bytes,
+              speed,
+              sample: sample + 1,
+            });
+            await started;
+            const result = wait(session, "evaluation:probe-result", id, 120000);
+            session.socket.send(randomBytes(bytes), {
+              binary: true,
+              compress: false,
+            });
+            const report = await result;
+            const ms = report["ms"];
+            if (
+              report["bytes"] !== bytes ||
+              typeof ms !== "number" ||
+              !Number.isFinite(ms) ||
+              ms <= 0 ||
+              ms > 120000
+            )
+              throw new Error("帯域検証の受信結果が不正です。");
+            const kbps = (bytes * 8) / ms;
+            measured.push(kbps);
+            await store.log("bandwidth-probe", {
+              speed,
+              sample: sample + 1,
+              bytes,
+              ms,
+              kbps,
+            });
+          }
+          const median = measured.sort((a, b) => a - b)[1]!;
+          const verified =
+            Math.abs(median - speed) / speed <= charles.tolerance;
+          await store.log("bandwidth-verification", {
+            speed,
+            measuredKbps: median,
+            tolerance: charles.tolerance,
+            verified,
+          });
+          if (!verified)
+            throw new Error(
+              `実効速度の検証に失敗しました：設定${speed}kbps、実測中央値${median.toFixed(1)}kbps。本測定を停止します。`,
+            );
+        }
         for (const url of config.urls) {
           if (session.stopped) throw session.stopped;
           const condition = await store.condition(url, speed);
@@ -314,6 +383,22 @@ export function registerTabletEvaluation(
       send(session, "evaluation:error", { error: String(error) });
     } finally {
       cancelWaits(session, new Error("Evaluation finished"));
+      if (charles && originalCharles) {
+        try {
+          await session.store?.log(
+            "charles-restored",
+            await charles.restore(originalCharles),
+          );
+        } catch (error) {
+          state = "failed";
+          await session.store?.log("charles-restore-failed", {
+            error: String(error),
+          });
+          send(session, "evaluation:error", {
+            error: `Charlesの設定を手動で確認してください：${String(error)}`,
+          });
+        }
+      }
       try {
         if (session.store) {
           await session.store.export(state);
@@ -374,6 +459,7 @@ export function registerTabletEvaluation(
             if (active || !canStart())
               throw new Error("仮想ブラウザを使用中です。");
             const config = parseConfig(message);
+            config.speedMode = charles ? "charles" : "external-unverified";
             const session: Session = {
               socket,
               token: randomUUID(),
