@@ -1,6 +1,6 @@
 # 2回目以降の表示時間の測定
 
-タブレットの評価ページで自動巡回し、Charlesで速度を切り替える方式は、[実機評価の設計案](tablet-design.md) を参照してください。以下は既存のPCクロールの実行方法です。
+タブレットの評価ページで自動巡回する場合は、[実機評価の使い方](tablet.md) を参照してください。[設計案](tablet-design.md) も残しています。以下は既存のPCクロールの実行方法です。
 
 リポジトリのルートで実行します。Node.jsとPuppeteerのChromeが必要です。
 ポート3000を使用するため、通常の代理サーバーは停止しておいてください。
@@ -71,7 +71,7 @@ DNSキャッシュ、接続の再利用、対象サイト・CDN側のキャッ�
 
 ```sh
 npm run build
-node --test evaluation/*.test.mjs
+node --test --test-concurrency=1 evaluation/*.test.mjs
 ```
 
 ローカルのキャッシュ可能なページへ初回＋5回アクセスし、キャッシュ無効、先行描画、DB保持、Excelと中央値を確認します。
