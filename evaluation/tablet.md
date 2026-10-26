@@ -18,6 +18,19 @@ http://PCのLAN内IPアドレス:3000/evaluation
 
 ポート3000への接続を許可してください。Charlesを使う場合はCharlesの待受ポート（通常8888）にも端末から接続できるようにします。評価サーバーとCharlesは同じPCで動作できます。
 
+### WindowsのWSL2で動かす場合
+
+WSL2のNAT環境では、Windowsのlocalhostで開けても、LAN内のタブレットから直接開けない場合があります。サーバーを起動したうえで、Windowsの管理者PowerShellから `expose-wsl.ps1` を実行します。
+
+```powershell
+# それぞれ現在のWindows側LANアドレス、WSL側アドレスを指定する
+.\evaluation\expose-wsl.ps1 -ListenAddress 192.168.10.5 -ConnectAddress 172.29.137.16
+```
+
+この例のIPは環境に合わせて変更してください。スクリプトはWindowsの指定アドレスのTCP 3000をWSLへ転送し、同じサブネットからの受信を許可します。ほかの転送設定を上書きしません。WSLのアドレスは再起動等で変わることがあり、変更後は既存の転送先を確認して設定し直す必要があります。
+
+端末では `http://Windows側LANアドレス:3000/evaluation` を開きます。`localhost` やWSL側の内部アドレスは使いません。Charles未設定の接続確認では、端末のWi-Fiプロキシ設定を無効にして確認してください。
+
 評価はタブレットで開いたページのJavaScriptが進めます。USB接続やPCによる実機ブラウザの遠隔操作は不要です。サーバーはタブレットのUser-AgentとCSS寸法を仮想ブラウザに設定します。仮想ブラウザのDPRは1、端末のDPRは実測値を別途保存します。
 
 ## Charlesの設定を後回しにする場合
