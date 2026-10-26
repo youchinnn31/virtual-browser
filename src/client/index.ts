@@ -1,6 +1,5 @@
 "use strict";
 
-const PORT = 3000;
 let startTime = 0;
 let endTime = 0;
 let lcp = 0;
@@ -76,7 +75,11 @@ const renderSite = async (
   image.src = imgUrl;
 };
 
-const webSocket: WebSocket = new WebSocket(`ws://localhost:${PORT}`);
+const webSocketProtocol =
+  window.location.protocol === "https:" ? "wss:" : "ws:";
+const webSocket: WebSocket = new WebSocket(
+  `${webSocketProtocol}//${window.location.host}`,
+);
 const browser: HTMLCanvasElement = getBrowser();
 const urlButton: HTMLButtonElement = getButton("url-button");
 const urlInput: HTMLInputElement = getUrlInput();
