@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>タブレット実機評価</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #f3f5f7;
+        color: #182433;
+        font:
+          16px system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 1100px;
+        margin: auto;
+      }
+      h1 {
+        font-size: 1.4rem;
+      }
+      label {
+        display: block;
+        margin-top: 10px;
+      }
+      input,
+      textarea,
+      button {
+        font: inherit;
+        padding: 8px;
+      }
+      textarea {
+        width: 100%;
+        height: 110px;
+      }
+      input[type="text"] {
+        width: 100%;
+        max-width: 500px;
+      }
+      button {
+        margin: 8px 8px 8px 0;
+        min-height: 44px;
+      }
+      fieldset {
+        border: 1px solid #b8c4d0;
+        margin: 12px 0;
+      }
+      fieldset label {
+        display: inline-block;
+        margin: 4px 16px 4px 0;
+      }
+      #speed-panel {
+        padding: 12px;
+        border: 2px solid #ad6500;
+        background: #fff7df;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: 55vh;
+        background: white;
+        border: 1px solid #b8c4d0;
+      }
+      #status {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      #history {
+        max-height: 180px;
+        overflow: auto;
+        font-size: 0.9rem;
+      }
+      a {
+        display: inline-block;
+        padding: 10px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+    <script src="tablet-evaluation.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>タブレット実機評価</h1>
+      <p>
+        各サイトで初回収集後に5回測定します。画面ロックを解除し、向きを固定してください。
+      </p>
+      <p>
+        <strong>外部速度設定モード：</strong
+        >このページは通信速度を変更しません。Charles等で設定した速度を記録します。実効速度は未検証です。
+      </p>
+      <label
+        >端末名
+        <input
+          id="device-name"
+          type="text"
+          maxlength="200"
+          placeholder="例：研究用iPad"
+      /></label>
+      <label
+        >対象URL（1行に1件）<textarea id="urls" spellcheck="false"></textarea>
+      </label>
+      <fieldset id="speeds">
+        <legend>測定する速度</legend>
+        <label><input type="checkbox" value="128" />128 kbps</label>
+        <label><input type="checkbox" value="200" />200 kbps</label>
+        <label><input type="checkbox" value="300" />300 kbps</label>
+        <label><input type="checkbox" value="1024" checked />1024 kbps</label>
+      </fieldset>
+      <button id="start" disabled>測定開始</button
+      ><button id="stop" disabled>停止して保存</button>
+      <a id="download" hidden>Excelをダウンロード</a>
+      <section id="speed-panel" hidden>
+        <p id="speed-message"></p>
+        <button id="speed-confirm">外部の速度設定を確認して続行</button>
+      </section>
+      <p id="status" role="status">接続中…</p>
+      <canvas
+        id="evaluation-canvas"
+        aria-label="仮想ブラウザの描画領域"
+      ></canvas>
+      <ol id="history"></ol>
+    </main>
+  </body>
+</html>

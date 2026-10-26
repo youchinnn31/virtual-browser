@@ -17,6 +17,7 @@ import { WSResponse } from "./types/wsResponse";
 import { UrlRepository } from "./repository/url.repository";
 import { LcpRepository } from "./repository/lcp.repository";
 import { LcpInfo } from "./types/lcpInfo";
+import { registerTabletEvaluation } from "./evaluation/controller";
 
 const PORT: number = 3000; // 仮想ブラウザのPORT番号
 const DEFAULT_WIDTH: number = 1000;
@@ -67,7 +68,7 @@ async function main(): Promise<void> {
   const browser = await puppeteer.launch({
     headless: "new",
     ignoreHTTPSErrors: true,
-    args: ["--lang=ja"],
+    args: ["--lang=ja", "--no-proxy-server"],
   });
 
   // pageインスタンスの生成
@@ -103,6 +104,13 @@ async function main(): Promise<void> {
     );
   });
 
+  let legacyOperations = 0;
+  const tablet = registerTabletEvaluation(
+    app,
+    browser,
+    () => legacyOperations === 0,
+  );
+
   // サーバの起動
   const server = app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`);
@@ -129,37 +137,55 @@ async function main(): Promise<void> {
   });
 
   // WebSocketサーバの処理
-  wss.on("connection", (ws: WebSocket) => {
+  wss.on("connection", (ws: WebSocket, request) => {
+    const address = new URL(request.url ?? "/", "http://localhost");
+    if (address.pathname === "/evaluation/ws") {
+      tablet.connect(ws, address.searchParams.get("token"));
+      return;
+    }
+    if (tablet.isBusy()) {
+      ws.close(1013, "Tablet evaluation in progress");
+      return;
+    }
     console.log("Client connected.");
 
     // リクエストの処理
     ws.on("message", async (data: string) => {
-      const req: WSRequest = JSON.parse(data);
-      switch (req.action) {
-        case "image": {
-          const candidates = await getImage(req);
-          if (evaluationMode)
-            ws.send(JSON.stringify({ action: "complete", candidates }));
-          break;
+      if (tablet.isBusy()) {
+        ws.close(1013, "Tablet evaluation in progress");
+        return;
+      }
+      legacyOperations++;
+      try {
+        const req: WSRequest = JSON.parse(data);
+        switch (req.action) {
+          case "image": {
+            const candidates = await getImage(req);
+            if (evaluationMode)
+              ws.send(JSON.stringify({ action: "complete", candidates }));
+            break;
+          }
+          case "lcp": {
+            await processSentLcp(req);
+            if (evaluationMode)
+              ws.send(JSON.stringify({ action: "lcp-received" }));
+            break;
+          }
+          case "scroll": {
+            await scrollBrowser(req);
+            break;
+          }
+          case "init": {
+            await setConfig(req);
+            if (evaluationMode) ws.send(JSON.stringify({ action: "ready" }));
+            break;
+          }
+          default: {
+            break;
+          }
         }
-        case "lcp": {
-          await processSentLcp(req);
-          if (evaluationMode)
-            ws.send(JSON.stringify({ action: "lcp-received" }));
-          break;
-        }
-        case "scroll": {
-          await scrollBrowser(req);
-          break;
-        }
-        case "init": {
-          await setConfig(req);
-          if (evaluationMode) ws.send(JSON.stringify({ action: "ready" }));
-          break;
-        }
-        default: {
-          break;
-        }
+      } finally {
+        legacyOperations--;
       }
     });
 
