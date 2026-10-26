@@ -5,6 +5,7 @@ import type { Browser, BrowserContext, Page } from "puppeteer";
 import { UrlRepository } from "../repository/url.repository";
 import { LcpRepository } from "../repository/lcp.repository";
 import type { CandidateResult, DeviceInfo, EvaluationFrame } from "./types";
+import type { ProgressLogger } from "./logger";
 
 /** One fresh context and collection DB for one requested URL / speed pair. */
 export class TabletWorker {
@@ -19,6 +20,7 @@ export class TabletWorker {
     private db: sqlite3.Database,
     private url: string,
     private urlId: number,
+    private progress: ProgressLogger,
   ) {}
 
   static async open(
@@ -26,6 +28,7 @@ export class TabletWorker {
     database: string,
     url: string,
     device: DeviceInfo,
+    progress: ProgressLogger = () => {},
   ) {
     const context = await browser.createIncognitoBrowserContext();
     const db = new sqlite3.Database(database);
@@ -52,7 +55,14 @@ export class TabletWorker {
       await page.setBypassServiceWorker(true);
       await page.setBypassCSP(true);
       await page.setExtraHTTPHeaders({ "Accept-Language": "ja-JP" });
-      const worker = new TabletWorker(context, page, db, url, entity.id);
+      const worker = new TabletWorker(
+        context,
+        page,
+        db,
+        url,
+        entity.id,
+        progress,
+      );
       const lcps = new LcpRepository(db);
       page.on("console", (message) => {
         if (!worker.collecting || message.type() !== "trace") return;
@@ -69,9 +79,10 @@ export class TabletWorker {
             return;
           const lcp = entry["lcp"];
           const xpath = entry["xpath"];
-          worker.writes = worker.writes.then(() =>
-            lcps.save(lcp, xpath, entity.id),
-          );
+          worker.writes = worker.writes.then(async () => {
+            await lcps.save(lcp, xpath, entity.id);
+            progress("candidate-collected", { lcpMs: lcp, xpath });
+          });
           // Keep errors for the awaited flush without an unhandled rejection.
           void worker.writes.catch(() => {});
         } catch {
@@ -102,11 +113,23 @@ export class TabletWorker {
         )
       ).identifier;
     }
-    await this.page.goto(this.url, {
+    this.progress("navigate-start", {
+      access: access + 1,
+      url: this.url,
+      waitUntil: "networkidle2",
+    });
+    const navigationStart = performance.now();
+    const response = await this.page.goto(this.url, {
       waitUntil: "networkidle2",
       timeout: 60000,
     });
     const finalUrl = this.page.url();
+    this.progress("navigate-complete", {
+      access: access + 1,
+      url: finalUrl,
+      status: response?.status() ?? null,
+      elapsedMs: performance.now() - navigationStart,
+    });
     const candidates: CandidateResult[] = [];
     const frames: EvaluationFrame[] = [];
     const emit = async (
@@ -142,6 +165,11 @@ export class TabletWorker {
           if (element) {
             const box = await element.boundingBox();
             if (box && box.width > 0 && box.height > 0) {
+              this.progress("capture-start", {
+                access: access + 1,
+                kind: "lcp",
+                xpath: entry.xpath,
+              });
               const image = await element.screenshot({ type: "webp" });
               await emit(image, { kind: "lcp", xpath: entry.xpath, ...box });
               result.status = "sent";
@@ -152,9 +180,12 @@ export class TabletWorker {
           result.detail = String(error);
         }
         candidates.push(result);
+        if (result.status !== "sent")
+          this.progress("candidate-skipped", { access: access + 1, ...result });
       }
     }
     await this.page.evaluate(() => window.scrollTo(0, 0));
+    this.progress("capture-start", { access: access + 1, kind: "viewport" });
     const viewport = await this.page.screenshot({ type: "webp" });
     if (this.collecting) {
       await this.page.evaluate("window.__stopLcpCollection?.()");
@@ -179,6 +210,8 @@ export class TabletWorker {
     const collected = await new LcpRepository(this.db).findAllByUrlId(
       this.urlId,
     );
+    if (access === 0)
+      this.progress("collection-complete", { candidates: collected.length });
     this.nextAccess++;
     return {
       frames,

@@ -200,6 +200,47 @@ test(
         path.join(directory, shutdownId, "results.xlsx"),
       );
       assert.equal(shutdown.getWorksheet("中央値").rowCount, 1);
+      const logFiles = await fs.readdir(path.join(directory, "logs"));
+      const records = (
+        await fs.readFile(path.join(directory, "logs", logFiles[0]), "utf8")
+      )
+        .trim()
+        .split("\n")
+        .map((line) => JSON.parse(line));
+      for (const event of [
+        "client-connected",
+        "evaluation:speed-required",
+        "navigate-start",
+        "navigate-complete",
+        "image-queued",
+        "client-rendered",
+        "evaluation:trial-saved",
+        "excel-written",
+      ]) {
+        assert.ok(
+          records.some((record) => record.event === event),
+          `Missing progress event: ${event}`,
+        );
+      }
+      assert.ok(
+        records.some(
+          (record) =>
+            record.event === "image-queued" &&
+            record.kind === "lcp" &&
+            record.bytes > 0,
+        ),
+      );
+      assert.ok(
+        records.some(
+          (record) =>
+            record.event === "client-rendered" && record.renderKind === "lcp",
+        ),
+      );
+      assert.ok(
+        records.every((record) => !("img" in record) && !("token" in record)),
+      );
+      assert.match(logs, /\[tablet\].*navigate-start/);
+      assert.match(logs, /\[tablet\].*client-rendered/);
       assert.deepEqual(errors, []);
     } finally {
       await browser?.close();

@@ -8,6 +8,7 @@ import { TabletWorker } from "./worker";
 import { RunStore, RunConfig } from "./store";
 import type { Sample } from "./types";
 import { CharlesController, CharlesState } from "./charles";
+import { createEvaluationLogger } from "./logger";
 
 type Message = Record<string, unknown>;
 interface Waiter {
@@ -108,12 +109,37 @@ export function registerTabletEvaluation(
     process.env["TABLET_RESULTS_DIR"] ?? "evaluation/results",
   );
   const charles = CharlesController.fromEnvironment();
+  const logger = createEvaluationLogger(root);
+  logger.log("service-ready", {
+    mode: charles ? "charles" : "external-unverified",
+    logFile: logger.file,
+    pid: process.pid,
+  });
   let active: Session | undefined;
   const send = (session: Session, action: string, data: object = {}) => {
-    if (session.socket.readyState === WebSocket.OPEN)
+    if (session.socket.readyState === WebSocket.OPEN) {
       session.socket.send(
         JSON.stringify({ action, runId: session.store?.id, ...data }),
       );
+      if (action === "evaluation:frame") {
+        const frame = data as Record<string, unknown>;
+        logger.log("image-queued", {
+          runId: session.store?.id,
+          trialId: frame["id"],
+          frameId: frame["frameId"],
+          kind: frame["kind"],
+          xpath: frame["xpath"],
+          bytes: Buffer.isBuffer(frame["img"])
+            ? frame["img"].length
+            : undefined,
+        });
+      } else {
+        const safe = Object.fromEntries(
+          Object.entries(data).filter(([key]) => key !== "token"),
+        );
+        logger.log(action, { runId: session.store?.id, ...safe });
+      }
+    }
   };
   const cancelWaits = (session: Session, error: Error) => {
     for (const waiter of session.pending.values()) {
@@ -123,6 +149,8 @@ export function registerTabletEvaluation(
     session.pending.clear();
   };
   const stop = (session: Session, reason: string) => {
+    if (!session.stopped)
+      logger.log("stop-requested", { runId: session.store?.id, reason });
     session.stopped ??= new Error(reason);
     cancelWaits(session, session.stopped);
     void session.worker?.abort().catch(() => {});
@@ -222,9 +250,16 @@ export function registerTabletEvaluation(
             id: speedId,
             speed,
             verified: false,
+            message:
+              "外部プロキシの速度設定後、端末の確認ボタンを押すまで待機します。",
           });
           await confirmed;
           await store.log("external-speed-confirmed", {
+            speed,
+            verified: false,
+          });
+          logger.log("speed-confirmed", {
+            runId: store.id,
             speed,
             verified: false,
           });
@@ -295,6 +330,12 @@ export function registerTabletEvaluation(
         for (const url of config.urls) {
           if (session.stopped) throw session.stopped;
           const condition = await store.condition(url, speed);
+          logger.log("condition-start", {
+            runId: store.id,
+            conditionId: condition.id,
+            url,
+            speed,
+          });
           let trialId: string | undefined;
           try {
             session.worker = await TabletWorker.open(
@@ -302,6 +343,14 @@ export function registerTabletEvaluation(
               condition.row.database,
               url,
               config.device,
+              (event, details) =>
+                logger.log(event, {
+                  runId: store.id,
+                  conditionId: condition.id,
+                  requestedUrl: url,
+                  speed,
+                  ...details,
+                }),
             );
             for (let access = 0; access <= 5; access++) {
               if (session.stopped) throw session.stopped;
@@ -317,6 +366,14 @@ export function registerTabletEvaluation(
                 phase: access === 0 ? "collect" : "measure",
               });
               await started;
+              logger.log("trial-start", {
+                runId: store.id,
+                trialId,
+                url,
+                speed,
+                access: access + 1,
+                phase: access === 0 ? "collect" : "measure",
+              });
               const reported = wait(
                 session,
                 "evaluation:trial-result",
@@ -361,6 +418,14 @@ export function registerTabletEvaluation(
                 ).length,
                 candidates: rendered.candidates,
               };
+              logger.log("client-rendered", {
+                runId: store.id,
+                trialId,
+                firstFrameId: first.frameId,
+                renderKind: first.kind,
+                lcpMs: lcp,
+                renderedFrames: drawn.length,
+              });
               if (access === 0) await session.worker.saveInitial(lcp);
               await store.sample(
                 trialId,
@@ -378,6 +443,12 @@ export function registerTabletEvaluation(
               trialId = undefined;
             }
             await store.finishCondition(condition.id, "ok");
+            logger.log("condition-complete", {
+              runId: store.id,
+              conditionId: condition.id,
+              url,
+              speed,
+            });
           } catch (error) {
             state = "partial";
             const reason = String(error);
@@ -394,7 +465,11 @@ export function registerTabletEvaluation(
           } finally {
             await session.worker?.close();
             delete session.worker;
-            await store.export("running");
+            logger.log("excel-written", {
+              runId: store.id,
+              path: await store.export("running"),
+              status: "running",
+            });
           }
         }
       }
@@ -421,7 +496,11 @@ export function registerTabletEvaluation(
       }
       try {
         if (session.store) {
-          await session.store.export(state);
+          logger.log("excel-written", {
+            runId: session.store.id,
+            path: await session.store.export(state),
+            status: state,
+          });
           await session.store.close();
           if (active === session) active = undefined;
           send(session, "evaluation:finished", {
@@ -446,8 +525,10 @@ export function registerTabletEvaluation(
         stop(session, "Server stopping");
         await session.completion;
       }
+      await logger.close();
     },
     connect(socket: WebSocket, token: string | null = null) {
+      logger.log("client-connected", { reconnect: !!token });
       if (active && token === active.token && active.reconnecting) {
         const session = active;
         const previous = session.socket;
@@ -538,6 +619,7 @@ export function registerTabletEvaluation(
             waiter.resolve(message);
           }
         } catch (error) {
+          logger.log("request-error", { error: String(error) });
           socket.send(
             JSON.stringify({
               action: "evaluation:error",
@@ -546,7 +628,11 @@ export function registerTabletEvaluation(
           );
         }
       });
-      socket.on("close", () => {
+      socket.on("close", (code) => {
+        logger.log("client-disconnected", {
+          runId: active?.socket === socket ? active.store?.id : undefined,
+          code,
+        });
         if (active?.socket === socket && !active.reconnecting)
           stop(active, "端末との接続が切断されました。");
       });

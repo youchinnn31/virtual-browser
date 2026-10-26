@@ -68,6 +68,28 @@ npm run tablet:network -- --dry-run
 
 ## 計測と結果
 
+### ターミナル・ログファイルで処理を確認する
+
+`npm start` と `npm run start:tablet` のどちらでも、サーバーのターミナルに `[tablet]` で始まる進捗ログを出します。同じ内容を既定で `evaluation/results/logs/tablet-server-<日時>-<PID>.jsonl` に保存します。起動時の `service-ready` に実際のファイルパスを表示します。
+
+- `client-connected`：評価ページのWebSocket接続。
+- `evaluation:speed-required`：外部の速度設定後、端末の確認ボタンを押すまで待機。本測定はまだ開始していません。
+- `navigate-start` / `navigate-complete`：サーバーの仮想ブラウザによるアクセス開始・networkidle2完了。HTTPステータスと所要時間も記録。
+- `capture-start` / `image-queued`：画像化の開始、画像の送信キューへの追加。種類・画像ID・WebPサイズを記録。
+- `client-rendered`：端末から全画像の描画完了を受信・検証。最初の画像種別と計測値を記録。
+- `evaluation:trial-saved` / `excel-written`：DB保存、Excel出力。
+- `candidate-skipped` / `evaluation:condition-error` / `stop-requested`：候補スキップ・処理失敗・停止理由。
+
+`image-queued` は送信キューに入れたことを表し、端末での表示確認は `client-rendered` で行います。画像データ本体・再接続用トークン・認証情報はログへ出しません。
+
+既存サーバーを再利用する場合、そのプロセスの標準出力は元の起動ターミナルへ出ます。ログファイルで追跡してください。古いサーバーには新しいログ処理が反映されないため、変更後はサーバーを停止し、`npm run build` と `npm start` を実行して評価ページを読み込み直してください。
+
+```sh
+tail -f evaluation/results/logs/tablet-server-*.jsonl
+```
+
+### 測定値の扱い
+
 計測するのは、端末が要求を送信する直前から、最初の受信画像を `drawImage()` でCanvasへ描画した直後までの時間です。画面への物理的な表示完了や、ブラウザ標準のLCPとは異なります。
 
 対象サイトへのアクセスと画像化はサーバー側で行います。`networkidle2` の待機後に保存候補をLCP値の降順で画像化し、最後にビューポートを送ります。端末は同じ評価ページに留まり、画像を描画します。
