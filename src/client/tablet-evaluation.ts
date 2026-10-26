@@ -22,9 +22,6 @@ let baseline: {
   viewportHeight: number;
 };
 let pendingStop = "";
-let probe:
-  | { id: string; started: number; timer: ReturnType<typeof setTimeout> }
-  | undefined;
 
 interface Trial {
   id: string;
@@ -72,8 +69,6 @@ function stop(reason: string) {
     send("evaluation:stop", { reason });
 }
 function finish() {
-  if (probe) clearTimeout(probe.timer);
-  probe = undefined;
   discardTrial();
   running = false;
   pendingStop = "";
@@ -105,7 +100,6 @@ function connect(token?: string) {
   const next = new WebSocket(
     `${protocol}//${location.host}/evaluation/ws${token ? `?token=${encodeURIComponent(token)}` : ""}`,
   );
-  next.binaryType = "arraybuffer";
   socket = next;
   next.onopen = () => {
     startButton.disabled = running || !loaded;
@@ -132,34 +126,9 @@ function connect(token?: string) {
   next.onmessage = (event) => {
     if (socket !== next) return;
     try {
-      if (event.data instanceof ArrayBuffer) {
-        if (!probe) throw new Error("予期しない帯域検証データです。");
-        const ms = performance.now() - probe.started;
-        const id = probe.id;
-        clearTimeout(probe.timer);
-        probe = undefined;
-        send("evaluation:probe-result", {
-          id,
-          ms,
-          bytes: event.data.byteLength,
-        });
-        return;
-      }
       const data = JSON.parse(event.data);
       if (data.runId && runId && data.runId !== runId) return;
       switch (data.action) {
-        case "evaluation:probe-ready":
-          log(`${data.speed} kbpsの実効速度を検証中 ${data.sample}/3`);
-          probe = {
-            id: data.id,
-            started: performance.now(),
-            timer: setTimeout(
-              () => stop("帯域検証がタイムアウトしました"),
-              120000,
-            ),
-          };
-          send("evaluation:probe-start", { id: data.id });
-          break;
         case "evaluation:hello":
           if (!running)
             log(
@@ -178,8 +147,8 @@ function connect(token?: string) {
           confirmButton.disabled = false;
           speedPanel.hidden = false;
           element<HTMLElement>("speed-message").textContent =
-            `${data.speed} kbpsに外部プロキシを設定してください。上下同じ帯域・追加遅延0msを想定しています。設定後、下のボタンを押してください。`;
-          log(`${data.speed} kbpsの外部設定を待っています（実効速度未検証）。`);
+            `Charlesで上下とも${data.speed} kbps、追加遅延0msに手動設定してください。設定後、下のボタンを押してください。`;
+          log(`${data.speed} kbpsの手動設定を待っています。`);
           break;
         case "evaluation:reconnect": {
           const old = socket;
@@ -333,6 +302,8 @@ startButton.onclick = async () => {
     send("evaluation:start", {
       urls,
       speeds,
+      navigationWaitUntil: element<HTMLSelectElement>("navigation-wait-until")
+        .value,
       device: {
         name: element<HTMLInputElement>("device-name").value.trim(),
         userAgent: navigator.userAgent,
@@ -378,9 +349,6 @@ void fetch("/evaluation/config", { cache: "no-store" })
     return response.json();
   })
   .then((data) => {
-    if (data.speedMode === "charles")
-      element<HTMLElement>("mode-notice").textContent =
-        "Charles自動制御モード：サーバーが速度を切り替え、実効速度の検証後に測定します。";
     element<HTMLTextAreaElement>("urls").value = data.urls.join("\n");
     loaded = true;
     startButton.disabled = running || socket.readyState !== WebSocket.OPEN;

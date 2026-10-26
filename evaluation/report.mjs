@@ -137,7 +137,7 @@ export async function writeReport(output, rows, options = {}) {
     if (!overriddenConditions.has(entry[0])) conditions.addRow(entry);
   for (const entry of options.conditions ?? []) conditions.addRow(entry);
   if (options.controls) {
-    const controls = workbook.addWorksheet("速度制御");
+    const controls = workbook.addWorksheet("速度設定");
     controls.addRow(["日時", "操作", "記録"]);
     for (const entry of options.controls)
       controls.addRow([entry.at, entry.kind, JSON.stringify(entry.data)]);

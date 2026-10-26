@@ -4,7 +4,12 @@ import sharp from "sharp";
 import type { Browser, BrowserContext, Page } from "puppeteer";
 import { UrlRepository } from "../repository/url.repository";
 import { LcpRepository } from "../repository/lcp.repository";
-import type { CandidateResult, DeviceInfo, EvaluationFrame } from "./types";
+import type {
+  CandidateResult,
+  DeviceInfo,
+  EvaluationFrame,
+  NavigationWaitUntil,
+} from "./types";
 import type { ProgressLogger } from "./logger";
 
 /** One fresh context and collection DB for one requested URL / speed pair. */
@@ -21,6 +26,7 @@ export class TabletWorker {
     private url: string,
     private urlId: number,
     private progress: ProgressLogger,
+    private navigationWaitUntil: NavigationWaitUntil,
   ) {}
 
   static async open(
@@ -29,6 +35,7 @@ export class TabletWorker {
     url: string,
     device: DeviceInfo,
     progress: ProgressLogger = () => {},
+    navigationWaitUntil: NavigationWaitUntil = "networkidle2",
   ) {
     const context = await browser.createIncognitoBrowserContext();
     const db = new sqlite3.Database(database);
@@ -62,6 +69,7 @@ export class TabletWorker {
         url,
         entity.id,
         progress,
+        navigationWaitUntil,
       );
       const lcps = new LcpRepository(db);
       page.on("console", (message) => {
@@ -116,18 +124,33 @@ export class TabletWorker {
     this.progress("navigate-start", {
       access: access + 1,
       url: this.url,
-      waitUntil: "networkidle2",
+      waitUntil: this.navigationWaitUntil,
     });
     const navigationStart = performance.now();
-    const response = await this.page.goto(this.url, {
-      waitUntil: "networkidle2",
-      timeout: 60000,
-    });
+    const response = await this.page
+      .goto(this.url, {
+        waitUntil: this.navigationWaitUntil,
+        timeout: 60000,
+      })
+      .catch((error: unknown) => {
+        this.progress("navigate-failed", {
+          access: access + 1,
+          waitUntil: this.navigationWaitUntil,
+          elapsedMs: performance.now() - navigationStart,
+          error: String(error),
+        });
+        if (error instanceof Error && error.name === "TimeoutError")
+          throw new Error(
+            `ページ読み込み待ち（${this.navigationWaitUntil}）が60秒でタイムアウトしました。画像の撮影・転送はまだ開始していません。待機条件を確認してください。`,
+          );
+        throw error;
+      });
     const finalUrl = this.page.url();
     this.progress("navigate-complete", {
       access: access + 1,
       url: finalUrl,
       status: response?.status() ?? null,
+      waitUntil: this.navigationWaitUntil,
       elapsedMs: performance.now() - navigationStart,
     });
     const candidates: CandidateResult[] = [];

@@ -34,17 +34,18 @@ test(
     let visits = 0;
     app.get("/fixture", (_req, res) => {
       visits++;
-      res.send('<h1 id="hero">Logging fixture</h1>');
+      res.send(`<h1 id="hero">Logging fixture</h1>
+        <script>
+          for (let i = 0; i < 3; i++) fetch('/pending?i=' + i);
+        </script>`);
     });
+    // Three unfinished requests prevent networkidle2 even after load fires.
+    app.get("/pending", () => {});
     const previousRoot = process.env.TABLET_RESULTS_DIR;
-    const previousCharles = process.env.CHARLES_CONFIG;
     process.env.TABLET_RESULTS_DIR = directory;
-    delete process.env.CHARLES_CONFIG;
     const evaluation = registerTabletEvaluation(app, browser, () => true);
     if (previousRoot === undefined) delete process.env.TABLET_RESULTS_DIR;
     else process.env.TABLET_RESULTS_DIR = previousRoot;
-    if (previousCharles === undefined) delete process.env.CHARLES_CONFIG;
-    else process.env.CHARLES_CONFIG = previousCharles;
     const server = http.createServer(app);
     const wss = new WebSocketServer({ server });
     wss.on("connection", (socket, request) =>
@@ -68,6 +69,7 @@ test(
       await page.evaluate((url) => {
         document.getElementById("urls").value = url;
       }, `${origin}/fixture`);
+      await page.select("#navigation-wait-until", "load");
       await page.click("#start");
       await page.waitForSelector("#speed-panel:not([hidden])");
       await page.click("#speed-confirm");
@@ -79,6 +81,15 @@ test(
         { timeout: 30000 },
       );
       await evaluation.stop();
+      const runId = (
+        await page.$eval("#download", (element) => element.getAttribute("href"))
+      )
+        .split("/")
+        .at(-1);
+      const config = JSON.parse(
+        await fs.readFile(path.join(directory, runId, "config.json"), "utf8"),
+      );
+      assert.equal(config.navigationWaitUntil, "load");
       const files = await fs.readdir(path.join(directory, "logs"));
       const raw = await fs.readFile(
         path.join(directory, "logs", files[0]),
@@ -103,6 +114,11 @@ test(
           `Missing ${event}`,
         );
       assert.equal(visits, 6);
+      assert.ok(
+        records
+          .filter((record) => record.event === "navigate-start")
+          .every((record) => record.waitUntil === "load"),
+      );
       assert.equal(
         records.filter((record) => record.event === "client-rendered").length,
         6,

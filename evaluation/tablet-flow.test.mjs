@@ -11,7 +11,7 @@ import ExcelJS from "exceljs";
 import WebSocket from "ws";
 
 test(
-  "real-page evaluation repeats on the client, exports two speeds, and saves stopped runs",
+  "manual speed confirmation gates each speed, ignores legacy Charles config, and saves completed and stopped runs",
   { timeout: 120000 },
   async () => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "tablet-flow-"));
@@ -31,7 +31,8 @@ test(
       detached: true,
       env: {
         ...process.env,
-        CHARLES_CONFIG: "",
+        // A leftover automatic-control setting must not affect manual runs.
+        CHARLES_CONFIG: path.join(directory, "unused-charles-config.json"),
         TABLET_RESULTS_DIR: directory,
         LCP_DB_PATH: path.join(directory, "normal.db"),
       },
@@ -87,6 +88,11 @@ test(
       await page.click("#start");
       for (let speed = 0; speed < 2; speed++) {
         await page.waitForSelector("#speed-panel:not([hidden])");
+        assert.equal(visits, speed * 6, "Must wait for manual confirmation");
+        assert.match(
+          await page.$eval("#speed-message", (element) => element.textContent),
+          new RegExp(`Charles.*${[128, 1024][speed]} kbps.*手動設定`),
+        );
         if (speed === 0) {
           const normal = new WebSocket("ws://127.0.0.1:3000/");
           const [code] = await once(normal, "close");
@@ -120,6 +126,21 @@ test(
       await book.xlsx.readFile(path.join(directory, runId, "results.xlsx"));
       assert.equal(book.getWorksheet("中央値").rowCount, 3);
       assert.equal(book.getWorksheet("測定値").rowCount, 11);
+      const confirmations = book.getWorksheet("速度設定");
+      assert.equal(confirmations.rowCount, 3);
+      for (const [index, speed] of [
+        [2, 128],
+        [3, 1024],
+      ]) {
+        assert.equal(
+          confirmations.getCell(`B${index}`).value,
+          "external-speed-confirmed",
+        );
+        assert.deepEqual(JSON.parse(confirmations.getCell(`C${index}`).value), {
+          speed,
+          verified: false,
+        });
+      }
       for (const index of [2, 3]) {
         assert.equal(
           book.getWorksheet("中央値").getCell(`K${index}`).value,
@@ -238,6 +259,13 @@ test(
       );
       assert.ok(
         records.every((record) => !("img" in record) && !("token" in record)),
+      );
+      assert.ok(
+        records.every(
+          (record) =>
+            !record.event.includes("probe") &&
+            !record.event.startsWith("charles-"),
+        ),
       );
       assert.match(logs, /\[tablet\].*navigate-start/);
       assert.match(logs, /\[tablet\].*client-rendered/);

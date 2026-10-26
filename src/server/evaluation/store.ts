@@ -2,13 +2,19 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import sqlite3 from "sqlite3";
-import type { DeviceInfo, ReportRow, Sample } from "./types";
+import type {
+  DeviceInfo,
+  NavigationWaitUntil,
+  ReportRow,
+  Sample,
+} from "./types";
 
 export interface RunConfig {
   device: DeviceInfo;
   urls: string[];
   speeds: number[];
-  speedMode: "external-unverified" | "charles";
+  speedMode: "external-unverified";
+  navigationWaitUntil?: NavigationWaitUntil;
   versions?: {
     node: string;
     chrome: string;
@@ -194,6 +200,10 @@ export class RunStore {
     await writeReport(temporary, this.rows, {
       conditions: [
         ["評価方法", "タブレット実機"],
+        [
+          "撮影開始の待機条件",
+          this.config.navigationWaitUntil ?? "networkidle2",
+        ],
         ["実機名", device.name],
         ["User-Agent", device.userAgent],
         [
@@ -209,18 +219,14 @@ export class RunStore {
         ["実機DPR", device.dpr],
         ["実機の向き", device.orientation],
         ["仮想ブラウザDPR", 1],
-        ["速度制御モード", this.config.speedMode],
+        ["速度設定方法", "Charles等で手動設定"],
+        ["速度設定の記録形式", this.config.speedMode],
         ["実行状態", status],
         ["サーバーNode", this.config.versions?.node ?? "未記録"],
         ["仮想Chrome", this.config.versions?.chrome ?? "未記録"],
         ["実装コミット", this.config.versions?.revision ?? "未記録"],
         ["Charlesバージョン", this.config.versions?.charles ?? "未設定"],
-        [
-          "注意",
-          this.config.speedMode === "external-unverified"
-            ? "速度は外部設定の申告値。ソフトウェアでは検証していません。"
-            : "Charles制御ログを参照",
-        ],
+        ["注意", "速度は手動設定の申告値。ソフトウェアでは検証していません。"],
       ],
       controls: this.controls,
     });

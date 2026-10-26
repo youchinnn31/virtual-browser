@@ -30,6 +30,7 @@
       }
       input,
       textarea,
+      select,
       button {
         font: inherit;
         padding: 8px;
@@ -91,9 +92,9 @@
       <p>
         各サイトで初回収集後に5回測定します。画面ロックを解除し、向きを固定してください。
       </p>
-      <p id="mode-notice">
-        <strong>外部速度設定モード：</strong
-        >このページは通信速度を変更しません。Charles等で設定した速度を記録します。実効速度は未検証です。
+      <p>
+        <strong>通信速度はCharlesで手動設定してください。</strong>
+        速度ごとの確認後に測定を開始し、選択した速度を申告値として記録します。実効速度の自動検証は行いません。
       </p>
       <label
         >端末名
@@ -113,12 +114,26 @@
         <label><input type="checkbox" value="300" />300 kbps</label>
         <label><input type="checkbox" value="1024" checked />1024 kbps</label>
       </fieldset>
+      <label>
+        撮影開始の待機条件
+        <select id="navigation-wait-until">
+          <option value="networkidle2" selected>
+            通信が落ち着くまで待つ（従来の条件）
+          </option>
+          <option value="load">ページの読み込み完了まで待つ</option>
+          <option value="domcontentloaded">DOMの構築完了まで待つ</option>
+        </select>
+      </label>
+      <p>
+        通信待ちでタイムアウトする場合は「ページの読み込み完了まで待つ」を選択してください。
+        DOMの構築完了は画像の読み込み完了を待ちません。選択した条件は結果に保存します。
+      </p>
       <button id="start" disabled>測定開始</button
       ><button id="stop" disabled>停止して保存</button>
       <a id="download" hidden>Excelをダウンロード</a>
       <section id="speed-panel" hidden>
         <p id="speed-message"></p>
-        <button id="speed-confirm">外部の速度設定を確認して続行</button>
+        <button id="speed-confirm">Charlesの手動設定を確認して続行</button>
       </section>
       <p id="status" role="status">接続中…</p>
       <canvas

@@ -1,3 +1,5 @@
+export type NavigationWaitUntil = "domcontentloaded" | "load" | "networkidle2";
+
 export interface DeviceInfo {
   name: string;
   userAgent: string;

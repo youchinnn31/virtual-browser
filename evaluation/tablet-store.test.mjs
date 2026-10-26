@@ -21,6 +21,7 @@ test("tablet results persist warmup separately and export partial runs without a
     urls: ["https://example.org/"],
     speeds: [1024],
     speedMode: "external-unverified",
+    navigationWaitUntil: "load",
     device: {
       name: "test",
       userAgent: "Real Tablet",
@@ -60,7 +61,17 @@ test("tablet results persist warmup separately and export partial runs without a
     assert.equal(workbook.getWorksheet("中央値").getCell("C2").value, null);
     assert.equal(workbook.getWorksheet("中央値").getCell("I2").value, 8000);
     assert.equal(workbook.getWorksheet("測定値").rowCount, 3);
-    assert.ok(workbook.getWorksheet("速度制御"));
+    assert.ok(workbook.getWorksheet("速度設定"));
+    assert.ok(
+      workbook
+        .getWorksheet("測定条件")
+        .getRows(1, 40)
+        .some(
+          (row) =>
+            row.getCell(1).value === "撮影開始の待機条件" &&
+            row.getCell(2).value === "load",
+        ),
+    );
     assert.ok(
       (await fs.stat(path.join(store.directory, "results.db"))).size > 0,
     );
