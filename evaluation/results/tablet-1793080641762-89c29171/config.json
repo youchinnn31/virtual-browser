@@ -1,0 +1,56 @@
+{
+  "urls": [
+    "https://www.google.com/",
+    "https://m.yahoo.co.jp/",
+    "https://m.youtube.com/",
+    "https://news.yahoo.co.jp/",
+    "https://www.amazon.co.jp/",
+    "https://www.docomo.ne.jp/",
+    "https://x.com/?mx=2",
+    "https://www.rakuten.co.jp/",
+    "https://www.google.co.jp/",
+    "https://www.pixiv.net/",
+    "https://weather.yahoo.co.jp/weather/",
+    "https://ameblo.jp/",
+    "https://www.wikipedia.org/",
+    "https://livedoor.com/lite/",
+    "https://tenki.jp/lite/",
+    "https://www.instagram.com/",
+    "https://m.facebook.com/",
+    "https://portal.auone.jp/",
+    "https://note.com/",
+    "https://sports.yahoo.co.jp/",
+    "https://www.nhk.or.jp/",
+    "https://fc2.com/",
+    "https://shopping.yahoo.co.jp/",
+    "https://sp.nicovideo.jp/",
+    "https://blog.jp/",
+    "https://www.cmoa.jp/",
+    "https://weathernews.jp/",
+    "https://trilltrill.jp/",
+    "https://syosetu.com/",
+    "https://www.mercari.com/"
+  ],
+  "speeds": [
+    1024
+  ],
+  "speedMode": "external-unverified",
+  "navigationWaitUntil": "networkidle2",
+  "cacheEnabled": true,
+  "device": {
+    "name": "",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) GSA/443.5.997327796 Mobile/15E148 Safari/604.1",
+    "orientation": "portrait-primary",
+    "width": 368,
+    "height": 426,
+    "dpr": 3
+  },
+  "versions": {
+    "node": "v18.19.1",
+    "chrome": "Chrome/121.0.6167.85",
+    "revision": "8eb6eca1c817f243d65910bbc55984ae071e19c5",
+    "charles": "未設定"
+  },
+  "createdAt": "2026-10-27T05:57:21.763Z",
+  "proxyDeviceScaleFactor": 1
+}
