@@ -24,6 +24,12 @@
       <input id="url-input" type="url" name="url" />
       <button id="url-button" type="submit">送信</button>
     </div>
+    <label for="cache-enabled">対象サイトのHTTPキャッシュ：</label>
+    <select id="cache-enabled">
+      <option value="on" selected>利用する</option>
+      <option value="off">利用しない</option>
+    </select>
+    <p>代理サーバーでのページ取得に適用します。次のURL送信から反映します。</p>
     <canvas id="browser"></canvas>
   </body>
 </html>

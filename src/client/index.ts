@@ -93,6 +93,9 @@ urlButton.addEventListener("click", () => {
   const data: object = {
     action: "image",
     url: url,
+    cacheEnabled:
+      (document.getElementById("cache-enabled") as HTMLSelectElement).value ===
+      "on",
   };
   webSocket.send(JSON.stringify(data));
 });

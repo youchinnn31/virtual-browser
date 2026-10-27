@@ -24,6 +24,7 @@ export class TabletWorker {
     device: DeviceInfo,
     progress: ProgressLogger = () => {},
     navigationWaitUntil: NavigationWaitUntil = "networkidle2",
+    cacheEnabled = false,
   ) {
     const context = await browser.createIncognitoBrowserContext();
     const db = new sqlite3.Database(database);
@@ -43,7 +44,7 @@ export class TabletWorker {
         deviceScaleFactor: 1,
       });
       await page.setUserAgent(device.userAgent);
-      await page.setCacheEnabled(false);
+      await page.setCacheEnabled(cacheEnabled);
       await page.setBypassServiceWorker(true);
       await page.setBypassCSP(true);
       await page.setExtraHTTPHeaders({ "Accept-Language": "ja-JP" });

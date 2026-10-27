@@ -4,6 +4,7 @@ const element = <T extends HTMLElement>(id: string) =>
   document.getElementById(id) as T;
 const startButton = element<HTMLButtonElement>("start");
 const stopButton = element<HTMLButtonElement>("stop");
+const cacheSelect = element<HTMLSelectElement>("cache-enabled");
 const confirmButton = element<HTMLButtonElement>("speed-confirm");
 const speedPanel = element<HTMLElement>("speed-panel");
 const status = element<HTMLElement>("status");
@@ -71,6 +72,7 @@ function stop(reason: string) {
 function finish() {
   discardTrial();
   running = false;
+  cacheSelect.disabled = false;
   pendingStop = "";
   speedPanel.hidden = true;
   stopButton.disabled = true;
@@ -293,6 +295,7 @@ startButton.onclick = async () => {
     canvas.width = width;
     canvas.height = height;
     running = true;
+    cacheSelect.disabled = true;
     element<HTMLOListElement>("history").replaceChildren();
     runId = "";
     pendingStop = "";
@@ -302,6 +305,7 @@ startButton.onclick = async () => {
     send("evaluation:start", {
       urls,
       speeds,
+      cacheEnabled: cacheSelect.value === "on",
       navigationWaitUntil: element<HTMLSelectElement>("navigation-wait-until")
         .value,
       device: {

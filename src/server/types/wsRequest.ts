@@ -8,6 +8,8 @@ export interface WSRequest {
   action: "image" | "scroll" | "click" | "lcp" | "init";
   /** リクエストURL or アクセスしているURL */
   url: string;
+  /** 対象サイト取得時のHTTPキャッシュ。省略時はサーバーの既定値 */
+  cacheEnabled?: boolean;
   /** ビューポートのwidth */
   width: number;
   /** ビューポートのheight */

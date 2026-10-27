@@ -115,6 +115,17 @@
         <label><input type="checkbox" value="1024" checked />1024 kbps</label>
       </fieldset>
       <label>
+        対象サイトのHTTPキャッシュ
+        <select id="cache-enabled">
+          <option value="off" selected>利用しない（従来の条件）</option>
+          <option value="on">利用する（初回収集時から保持）</option>
+        </select>
+      </label>
+      <p>
+        「利用する」では、初回収集と続く5回の測定で同じキャッシュを使います。
+        URL・通信速度が変わるたびに新しく開始します。選択した条件は結果に保存します。
+      </p>
+      <label>
         撮影開始の待機条件
         <select id="navigation-wait-until">
           <option value="networkidle2" selected>

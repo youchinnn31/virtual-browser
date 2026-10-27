@@ -35,6 +35,10 @@ function parseConfig(message: Message): RunConfig {
   const urls = message["urls"];
   const speeds = message["speeds"];
   const device = message["device"];
+  const cacheEnabled =
+    message["cacheEnabled"] === undefined ? false : message["cacheEnabled"];
+  if (typeof cacheEnabled !== "boolean")
+    throw new Error("HTTPキャッシュの設定が不正です。");
   const navigationWaitUntil = message["navigationWaitUntil"] ?? "networkidle2";
   if (
     navigationWaitUntil !== "domcontentloaded" &&
@@ -96,6 +100,7 @@ function parseConfig(message: Message): RunConfig {
     speeds: [...new Set(speeds as number[])],
     speedMode: "external-unverified",
     navigationWaitUntil,
+    cacheEnabled,
     device: {
       name: device["name"],
       userAgent: device["userAgent"],
@@ -295,6 +300,7 @@ export function registerTabletEvaluation(
                   ...details,
                 }),
               config.navigationWaitUntil,
+              config.cacheEnabled,
             );
             for (let access = 0; access <= 5; access++) {
               if (session.stopped) throw session.stopped;

@@ -19,6 +19,7 @@ const { values } = parseArgs({
       default: `evaluation/results/lcp-${Date.now()}.xlsx`,
     },
     timeout: { type: "string", default: "120000" },
+    cache: { type: "string", default: "off" },
   },
 });
 
@@ -196,6 +197,9 @@ function readCollected(database, url) {
 }
 
 async function main() {
+  if (!["on", "off"].includes(values.cache))
+    throw new Error("--cache must be on or off.");
+  const cacheEnabled = values.cache === "on";
   const urls = JSON.parse(await fs.readFile(path.resolve(values.urls), "utf8"));
   const speeds = values.speeds.split(",").map(Number);
   const timeout = Number(values.timeout);
@@ -269,6 +273,7 @@ async function main() {
           });
           await page.goto("http://localhost:3000/", { timeout });
           await page.waitForFunction(() => window.__measurement.ready);
+          await page.select("#cache-enabled", values.cache);
           const warmup = await access(page, url, timeout);
           row.warmup = warmup.lcp;
           row.collected = await readCollected(row.database, url);
@@ -288,7 +293,17 @@ async function main() {
           await page?.close().catch((error) => console.error(error));
           await stopProxy(proxy);
           activeProxy = undefined;
-          await writeReport(output, rows);
+          await writeReport(output, rows, {
+            conditions: [
+              ["代理サーバーHTTPキャッシュ", cacheEnabled ? "有効" : "無効"],
+              [
+                "HTTPキャッシュの保持範囲",
+                cacheEnabled
+                  ? "URL・通信速度ごとに空の状態で開始し、初回収集から続く5回の測定まで保持。サイトのHTTPキャッシュ指定に従う"
+                  : "全6アクセスで利用しない。LCP候補のDBは保持",
+              ],
+            ],
+          });
         }
       }
     }

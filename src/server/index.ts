@@ -50,10 +50,8 @@ async function main(): Promise<void> {
 
   // pageインスタンスの生成
   const page = await browser.newPage();
-  if (evaluationMode) {
-    await page.setCacheEnabled(false);
-    await page.setBypassServiceWorker(true);
-  }
+  await page.setCacheEnabled(!evaluationMode);
+  await page.setBypassServiceWorker(true);
   await page.setBypassCSP(true);
   await page.setExtraHTTPHeaders({
     "Accept-Language": "ja-JP",
@@ -184,6 +182,12 @@ async function main(): Promise<void> {
      * @param req リクエスト情報
      */
     const getImage = async (req: WSRequest): Promise<CandidateResult[]> => {
+      if (
+        req.cacheEnabled !== undefined &&
+        typeof req.cacheEnabled !== "boolean"
+      )
+        throw new Error("HTTPキャッシュの設定が不正です。");
+      await page.setCacheEnabled(req.cacheEnabled ?? !evaluationMode);
       requestedUrl = req.url;
       const result = await renderer.render(req.url, (frame) => {
         ws.send(JSON.stringify(frame));

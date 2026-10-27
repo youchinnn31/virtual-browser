@@ -15,6 +15,7 @@ export interface RunConfig {
   speeds: number[];
   speedMode: "external-unverified";
   navigationWaitUntil?: NavigationWaitUntil;
+  cacheEnabled?: boolean;
   versions?: {
     node: string;
     chrome: string;
@@ -36,6 +37,7 @@ export class RunStore {
   ) {}
 
   static async create(root: string, config: RunConfig) {
+    config = { ...config, cacheEnabled: config.cacheEnabled ?? false };
     const id = `tablet-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const directory = path.resolve(root, id);
     await fs.mkdir(path.join(directory, "collected"), { recursive: true });
@@ -200,6 +202,16 @@ export class RunStore {
     await writeReport(temporary, this.rows, {
       conditions: [
         ["評価方法", "タブレット実機"],
+        [
+          "代理サーバーHTTPキャッシュ",
+          this.config.cacheEnabled ? "有効" : "無効",
+        ],
+        [
+          "HTTPキャッシュの保持範囲",
+          this.config.cacheEnabled
+            ? "URL・通信速度ごとに空の状態で開始し、初回収集から続く5回の測定まで保持。サイトのHTTPキャッシュ指定に従う"
+            : "全6アクセスで利用しない。LCP候補のDBは保持",
+        ],
         [
           "撮影開始の待機条件",
           this.config.navigationWaitUntil ?? "networkidle2",
