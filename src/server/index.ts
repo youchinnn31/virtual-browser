@@ -1,38 +1,21 @@
 "use strict";
 
 import path from "path";
-import fs from "fs";
 
 import express, { Express } from "express";
 import puppeteer from "puppeteer";
-import sharp from "sharp";
 
 import sqlite3 from "sqlite3";
 import WebSocket, { WebSocketServer } from "ws";
 
-import { LcpEntity } from "./types/lcpEntity";
-import { UrlEntity } from "./types/urlEntity";
 import { WSRequest } from "./types/wsRequest";
-import { WSResponse } from "./types/wsResponse";
-import { UrlRepository } from "./repository/url.repository";
-import { LcpRepository } from "./repository/lcp.repository";
-import { LcpInfo } from "./types/lcpInfo";
 import { registerTabletEvaluation } from "./evaluation/controller";
+import { PageRenderer } from "./rendering/page-renderer";
+import type { CandidateResult } from "./rendering/types";
 
 const PORT: number = 3000; // 仮想ブラウザのPORT番号
-const DEFAULT_WIDTH: number = 1000;
-const TARGET_SIZE: number = (128 / 8) * 1000 * 4;
-
-interface LcpRenderResult {
-  xpath: string;
-  lcp: number;
-  status: "sent" | "not-found" | "no-bounding-box" | "error";
-  detail?: string;
-}
-
 const evaluationMode = process.env["LCP_EVALUATION"] === "1";
 const db = new sqlite3.Database(process.env["LCP_DB_PATH"] ?? "./json.db");
-const lcpFile = fs.readFileSync("./lcp.js", "utf8");
 
 /**
  * 仮想ブラウザの処理
@@ -54,15 +37,7 @@ async function main(): Promise<void> {
     );
   });
 
-  // DB操作用のレポジトリ
-  const urlRepository: UrlRepository = new UrlRepository(db);
-  const lcpRepository: LcpRepository = new LcpRepository(db);
   let requestedUrl = "";
-  let navigationId = 0;
-  let observerScriptId: string | undefined;
-  let collection:
-    | { id: number; urlId: number; accepting: boolean; writes: Promise<void> }
-    | undefined;
 
   // headlessブラウザの起動
   const browser = await puppeteer.launch({
@@ -84,27 +59,7 @@ async function main(): Promise<void> {
     "Accept-Language": "ja-JP",
   });
 
-  // アクセス開始時に確定した初回収集だけを保存する
-  page.on("console", (msg) => {
-    if (msg.type() !== "trace") return;
-    let lcpInfo: LcpInfo;
-    try {
-      lcpInfo = JSON.parse(msg.text());
-    } catch {
-      return;
-    }
-    const target = collection;
-    if (
-      !target?.accepting ||
-      lcpInfo.collectionId !== target.id ||
-      !Number.isFinite(lcpInfo.lcp) ||
-      typeof lcpInfo.xpath !== "string"
-    )
-      return;
-    target.writes = target.writes.then(() =>
-      lcpRepository.save(lcpInfo.lcp, lcpInfo.xpath, target.urlId),
-    );
-  });
+  const renderer = await PageRenderer.create(page, db);
 
   let legacyOperations = 0;
   let shuttingDown = false;
@@ -144,8 +99,12 @@ async function main(): Promise<void> {
     try {
       await tablet.stop();
       for (const client of wss.clients) client.terminate();
+      await renderer.close();
       await browser.close();
-      await new Promise<void>((resolve) => server.close(() => resolve()));
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+        server.closeAllConnections();
+      });
       await new Promise<void>((resolve) => db.close(() => resolve()));
       process.exitCode = 0;
     } catch (error) {
@@ -224,150 +183,12 @@ async function main(): Promise<void> {
      * スクリーンショットを撮影してクライアントに送信
      * @param req リクエスト情報
      */
-    const getImage = async (req: WSRequest): Promise<LcpRenderResult[]> => {
-      const results: LcpRenderResult[] = [];
-      const requestURl: string = req.url;
-      requestedUrl = requestURl;
-      await urlRepository.save(requestedUrl);
-      const initialEntity = await urlRepository.findByUrl(requestedUrl);
-      const target = {
-        id: ++navigationId,
-        urlId: initialEntity.id,
-        accepting: initialEntity.image_lcp < 0,
-        writes: Promise.resolve(),
-      };
-      collection = target;
-      if (observerScriptId) {
-        await page.removeScriptToEvaluateOnNewDocument(observerScriptId);
-        observerScriptId = undefined;
-      }
-      if (target.accepting) {
-        const script = await page.evaluateOnNewDocument(
-          `window.__lcpCollectionId = ${target.id};\n${lcpFile}`,
-        );
-        observerScriptId = script.identifier;
-      }
-
-      // Webサイトにアクセス
-      await page.goto(requestURl, {
-        waitUntil: "networkidle2",
+    const getImage = async (req: WSRequest): Promise<CandidateResult[]> => {
+      requestedUrl = req.url;
+      const result = await renderer.render(req.url, (frame) => {
+        ws.send(JSON.stringify(frame));
       });
-
-      // DBにWebサイトの情報を保存
-      await urlRepository.incrementAccessNumByUrl(requestedUrl);
-
-      const currentUrl: string = page.url();
-      const urlEntity: UrlEntity = await urlRepository.findByUrl(requestedUrl);
-
-      // 初回の表示時間が収集済みなら、値にかかわらずLCPコンテンツを描画
-      if (urlEntity && urlEntity.image_lcp >= 0) {
-        // LCPコンテンツ情報を取得
-        const lcps: Array<LcpEntity> = await lcpRepository.findAllByUrlId(
-          urlEntity.id,
-        );
-
-        for (const lcp of lcps!) {
-          // XPathからLCPコンテンツを特定
-          const lcpXpath: string = lcp.xpath;
-          try {
-            const [lcpContent] = await page.$x(lcpXpath);
-
-            // コンテンツが特定できた場合
-            if (lcpContent) {
-              // 座標を取得用のBoundingBox
-              const lcpBoundingBox = await lcpContent.boundingBox();
-
-              // 座標の特定が可能な場合
-              if (lcpBoundingBox) {
-                // 画像を取得
-                let screenshot: Buffer = await lcpContent.screenshot({
-                  type: "webp",
-                });
-
-                // 画像を加工
-                const img = sharp(screenshot);
-                const metadata = await img.metadata();
-                let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
-                while (screenshot.length > TARGET_SIZE) {
-                  resizedWidth = Math.trunc(resizedWidth / 2);
-                  screenshot = await sharp(screenshot)
-                    .resize(Math.trunc(resizedWidth), null)
-                    .toBuffer();
-                }
-
-                // レスポンスデータ
-                const res: WSResponse = {
-                  kind: "lcp",
-                  xpath: lcpXpath,
-                  url: currentUrl,
-                  img: screenshot,
-                  x: lcpBoundingBox.x,
-                  y: lcpBoundingBox.y,
-                };
-
-                // クライアントにLCP画像と座標を送信
-                ws.send(JSON.stringify(res));
-                results.push({ xpath: lcpXpath, lcp: lcp.lcp, status: "sent" });
-              } else {
-                results.push({
-                  xpath: lcpXpath,
-                  lcp: lcp.lcp,
-                  status: "no-bounding-box",
-                });
-              }
-            } else {
-              results.push({
-                xpath: lcpXpath,
-                lcp: lcp.lcp,
-                status: "not-found",
-              });
-            }
-          } catch (error) {
-            results.push({
-              xpath: lcpXpath,
-              lcp: lcp.lcp,
-              status: "error",
-              detail: String(error),
-            });
-          }
-        }
-      }
-      await page.evaluate(() => {
-        window.scrollTo(0, 0);
-      });
-
-      // スクリーンショットを撮影
-      let screenshot = await page.screenshot({ type: "webp" });
-      if (target.accepting) {
-        await page.evaluate("window.__stopLcpCollection?.()");
-        target.accepting = false;
-        await target.writes;
-      }
-
-      // 画像を加工
-      const img = sharp(screenshot);
-      const metadata = await img.metadata();
-      let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
-      while (screenshot.length > TARGET_SIZE) {
-        resizedWidth = Math.trunc(resizedWidth / 2);
-        screenshot = await sharp(screenshot)
-          .resize(Math.trunc(resizedWidth), null)
-          .webp()
-          .toBuffer();
-      }
-
-      // レスポンスデータ
-      const res: WSResponse = {
-        kind: "viewport",
-        url: currentUrl,
-        img: screenshot,
-        x: 0,
-        y: 0,
-      };
-
-      // クライアントにビューポート画像を送信
-      ws.send(JSON.stringify(res));
-      return results;
+      return result.candidates;
     };
 
     /**
@@ -375,12 +196,7 @@ async function main(): Promise<void> {
      * @param LCP
      */
     const processSentLcp = async (req: WSRequest): Promise<void> => {
-      const accesedUrl: string = requestedUrl;
-      const imageLcp: number = req.lcp;
-      const urlEntity: UrlEntity = await urlRepository.findByUrl(accesedUrl);
-      if (urlEntity.image_lcp < 0) {
-        await urlRepository.updateImageLcpByUrl(accesedUrl, imageLcp);
-      }
+      await renderer.saveInitial(requestedUrl, req.lcp);
     };
 
     /**
@@ -393,30 +209,7 @@ async function main(): Promise<void> {
         window.scrollBy(0, scrollAmount);
       }, req.scrollAmount);
 
-      // スクリーンショットを撮影
-      let screenshot: Buffer = await page.screenshot({ type: "webp" });
-
-      // 画像を加工
-      const img = sharp(screenshot);
-      const metadata = await img.metadata();
-      let resizedWidth = metadata.width ?? DEFAULT_WIDTH;
-      while (screenshot.length > TARGET_SIZE) {
-        resizedWidth = Math.trunc(resizedWidth / 2);
-        screenshot = await sharp(screenshot)
-          .resize(Math.trunc(resizedWidth), null)
-          .toBuffer();
-      }
-
-      // レスポンスデータ
-      const res: WSResponse = {
-        url: page.url(),
-        img: screenshot,
-        x: 0,
-        y: 0,
-      };
-
-      // クライアントにビューポート画像を送信
-      ws.send(JSON.stringify(res));
+      ws.send(JSON.stringify(await renderer.captureViewport()));
     };
 
     /**

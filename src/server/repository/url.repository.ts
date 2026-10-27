@@ -89,8 +89,12 @@ export class UrlRepository {
    * urlからacces_numを+1する
    */
   async incrementAccessNumByUrl(url: string): Promise<void> {
-    this.db.run("UPDATE url SET access_num = access_num + 1 WHERE url = $url", {
-      $url: url,
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "UPDATE url SET access_num = access_num + 1 WHERE url = $url",
+        { $url: url },
+        (error) => (error ? reject(error) : resolve()),
+      );
     });
   }
 }

@@ -1,4 +1,10 @@
-export type NavigationWaitUntil = "domcontentloaded" | "load" | "networkidle2";
+import type { CandidateResult } from "../rendering/types";
+
+export type {
+  CandidateResult,
+  NavigationWaitUntil,
+  RenderFrame as EvaluationFrame,
+} from "../rendering/types";
 
 export interface DeviceInfo {
   name: string;
@@ -7,25 +13,6 @@ export interface DeviceInfo {
   height: number;
   dpr: number;
   orientation: string;
-}
-
-export interface CandidateResult {
-  xpath: string;
-  lcp: number;
-  status: "sent" | "not-found" | "no-bounding-box" | "error";
-  detail?: string;
-}
-
-export interface EvaluationFrame {
-  frameId: number;
-  kind: "lcp" | "viewport";
-  xpath?: string;
-  img: Buffer;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  url: string;
 }
 
 export interface Sample {

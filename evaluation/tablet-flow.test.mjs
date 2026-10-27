@@ -43,6 +43,7 @@ test(
       logs += data;
     });
     let browser;
+    let unfinishedDownload;
     try {
       await new Promise((resolve, reject) => {
         const timer = setTimeout(
@@ -212,6 +213,19 @@ test(
       )
         .split("/")
         .at(-1);
+      // Keep an HTTP response active: shutdown must not wait for its reader.
+      await fs.writeFile(
+        "dist/client/shutdown-test.bin",
+        Buffer.alloc(8 * 1024 * 1024),
+      );
+      unfinishedDownload = await new Promise((resolve, reject) => {
+        http
+          .get("http://127.0.0.1:3000/shutdown-test.bin", (response) => {
+            response.on("error", () => {});
+            resolve(response);
+          })
+          .on("error", reject);
+      });
       const exited = once(child, "exit");
       process.kill(-child.pid, "SIGTERM");
       const [exitCode] = await exited;
@@ -271,6 +285,7 @@ test(
       assert.match(logs, /\[tablet\].*client-rendered/);
       assert.deepEqual(errors, []);
     } finally {
+      unfinishedDownload?.destroy();
       await browser?.close();
       if (child.exitCode === null && child.signalCode === null) {
         const exited = once(child, "exit");
