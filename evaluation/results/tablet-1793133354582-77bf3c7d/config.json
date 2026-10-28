@@ -1,0 +1,27 @@
+{
+  "urls": [
+    "https://trilltrill.jp/"
+  ],
+  "speeds": [
+    1024
+  ],
+  "speedMode": "external-unverified",
+  "navigationWaitUntil": "networkidle2",
+  "cacheEnabled": true,
+  "device": {
+    "name": "",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) GSA/444.2.1001595231 Mobile/15E148 Safari/604.1",
+    "orientation": "portrait-primary",
+    "width": 368,
+    "height": 426,
+    "dpr": 3
+  },
+  "versions": {
+    "node": "v18.19.1",
+    "chrome": "Chrome/121.0.6167.85",
+    "revision": "47a89fca9c93fa2fb3dcaa9599e07161488f44af",
+    "charles": "未設定"
+  },
+  "createdAt": "2026-10-27T20:35:54.583Z",
+  "proxyDeviceScaleFactor": 1
+}
