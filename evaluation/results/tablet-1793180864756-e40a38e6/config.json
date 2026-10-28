@@ -1,0 +1,36 @@
+{
+  "urls": [
+    "https://www.google.com/",
+    "https://m.yahoo.co.jp/",
+    "https://m.youtube.com/",
+    "https://news.yahoo.co.jp/",
+    "https://www.amazon.co.jp/",
+    "https://www.docomo.ne.jp/",
+    "https://x.com/?mx=2",
+    "https://www.rakuten.co.jp/",
+    "https://www.google.co.jp/",
+    "https://www.pixiv.net/"
+  ],
+  "speeds": [
+    1024
+  ],
+  "speedMode": "external-unverified",
+  "navigationWaitUntil": "networkidle2",
+  "cacheEnabled": true,
+  "device": {
+    "name": "",
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "orientation": "portrait-primary",
+    "width": 566,
+    "height": 594,
+    "dpr": 1
+  },
+  "versions": {
+    "node": "v18.19.1",
+    "chrome": "Chrome/121.0.6167.85",
+    "revision": "7959e1386b77fe61e763cce4bbb15d91afbd1887",
+    "charles": "未設定"
+  },
+  "createdAt": "2026-10-28T09:47:44.757Z",
+  "proxyDeviceScaleFactor": 1
+}
