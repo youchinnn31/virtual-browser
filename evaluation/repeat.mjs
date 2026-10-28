@@ -19,7 +19,7 @@ const { values } = parseArgs({
       default: `evaluation/results/lcp-${Date.now()}.xlsx`,
     },
     timeout: { type: "string", default: "120000" },
-    cache: { type: "string", default: "off" },
+    cache: { type: "string", default: "on" },
   },
 });
 
@@ -260,8 +260,6 @@ async function main() {
           await page.setUserAgent(
             "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
           );
-          await page.setCacheEnabled(false);
-          await page.setBypassServiceWorker(true);
           await page.evaluateOnNewDocument(observeClient);
           const cdp = await page.createCDPSession();
           await cdp.send("Network.enable");
@@ -276,7 +274,7 @@ async function main() {
           await page.select("#cache-enabled", values.cache);
           const warmup = await access(page, url, timeout);
           row.warmup = warmup.lcp;
-          row.collected = await readCollected(row.database, url);
+          row.collected = await readCollected(row.database, warmup.finalUrl);
           for (let trial = 1; trial <= 5; trial++) {
             const sample = await access(page, url, timeout);
             row.samples.push({ trial, access: trial + 1, ...sample });

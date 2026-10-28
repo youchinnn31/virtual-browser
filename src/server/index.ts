@@ -45,13 +45,11 @@ async function main(): Promise<void> {
     handleSIGINT: false,
     handleSIGTERM: false,
     ignoreHTTPSErrors: true,
-    args: ["--lang=ja", "--no-proxy-server"],
+    args: ["--lang=ja"],
   });
 
   // pageインスタンスの生成
   const page = await browser.newPage();
-  await page.setCacheEnabled(!evaluationMode);
-  await page.setBypassServiceWorker(true);
   await page.setBypassCSP(true);
   await page.setExtraHTTPHeaders({
     "Accept-Language": "ja-JP",
@@ -187,9 +185,10 @@ async function main(): Promise<void> {
         typeof req.cacheEnabled !== "boolean"
       )
         throw new Error("HTTPキャッシュの設定が不正です。");
-      await page.setCacheEnabled(req.cacheEnabled ?? !evaluationMode);
+      await page.setCacheEnabled(req.cacheEnabled ?? true);
       requestedUrl = req.url;
       const result = await renderer.render(req.url, (frame) => {
+        requestedUrl = frame.url;
         ws.send(JSON.stringify(frame));
       });
       return result.candidates;

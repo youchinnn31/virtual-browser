@@ -37,7 +37,7 @@ export class RunStore {
   ) {}
 
   static async create(root: string, config: RunConfig) {
-    config = { ...config, cacheEnabled: config.cacheEnabled ?? false };
+    config = { ...config, cacheEnabled: config.cacheEnabled ?? true };
     const id = `tablet-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const directory = path.resolve(root, id);
     await fs.mkdir(path.join(directory, "collected"), { recursive: true });
@@ -216,6 +216,12 @@ export class RunStore {
           "撮影開始の待機条件",
           this.config.navigationWaitUntil ?? "networkidle2",
         ],
+        ["ページ読み込みのタイムアウト", "30秒"],
+        ["Canvas描画", "受信画像のサイズで描画（拡大・縮小なし）"],
+        [
+          "ビューポート寸法の計算方法",
+          "mainと同じ。幅=CanvasのCSS幅÷実機DPR、高さ=(ウィンドウの高さ−Canvas上端)÷実機DPR。小数点以下切り捨て",
+        ],
         ["実機名", device.name],
         ["User-Agent", device.userAgent],
         [
@@ -227,7 +233,7 @@ export class RunStore {
           "評価ページno-store・画像は新規Blob。端末全体のキャッシュ消去は行わない",
         ],
         ["通信制限", "外部設定。仮想ブラウザから対象サイトへの通信は制限なし"],
-        ["実機CSS寸法", `${device.width}×${device.height}`],
+        ["仮想ブラウザのビューポート寸法", `${device.width}×${device.height}`],
         ["実機DPR", device.dpr],
         ["実機の向き", device.orientation],
         ["仮想ブラウザDPR", 1],

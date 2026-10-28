@@ -133,7 +133,7 @@ test(
       );
       assert.equal(
         await tablet.$eval("#cache-enabled", (el) => el.value),
-        "off",
+        "on",
       );
       await tablet.select("#navigation-wait-until", "load");
       await tablet.$eval(
@@ -215,7 +215,7 @@ test(
 );
 
 test(
-  "CLI cache option reuses assets and records the selected condition",
+  "CLI defaults to main cache policy and records the selected condition",
   { timeout: 60000 },
   async () => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "cache-cli-"));
@@ -252,8 +252,6 @@ test(
       process.execPath,
       [
         "evaluation/repeat.mjs",
-        "--cache",
-        "on",
         "--urls",
         urls,
         "--speeds",

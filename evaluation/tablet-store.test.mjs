@@ -32,6 +32,19 @@ test("tablet results persist warmup separately and export partial runs without a
     },
   });
   try {
+    const nextRun = await RunStore.create(root, store.config);
+    try {
+      assert.notEqual(nextRun.directory, store.directory);
+      assert.deepEqual(nextRun.rows, []);
+      const nextCondition = await nextRun.condition(
+        "https://example.org/",
+        1024,
+      );
+      assert.ok(nextCondition.row.database.startsWith(nextRun.directory));
+      assert.equal(nextRun.config.cacheEnabled, true);
+    } finally {
+      await nextRun.close();
+    }
     const condition = await store.condition("https://example.org/", 1024);
     for (let access = 0; access < 3; access++) {
       const id = `trial-${access}`;

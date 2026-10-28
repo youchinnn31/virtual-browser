@@ -2,18 +2,17 @@
 
 function reportEntries(entries) {
   if (window !== window.top || entries.length === 0) return;
-  for (const entry of entries) {
-    if (!entry.element) continue;
-    const xpath = getElementXPath(entry.element);
-    console.trace(
-      JSON.stringify({
-        collectionId: window.__lcpCollectionId,
-        url: location.href,
-        lcp: entry.startTime,
-        xpath: xpath,
-      }),
-    );
-  }
+  const entry = entries[entries.length - 1];
+  if (!entry.element) return;
+  const xpath = getElementXPath(entry.element);
+  console.trace(
+    JSON.stringify({
+      collectionId: window.__lcpCollectionId,
+      url: location.href,
+      lcp: entry.startTime,
+      xpath: xpath,
+    }),
+  );
 }
 
 const observer = new PerformanceObserver((list) =>

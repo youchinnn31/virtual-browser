@@ -117,7 +117,9 @@ test(
       assert.ok(
         records
           .filter((record) => record.event === "navigate-start")
-          .every((record) => record.waitUntil === "load"),
+          .every(
+            (record) => record.waitUntil === "load" && record.timeout === 30000,
+          ),
       );
       assert.equal(
         records.filter((record) => record.event === "client-rendered").length,

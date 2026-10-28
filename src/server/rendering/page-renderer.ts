@@ -13,7 +13,7 @@ import type {
 
 interface Collection {
   id: number;
-  urlId: number;
+  urlId: Promise<number | undefined>;
   accepting: boolean;
   writes: Promise<void>;
   progress: RenderProgress;
@@ -62,7 +62,9 @@ export class PageRenderer {
     )
       return;
     target.writes = target.writes.then(async () => {
-      await this.lcps.save(lcp, xpath, target.urlId);
+      const urlId = await target.urlId;
+      if (urlId === undefined) return;
+      await this.lcps.save(lcp, xpath, urlId);
       target.progress("candidate-collected", { lcpMs: lcp, xpath });
     });
     // Retain failures for the render/close flush without an unhandled rejection.
@@ -79,13 +81,16 @@ export class PageRenderer {
         ...(options.access === undefined ? {} : { access: options.access }),
         ...details,
       });
-    await this.urls.save(url);
-    const entity = await this.urls.findByUrl(url);
-    const collecting = options.collect ?? entity.image_lcp < 0;
+    // Resolve the DB key after navigation, so redirects use the final URL.
+    // Early observer reports wait here until the initial-collection decision.
+    let resolveUrlId!: (id: number | undefined) => void;
+    const urlId = new Promise<number | undefined>((resolve) => {
+      resolveUrlId = resolve;
+    });
     const target: Collection = {
       id: ++this.navigationId,
-      urlId: entity.id,
-      accepting: collecting,
+      urlId,
+      accepting: options.collect !== false,
       writes: Promise.resolve(),
       progress,
     };
@@ -95,7 +100,7 @@ export class PageRenderer {
         await this.page.removeScriptToEvaluateOnNewDocument(this.scriptId);
         this.scriptId = undefined;
       }
-      if (collecting) {
+      if (target.accepting) {
         this.scriptId = (
           await this.page.evaluateOnNewDocument(
             `window.__lcpCollectionId = ${target.id};\n${this.observerSource}`,
@@ -130,7 +135,12 @@ export class PageRenderer {
         timeout,
         elapsedMs: performance.now() - started,
       });
-      await this.urls.incrementAccessNumByUrl(url);
+      await this.urls.save(finalUrl);
+      const entity = await this.urls.findByUrl(finalUrl);
+      const collecting = options.collect ?? entity.image_lcp < 0;
+      target.accepting = collecting;
+      resolveUrlId(collecting ? entity.id : undefined);
+      await this.urls.incrementAccessNumByUrl(finalUrl);
 
       const candidates: CandidateResult[] = [];
       const frames: RenderFrame[] = [];
@@ -195,6 +205,7 @@ export class PageRenderer {
       };
     } finally {
       target.accepting = false;
+      resolveUrlId(undefined);
       await target.writes;
     }
   }

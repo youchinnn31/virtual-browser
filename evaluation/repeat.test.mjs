@@ -52,9 +52,9 @@ test(
       res.setHeader("Cache-Control", "public, max-age=3600");
       if (req.url === "/") {
         visits++;
-        res.writeHead(302, { Location: `/page?visit=${visits}` });
+        res.writeHead(302, { Location: "/page" });
         res.end();
-      } else if (req.url.startsWith("/page?")) {
+      } else if (req.url === "/page") {
         setTimeout(() => {
           res.setHeader("Content-Type", "text/html");
           const hidden = visits === 3 ? "display:none;" : "";
@@ -91,6 +91,8 @@ test(
       process.execPath,
       [
         "evaluation/repeat.mjs",
+        "--cache",
+        "off",
         "--urls",
         urls,
         "--speeds",
@@ -124,10 +126,7 @@ test(
       const details = workbook.getWorksheet("測定値");
       assert.equal(details.rowCount, 6);
       for (let i = 2; i <= 6; i++) {
-        assert.equal(
-          details.getRow(i).getCell(7).value,
-          `${url}page?visit=${i}`,
-        );
+        assert.equal(details.getRow(i).getCell(7).value, `${url}page`);
       }
       const samples = [4, 5, 6, 7, 8].map(
         (column) => summary.getRow(2).getCell(column).value,
@@ -177,7 +176,7 @@ test(
         const db = new sqlite3.Database(path.join(`${output}.data`, "1.db"));
         db.get(
           "SELECT access_num, image_lcp, (SELECT COUNT(*) FROM url) AS urls, (SELECT COUNT(*) FROM lcp) AS candidates FROM url WHERE url = ?",
-          [url],
+          [`${url}page`],
           (error, row) => {
             db.close();
             if (error) return reject(error);

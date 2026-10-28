@@ -7,6 +7,7 @@ import type { ProgressLogger } from "./logger";
 /** One fresh context and collection DB for one requested URL / speed pair. */
 export class TabletWorker {
   private nextAccess = 0;
+  private finalUrl: string;
 
   private constructor(
     private context: BrowserContext,
@@ -15,7 +16,9 @@ export class TabletWorker {
     private url: string,
     private progress: ProgressLogger,
     private navigationWaitUntil: NavigationWaitUntil,
-  ) {}
+  ) {
+    this.finalUrl = url;
+  }
 
   static async open(
     browser: Browser,
@@ -24,7 +27,7 @@ export class TabletWorker {
     device: DeviceInfo,
     progress: ProgressLogger = () => {},
     navigationWaitUntil: NavigationWaitUntil = "networkidle2",
-    cacheEnabled = false,
+    cacheEnabled = true,
   ) {
     const context = await browser.createIncognitoBrowserContext();
     const db = new sqlite3.Database(database);
@@ -45,7 +48,6 @@ export class TabletWorker {
       });
       await page.setUserAgent(device.userAgent);
       await page.setCacheEnabled(cacheEnabled);
-      await page.setBypassServiceWorker(true);
       await page.setBypassCSP(true);
       await page.setExtraHTTPHeaders({ "Accept-Language": "ja-JP" });
       return new TabletWorker(
@@ -70,15 +72,16 @@ export class TabletWorker {
       collect: access === 0,
       access: access + 1,
       waitUntil: this.navigationWaitUntil,
-      timeout: 60000,
+      timeout: 30000,
       progress: this.progress,
     });
+    this.finalUrl = result.finalUrl;
     this.nextAccess++;
     return result;
   }
 
   async saveInitial(lcp: number) {
-    await this.renderer.saveInitial(this.url, lcp);
+    await this.renderer.saveInitial(this.finalUrl, lcp);
   }
 
   async abort() {

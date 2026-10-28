@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
 
-test("reports every candidate in a batch and flushes pending candidates", async () => {
+test("reports only the last candidate in each batch and flushes pending candidates", async () => {
   const source = await fs.readFile(
     new URL("../lcp.js", import.meta.url),
     "utf8",
@@ -42,15 +42,24 @@ test("reports every candidate in a batch and flushes pending candidates", async 
   window.__stopLcpCollection();
   assert.deepEqual(
     reports.map((report) => report.lcp),
-    [100, 200, 300, 400],
+    [300, 400],
   );
   assert.deepEqual(
     reports.map((report) => report.xpath),
-    ['id("first")', 'id("second")', 'id("third")', 'id("pending")'],
+    ['id("third")', 'id("pending")'],
   );
   assert.ok(reports.every((report) => report.collectionId === 42));
   assert.ok(disconnected);
   window.top = {};
   notify({ getEntries: () => [{ element: { id: "iframe" }, startTime: 500 }] });
-  assert.equal(reports.length, 4, "Ignore iframe candidates");
+  assert.equal(reports.length, 2, "Ignore iframe candidates");
+  window.top = window;
+  notify({ getEntries: () => [] });
+  notify({
+    getEntries: () => [
+      { element: { id: "earlier" }, startTime: 600 },
+      { element: null, startTime: 700 },
+    ],
+  });
+  assert.equal(reports.length, 2, "Do not fall back to an earlier candidate");
 });

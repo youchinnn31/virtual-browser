@@ -130,7 +130,10 @@ test(
       );
       let collected;
       for (let access = 0; access < 3; access++) {
-        const normal = await request({ action: "image", url }, "complete");
+        const normal = await request(
+          { action: "image", url, cacheEnabled: true },
+          "complete",
+        );
         const frames = [];
         const evaluated = await worker.render(access, (frame) =>
           frames.push(frame),

@@ -65,8 +65,8 @@ test(
       browser = await puppeteer.launch({ headless: "new" });
       const page = await browser.newPage();
       await page.setViewport({
-        width: 1024,
-        height: 900,
+        width: 1025,
+        height: 901,
         deviceScaleFactor: 2,
         isMobile: true,
       });
@@ -74,6 +74,32 @@ test(
         "Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 Version/16.6 Mobile/15E148 Safari/604.1";
       await page.setUserAgent(ua);
       const errors = [];
+      await page.evaluateOnNewDocument(() => {
+        window.drawArgumentCounts = [];
+        const send = WebSocket.prototype.send;
+        WebSocket.prototype.send = function (raw) {
+          if (JSON.parse(raw).action === "evaluation:start") {
+            const canvas = document.getElementById("evaluation-canvas");
+            window.expectedViewport = {
+              width: Math.trunc(canvas.clientWidth / devicePixelRatio),
+              height: Math.trunc(
+                (innerHeight - canvas.getBoundingClientRect().top) /
+                  devicePixelRatio,
+              ),
+            };
+            window.actualCanvas = {
+              width: canvas.width,
+              height: canvas.height,
+            };
+          }
+          return send.call(this, raw);
+        };
+        const draw = CanvasRenderingContext2D.prototype.drawImage;
+        CanvasRenderingContext2D.prototype.drawImage = function (...args) {
+          window.drawArgumentCounts.push(args.length);
+          return draw.apply(this, args);
+        };
+      });
       page.on("pageerror", (error) => errors.push(String(error)));
       await page.goto("http://127.0.0.1:3000/evaluation");
       await page.waitForFunction(
@@ -118,11 +144,23 @@ test(
         await fs.readFile(path.join(directory, runId, "config.json"), "utf8"),
       );
       assert.equal(config.device.dpr, 2);
-      assert.equal(
-        config.device.width,
-        await page.$eval("canvas", (canvas) => canvas.clientWidth),
+      const expectedViewport = await page.evaluate(
+        () => window.expectedViewport,
       );
+      assert.deepEqual(
+        { width: config.device.width, height: config.device.height },
+        expectedViewport,
+      );
+      assert.deepEqual(
+        await page.evaluate(() => window.actualCanvas),
+        expectedViewport,
+      );
+      assert.ok(expectedViewport.width > 0 && expectedViewport.height > 0);
       assert.equal(config.speedMode, "external-unverified");
+      assert.equal(config.cacheEnabled, true);
+      const drawCounts = await page.evaluate(() => window.drawArgumentCounts);
+      assert.ok(drawCounts.length >= 12);
+      assert.ok(drawCounts.every((count) => count === 3));
       const book = new ExcelJS.Workbook();
       await book.xlsx.readFile(path.join(directory, runId, "results.xlsx"));
       assert.equal(book.getWorksheet("中央値").rowCount, 3);

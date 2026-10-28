@@ -36,7 +36,7 @@ function parseConfig(message: Message): RunConfig {
   const speeds = message["speeds"];
   const device = message["device"];
   const cacheEnabled =
-    message["cacheEnabled"] === undefined ? false : message["cacheEnabled"];
+    message["cacheEnabled"] === undefined ? true : message["cacheEnabled"];
   if (typeof cacheEnabled !== "boolean")
     throw new Error("HTTPキャッシュの設定が不正です。");
   const navigationWaitUntil = message["navigationWaitUntil"] ?? "networkidle2";

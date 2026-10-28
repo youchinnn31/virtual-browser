@@ -208,7 +208,7 @@ function connect(token?: string) {
           image.onload = () => {
             try {
               if (trial !== current || pendingStop) return;
-              context.drawImage(image, data.x, data.y, data.width, data.height);
+              context.drawImage(image, data.x, data.y);
               const drawnAt = performance.now();
               current.first ??= {
                 frameId: data.frameId,
@@ -284,11 +284,22 @@ startButton.onclick = async () => {
       throw new Error("URLと速度を指定してください。");
     if (document.visibilityState !== "visible")
       throw new Error("評価ページを前面に表示してください。");
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
+    element<HTMLOListElement>("history").replaceChildren();
+    download.hidden = true;
+    // The controls can put the canvas below the viewport. Make it visible
+    // before applying the same viewport calculation as the main client.
+    canvas.scrollIntoView({ block: "start" });
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+    const canvasTop = canvas.getBoundingClientRect().top;
+    const width = Math.trunc(canvas.clientWidth / window.devicePixelRatio);
+    const height = Math.trunc(
+      (window.innerHeight - canvasTop) / window.devicePixelRatio,
+    );
     baseline = {
-      width,
-      height,
+      width: canvas.clientWidth,
+      height: canvas.clientHeight,
       viewportWidth: innerWidth,
       viewportHeight: innerHeight,
     };
@@ -296,12 +307,10 @@ startButton.onclick = async () => {
     canvas.height = height;
     running = true;
     cacheSelect.disabled = true;
-    element<HTMLOListElement>("history").replaceChildren();
     runId = "";
     pendingStop = "";
     startButton.disabled = true;
     stopButton.disabled = false;
-    download.hidden = true;
     send("evaluation:start", {
       urls,
       speeds,
