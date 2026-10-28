@@ -1,0 +1,10 @@
+{"mode":"external-unverified","logFile":"/home/golden/hayakawalab/kennkyuu/virtual-browser/evaluation/results/logs/tablet-server-2026-10-28T10-58-28-783Z-51702.jsonl","pid":51702,"at":"2026-10-28T10:58:28.785Z","event":"service-ready"}
+{"reconnect":false,"at":"2026-10-28T10:58:30.115Z","event":"client-connected"}
+{"code":1001,"at":"2026-10-28T10:58:32.449Z","event":"client-disconnected"}
+{"reconnect":false,"at":"2026-10-28T10:58:32.524Z","event":"client-connected"}
+{"runId":"tablet-1793185227395-82bb5e1f","id":"tablet-1793185227395-82bb5e1f","download":"/evaluation/results/tablet-1793185227395-82bb5e1f","at":"2026-10-28T11:00:27.411Z","event":"evaluation:started"}
+{"runId":"tablet-1793185227395-82bb5e1f","id":"b3ae1c73-a2f6-4538-b334-691bbdfdc8fd","speed":1024,"verified":false,"message":"Charlesで速度を手動設定し、端末の確認ボタンを押してください。","at":"2026-10-28T11:00:27.412Z","event":"evaluation:speed-required"}
+{"runId":"tablet-1793185227395-82bb5e1f","speed":1024,"verified":false,"at":"2026-10-28T11:00:28.414Z","event":"speed-confirmed"}
+{"runId":"tablet-1793185227395-82bb5e1f","at":"2026-10-28T11:00:28.416Z","event":"evaluation:reconnect"}
+{"runId":"tablet-1793185227395-82bb5e1f","code":1005,"at":"2026-10-28T11:00:28.622Z","event":"client-disconnected"}
+{"runId":"tablet-1793185227395-82bb5e1f","path":"/home/golden/hayakawalab/kennkyuu/virtual-browser/evaluation/results/tablet-1793185227395-82bb5e1f/results.xlsx","status":"failed","at":"2026-10-28T11:00:43.806Z","event":"excel-written"}
