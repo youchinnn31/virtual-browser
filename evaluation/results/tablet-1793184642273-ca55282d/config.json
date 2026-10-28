@@ -1,0 +1,35 @@
+{
+  "urls": [
+    "https://fc2.com/",
+    "https://shopping.yahoo.co.jp/",
+    "https://sp.nicovideo.jp/",
+    "https://blog.jp/",
+    "https://www.cmoa.jp/",
+    "https://weathernews.jp/",
+    "https://trilltrill.jp/",
+    "https://syosetu.com/",
+    "https://www.mercari.com/"
+  ],
+  "speeds": [
+    1024
+  ],
+  "speedMode": "external-unverified",
+  "navigationWaitUntil": "networkidle2",
+  "cacheEnabled": true,
+  "device": {
+    "name": "",
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "orientation": "portrait-primary",
+    "width": 566,
+    "height": 594,
+    "dpr": 1
+  },
+  "versions": {
+    "node": "v18.19.1",
+    "chrome": "Chrome/121.0.6167.85",
+    "revision": "7f428f2e018a1b96fdd21374a989fee24233e08a",
+    "charles": "未設定"
+  },
+  "createdAt": "2026-10-28T10:50:42.273Z",
+  "proxyDeviceScaleFactor": 1
+}
