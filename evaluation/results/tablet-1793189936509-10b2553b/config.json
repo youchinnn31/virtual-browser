@@ -1,0 +1,29 @@
+{
+  "urls": [
+    "https://x.com/?mx=2",
+    "https://tenki.jp/lite/",
+    "https://weathernews.jp/"
+  ],
+  "speeds": [
+    1024
+  ],
+  "speedMode": "external-unverified",
+  "navigationWaitUntil": "networkidle2",
+  "cacheEnabled": true,
+  "device": {
+    "name": "",
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "orientation": "portrait-primary",
+    "width": 566,
+    "height": 594,
+    "dpr": 1
+  },
+  "versions": {
+    "node": "v18.19.1",
+    "chrome": "Chrome/121.0.6167.85",
+    "revision": "7c4d8977a73b325dafc9c883d69126f497c0c25c",
+    "charles": "未設定"
+  },
+  "createdAt": "2026-10-28T12:18:56.510Z",
+  "proxyDeviceScaleFactor": 1
+}
