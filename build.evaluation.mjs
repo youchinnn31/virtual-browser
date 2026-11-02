@@ -15,6 +15,18 @@ await build({
   outfile: path.join(output, "server/index.js"),
 });
 await fs.copyFile(path.join(root, "lcp.js"), path.join(output, "lcp.js"));
+await build({
+  entryPoints: [path.join(root, "src/client/evaluation/index.ts")],
+  bundle: true,
+  minify: true,
+  platform: "browser",
+  target: ["es2020"],
+  outfile: path.join(output, "client/index.js"),
+});
+await fs.copyFile(
+  path.join(root, "src/client/evaluation/index.html"),
+  path.join(output, "client/index.html"),
+);
 let sourceCommit = null;
 let sourceDirty = null;
 try {

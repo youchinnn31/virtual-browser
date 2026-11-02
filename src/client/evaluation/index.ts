@@ -1,0 +1,444 @@
+import {
+  parseConfig,
+  type ClientMessage,
+  type DeviceInfo,
+  type ServerMessage,
+  type Summary,
+  type TrialResult,
+} from "../../evaluation/protocol";
+
+const settings = document.querySelector<HTMLFormElement>("#settings")!;
+const fields = document.querySelector<HTMLFieldSetElement>("#fields")!;
+const startButton = document.querySelector<HTMLButtonElement>("#start")!;
+const stopButton = document.querySelector<HTMLButtonElement>("#stop")!;
+const confirmButton =
+  document.querySelector<HTMLButtonElement>("#confirm-profile")!;
+const statusElement = document.querySelector<HTMLElement>("#status")!;
+const connectionElement = document.querySelector<HTMLElement>("#connection")!;
+const profilePanel = document.querySelector<HTMLElement>("#profile-panel")!;
+const profileName = document.querySelector<HTMLElement>("#profile-name")!;
+const trialUrl = document.querySelector<HTMLElement>("#trial-url")!;
+const canvas = document.querySelector<HTMLCanvasElement>("#browser")!;
+const context = canvas.getContext("2d")!;
+const summaries =
+  document.querySelector<HTMLTableSectionElement>("#summaries")!;
+const trials = document.querySelector<HTMLTableSectionElement>("#trials")!;
+const downloads = document.querySelector<HTMLElement>("#downloads")!;
+
+interface Trial {
+  id: string;
+  startedAt: number;
+  firstImageMs: number | null;
+  lastDrawMs: number;
+  expectedCount: number | null;
+  received: Set<number>;
+  rendered: Set<number>;
+  loading: Map<number, { image: HTMLImageElement; url: string }>;
+  complete: boolean;
+  timer: ReturnType<typeof setTimeout>;
+}
+
+let socket: WebSocket | null = null;
+let running = false;
+let abortRequested = false;
+let runId: string | null = null;
+let active: Trial | null = null;
+let device: DeviceInfo | null = null;
+let profile: Extract<ServerMessage, { action: "profile:required" }> | null =
+  null;
+const descriptions = new Map<string, { url: string; profile: string }>();
+
+function errorLabel(error: string): string {
+  const labels: Record<string, string> = {
+    no_lcp_candidates: "初回にLCP候補を取得できませんでした",
+    no_matching_lcp_element: "保存候補に対応する表示可能な要素がありません",
+    trial_timeout: "アクセス全体の上限時間を超過しました",
+    image_decode_failed: "受信画像を読み込めませんでした",
+    canvas_render_failed: "画像を描画できませんでした",
+    initial_access_failed: "初回アクセス失敗のためスキップ",
+    evaluation_browser_closed: "評価用ブラウザの終了によりスキップ",
+    client_hidden: "ページが前面から外れました",
+    client_viewport_changed: "画面幅が変更されました",
+    user_aborted: "中断ボタンが押されました",
+    client_disconnected: "端末との接続が切れました",
+    server_shutdown: "評価サーバが停止しました",
+  };
+  return labels[error] ?? error;
+}
+
+function send(message: ClientMessage): boolean {
+  if (socket?.readyState !== WebSocket.OPEN) return false;
+  socket.send(JSON.stringify(message));
+  return true;
+}
+
+function formatTime(value: number | null): string {
+  return value === null ? "—" : `${(value / 1000).toFixed(3)} 秒`;
+}
+
+function releaseImage(trial: Trial, index: number): void {
+  const pending = trial.loading.get(index);
+  if (!pending) return;
+  pending.image.onload = null;
+  pending.image.onerror = null;
+  URL.revokeObjectURL(pending.url);
+  trial.loading.delete(index);
+}
+
+function clearTrial(): void {
+  const trial = active;
+  active = null;
+  if (!trial) return;
+  clearTimeout(trial.timer);
+  for (const [index, pending] of trial.loading) {
+    releaseImage(trial, index);
+    pending.image.src = "";
+  }
+}
+
+function showDownloads(id: string): void {
+  downloads.replaceChildren();
+  for (const [file, label] of [
+    ["summary.csv", "全体の分析CSV"],
+    ["measurements.csv", "各アクセスのCSV"],
+    ["evaluation.sqlite", "評価DB"],
+  ]) {
+    const link = document.createElement("a");
+    link.href = `/results/${encodeURIComponent(id)}/${file}`;
+    link.textContent = label!;
+    link.download = file!;
+    downloads.append(link);
+  }
+  downloads.hidden = false;
+}
+
+function reset(): void {
+  clearTrial();
+  running = false;
+  abortRequested = false;
+  profile = null;
+  profilePanel.hidden = true;
+  canvas.hidden = true;
+  trialUrl.hidden = true;
+  settings.hidden = false;
+  fields.disabled = false;
+  startButton.disabled = socket?.readyState !== WebSocket.OPEN;
+  stopButton.disabled = true;
+}
+
+function abort(reason: string): void {
+  if (!running || abortRequested) return;
+  abortRequested = true;
+  clearTrial();
+  profilePanel.hidden = true;
+  stopButton.disabled = true;
+  statusElement.textContent = "評価を中断しています…";
+  send({ action: "run:abort", reason });
+}
+
+function failTrial(trial: Trial, error: string): void {
+  if (active !== trial) return;
+  send({ action: "trial:error", trialId: trial.id, error });
+  clearTrial();
+}
+
+function completeIfRendered(trial: Trial): void {
+  if (
+    active !== trial ||
+    trial.complete ||
+    trial.expectedCount === null ||
+    trial.received.size !== trial.expectedCount ||
+    trial.rendered.size !== trial.expectedCount ||
+    trial.firstImageMs === null
+  )
+    return;
+  trial.complete = true;
+  clearTimeout(trial.timer);
+  send({
+    action: "trial:complete",
+    trialId: trial.id,
+    allImagesMs: trial.lastDrawMs,
+    renderedCount: trial.rendered.size,
+  });
+}
+
+function renderImage(
+  message: Extract<ServerMessage, { action: "trial:image" }>,
+): void {
+  const trial = active;
+  if (!trial || trial.id !== message.trialId || abortRequested) return;
+  if (trial.complete || trial.received.has(message.imageIndex)) {
+    failTrial(trial, "duplicate_or_late_image");
+    return;
+  }
+  trial.received.add(message.imageIndex);
+  const image = new Image();
+  const url = URL.createObjectURL(
+    new Blob([new Uint8Array(message.img.data)], { type: "image/webp" }),
+  );
+  trial.loading.set(message.imageIndex, { image, url });
+  image.onload = () => {
+    try {
+      if (active !== trial || abortRequested) return;
+      context.drawImage(image, message.x, message.y);
+      const elapsed = performance.now() - trial.startedAt;
+      trial.lastDrawMs = elapsed;
+      if (trial.firstImageMs === null) {
+        trial.firstImageMs = elapsed;
+        send({
+          action: "trial:metric",
+          trialId: trial.id,
+          firstImageMs: elapsed,
+          firstImageIndex: message.imageIndex,
+        });
+        statusElement.textContent = `初回画像：${formatTime(elapsed)}・残りの画像を表示中`;
+      }
+      trial.rendered.add(message.imageIndex);
+      completeIfRendered(trial);
+    } catch {
+      failTrial(trial, "canvas_render_failed");
+    } finally {
+      releaseImage(trial, message.imageIndex);
+    }
+  };
+  image.onerror = () => {
+    releaseImage(trial, message.imageIndex);
+    failTrial(trial, "image_decode_failed");
+  };
+  image.src = url;
+}
+
+function addTrial(result: TrialResult): void {
+  const row = trials.insertRow();
+  const description = descriptions.get(result.evaluationId);
+  row.dataset["phase"] = result.phase;
+  row.dataset["status"] = result.status;
+  row.dataset["trialId"] = result.trialId;
+  for (const value of [
+    description?.url ?? "—",
+    description?.profile ?? "—",
+    result.phase === "initial"
+      ? "初回（中央値の対象外）"
+      : `再アクセス ${result.visitIndex}`,
+    formatTime(result.firstImageMs),
+    formatTime(result.allImagesMs),
+    String(result.imageCount),
+    result.error ? errorLabel(result.error) : "成功",
+  ])
+    row.insertCell().textContent = value;
+}
+
+function addSummary(summary: Summary): void {
+  const row = summaries.insertRow();
+  row.dataset["evaluationId"] = summary.evaluationId;
+  row.dataset["status"] = summary.status;
+  for (const value of [
+    summary.url,
+    summary.profile,
+    `${summary.successfulCount} / ${summary.revisitCount}`,
+    formatTime(summary.medianMs),
+    summary.status === "complete" ? "完了" : "欠測あり",
+  ])
+    row.insertCell().textContent = value;
+}
+
+function receive(message: ServerMessage): void {
+  switch (message.action) {
+    case "connection:ready":
+      connectionElement.textContent = "接続済み";
+      startButton.disabled = running;
+      break;
+    case "run:created":
+      runId = message.runId;
+      statusElement.textContent = `${message.evaluationCount}件の評価を開始します。`;
+      break;
+    case "profile:required":
+      if (abortRequested) break;
+      profile = message;
+      profileName.textContent = message.profile;
+      profilePanel.hidden = false;
+      statusElement.textContent = "Charlesの設定確認を待っています。";
+      break;
+    case "trial:ready": {
+      if (
+        !running ||
+        abortRequested ||
+        document.visibilityState !== "visible"
+      ) {
+        abort("client_hidden");
+        break;
+      }
+      clearTrial();
+      descriptions.set(message.evaluationId, {
+        url: message.url,
+        profile: message.profile,
+      });
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      trialUrl.textContent = `${message.profile} · ${message.url}`;
+      statusElement.textContent =
+        message.phase === "initial"
+          ? "初回：ビューポート表示を準備中"
+          : `再アクセス ${message.visitIndex}：LCP画像を準備中`;
+      const trial: Trial = {
+        id: message.trialId,
+        startedAt: performance.now(),
+        firstImageMs: null,
+        lastDrawMs: 0,
+        expectedCount: null,
+        received: new Set(),
+        rendered: new Set(),
+        loading: new Map(),
+        complete: false,
+        timer: setTimeout(() => {
+          failTrial(trial, "trial_timeout");
+        }, message.timeoutMs),
+      };
+      active = trial;
+      send({ action: "trial:start", trialId: trial.id });
+      break;
+    }
+    case "trial:image":
+      renderImage(message);
+      break;
+    case "trial:images-end":
+      if (active?.id === message.trialId) {
+        if (
+          message.imageCount < 1 ||
+          active.received.size > message.imageCount
+        ) {
+          failTrial(active, "invalid_image_count");
+        } else {
+          active.expectedCount = message.imageCount;
+          completeIfRendered(active);
+        }
+      }
+      break;
+    case "trial:saved":
+      if (active?.id === message.result.trialId) clearTrial();
+      addTrial(message.result);
+      break;
+    case "evaluation:complete":
+      addSummary(message.summary);
+      break;
+    case "run:finished":
+      reset();
+      showDownloads(message.runId);
+      downloads.scrollIntoView({ block: "start" });
+      statusElement.textContent =
+        message.status === "completed"
+          ? "評価が終了しました。結果をダウンロードできます。"
+          : `評価を中断しました：${errorLabel(message.error ?? message.status)}`;
+      break;
+    case "error":
+      if (runId && running) abort("server_error");
+      else reset();
+      statusElement.textContent = message.error;
+      break;
+  }
+}
+
+function connect(): void {
+  const url = new URL("/ws", window.location.href);
+  url.protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  socket = new WebSocket(url);
+  socket.addEventListener("message", (event: MessageEvent<string>) => {
+    try {
+      receive(JSON.parse(event.data) as ServerMessage);
+    } catch {
+      abort("invalid_server_message");
+      statusElement.textContent = "受信したデータを処理できませんでした。";
+    }
+  });
+  socket.addEventListener("close", () => {
+    const wasRunning = running;
+    reset();
+    connectionElement.textContent = "切断・再接続待ち";
+    startButton.disabled = true;
+    if (wasRunning) {
+      statusElement.textContent =
+        "接続が切れたため評価を中断しました。保存済みの結果は残ります。";
+      if (runId) showDownloads(runId);
+    }
+    setTimeout(connect, 1500);
+  });
+  socket.addEventListener("error", () => {
+    connectionElement.textContent = "接続できません";
+  });
+}
+
+settings.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (running || socket?.readyState !== WebSocket.OPEN) return;
+  try {
+    const lines = (id: string): string[] =>
+      document
+        .querySelector<HTMLTextAreaElement>(id)!
+        .value.split(/\r?\n/)
+        .map((value) => value.trim())
+        .filter(Boolean);
+    const config = parseConfig({
+      urls: lines("#urls"),
+      profiles: lines("#profiles"),
+      revisitCount: Number(
+        document.querySelector<HTMLInputElement>("#revisit-count")!.value,
+      ),
+      trialTimeoutMs:
+        Number(document.querySelector<HTMLInputElement>("#timeout")!.value) *
+        1000,
+    });
+    if (document.visibilityState !== "visible")
+      throw new Error("ページを前面に表示してください。");
+    running = true;
+    abortRequested = false;
+    runId = null;
+    fields.disabled = true;
+    settings.hidden = true;
+    canvas.hidden = false;
+    trialUrl.hidden = false;
+    stopButton.disabled = false;
+    summaries.replaceChildren();
+    trials.replaceChildren();
+    descriptions.clear();
+    downloads.hidden = true;
+    trialUrl.textContent = "";
+    window.scrollTo(0, 0);
+    canvas.width = Math.max(1, Math.floor(canvas.clientWidth));
+    canvas.height = Math.max(
+      160,
+      Math.floor(window.innerHeight - canvas.getBoundingClientRect().top - 12),
+    );
+    device = {
+      width: canvas.width,
+      height: canvas.height,
+      devicePixelRatio: window.devicePixelRatio,
+      userAgent: navigator.userAgent,
+    };
+    statusElement.textContent = "評価を準備しています…";
+    send({ action: "run:start", config, device });
+  } catch (error) {
+    reset();
+    statusElement.textContent =
+      error instanceof Error ? error.message : String(error);
+  }
+});
+
+confirmButton.addEventListener("click", () => {
+  if (!profile || abortRequested) return;
+  send({
+    action: "profile:confirmed",
+    runId: profile.runId,
+    profileIndex: profile.profileIndex,
+  });
+  profile = null;
+  profilePanel.hidden = true;
+  statusElement.textContent = "評価を進めています…";
+});
+stopButton.addEventListener("click", () => abort("user_aborted"));
+document.addEventListener("visibilitychange", () => {
+  if (running && document.visibilityState !== "visible") abort("client_hidden");
+});
+window.addEventListener("resize", () => {
+  if (running && device && Math.floor(canvas.clientWidth) !== device.width)
+    abort("client_viewport_changed");
+});
+connect();

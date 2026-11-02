@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LCP画像の連続評価</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #17212b;
+        background: #f5f7fa;
+      }
+      main {
+        max-width: 960px;
+        margin: auto;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.25rem;
+        margin: 0 0 8px;
+      }
+      h2 {
+        font-size: 1.05rem;
+      }
+      p {
+        line-height: 1.5;
+      }
+      label {
+        display: block;
+        margin: 14px 0 6px;
+        font-weight: 600;
+      }
+      textarea,
+      input,
+      button {
+        font: inherit;
+      }
+      textarea,
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #aeb9c4;
+        border-radius: 5px;
+      }
+      textarea {
+        min-height: 96px;
+      }
+      fieldset {
+        border: 0;
+        padding: 0;
+        margin: 0;
+      }
+      button {
+        min-height: 44px;
+        padding: 8px 14px;
+        border: 0;
+        border-radius: 5px;
+        background: #1753a2;
+        color: white;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      #stop {
+        background: #8a2530;
+      }
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      #status,
+      #trial-url {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      #status {
+        min-height: 1.5em;
+        margin: 8px 0;
+      }
+      #trial-url {
+        min-height: 1.4em;
+        font-size: 0.85rem;
+        color: #445;
+      }
+      #profile-panel {
+        padding: 12px;
+        margin: 12px 0;
+        background: #fff2ca;
+        border: 1px solid #d5b660;
+      }
+      #profile-name {
+        overflow-wrap: anywhere;
+      }
+      #browser {
+        display: block;
+        width: 100%;
+        background: white;
+        border: 1px solid #cbd2da;
+      }
+      .scroll {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        min-width: 640px;
+        border-collapse: collapse;
+        background: white;
+        font-size: 0.85rem;
+      }
+      th,
+      td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #dbe0e6;
+        vertical-align: top;
+      }
+      th {
+        white-space: nowrap;
+      }
+      #trial-table {
+        min-width: 900px;
+      }
+      td {
+        overflow-wrap: anywhere;
+      }
+      #downloads a {
+        display: inline-block;
+        margin: 4px 16px 8px 0;
+      }
+      .note {
+        font-size: 0.85rem;
+        color: #465361;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+    <script src="index.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>LCP画像の連続評価</h1>
+      <div class="toolbar">
+        <span id="connection" role="status">接続中…</span>
+        <button id="stop" type="button" disabled>中断</button>
+      </div>
+      <p id="status" role="status" aria-live="polite">
+        設定を入力してください。
+      </p>
+      <form id="settings">
+        <fieldset id="fields">
+          <label for="urls">評価するURL（1行に1件）</label>
+          <textarea
+            id="urls"
+            required
+            placeholder="https://example.com/"
+          ></textarea>
+          <label for="profiles">Charlesの通信条件名（1行に1条件）</label>
+          <textarea id="profiles" required>128kbps</textarea>
+          <label for="revisit-count">再アクセス回数 n</label>
+          <input
+            id="revisit-count"
+            type="number"
+            min="1"
+            step="1"
+            value="5"
+            required
+          />
+          <label for="timeout">1アクセス全体の上限（秒）</label>
+          <input
+            id="timeout"
+            type="number"
+            min="1"
+            step="1"
+            value="60"
+            required
+          />
+          <p class="note">
+            各サイトで初回1回＋再アクセスn回を実行します。評価結果は再アクセスn回の初回画像描画時間の中央値です。初回のビューポート表示時間は含めません。
+          </p>
+          <p class="note">
+            通信速度はCharlesで設定してください。評価中はこのページを前面に表示し、端末の向きと画面幅を固定してください。
+          </p>
+          <button id="start" type="submit" disabled>評価を開始</button>
+        </fieldset>
+      </form>
+      <section id="profile-panel" hidden aria-label="Charlesの設定確認">
+        <p>
+          Charlesを
+          <strong id="profile-name"></strong> の条件に設定してください。
+        </p>
+        <button id="confirm-profile" type="button">
+          設定済み・評価を進める
+        </button>
+      </section>
+      <div id="trial-url" hidden></div>
+      <canvas
+        id="browser"
+        width="375"
+        height="300"
+        aria-label="評価対象サイトの画像"
+        hidden
+      ></canvas>
+      <section
+        id="downloads"
+        hidden
+        aria-label="評価全体の結果ファイル"
+      ></section>
+      <section>
+        <h2>サイト・通信条件ごとの評価結果</h2>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>URL</th>
+                <th>通信条件</th>
+                <th>成功回数 / n</th>
+                <th>中央値</th>
+                <th>状態</th>
+              </tr>
+            </thead>
+            <tbody id="summaries"></tbody>
+          </table>
+        </div>
+      </section>
+      <section>
+        <h2>各アクセスの記録</h2>
+        <div class="scroll">
+          <table id="trial-table">
+            <thead>
+              <tr>
+                <th>URL</th>
+                <th>通信条件</th>
+                <th>アクセス</th>
+                <th>初回画像描画</th>
+                <th>全画像描画</th>
+                <th>枚数</th>
+                <th>状態</th>
+              </tr>
+            </thead>
+            <tbody id="trials"></tbody>
+          </table>
+        </div>
+        <p class="note">
+          時間はクライアントで測定した経過時間です。標準LCPとは定義が異なります。
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

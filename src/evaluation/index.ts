@@ -596,8 +596,12 @@ async function main(): Promise<void> {
         } catch (error) {
           status = "failed";
           failure = errorText(error);
-        } finally {
+        }
+        try {
           await current.store.close();
+        } catch (error) {
+          status = "failed";
+          failure = errorText(error);
         }
       }
       // Clear the active run before advertising downloadable results.

@@ -77,6 +77,15 @@ async function runClient(port, config, options = {}) {
           );
         }
         if (message.action === "trial:ready") {
+          if (options.injectStaleMessage && trials.size > 0) {
+            ws.send(
+              JSON.stringify({
+                action: "trial:error",
+                trialId: [...trials.keys()].at(-1),
+                error: "late_previous_trial_error",
+              }),
+            );
+          }
           trials.set(message.trialId, { ...message, images: [] });
           ws.send(
             JSON.stringify({ action: "trial:start", trialId: message.trialId }),
@@ -204,12 +213,16 @@ test(
       await t.test(
         "n=5 runs six visits per evaluation and excludes the viewport value from the median",
         async () => {
-          const result = await runClient(server.port, {
-            urls: [origin + "/a", origin + "/b"],
-            profiles: ["128kbps", "1024kbps"],
-            revisitCount: 5,
-            trialTimeoutMs: 20000,
-          });
+          const result = await runClient(
+            server.port,
+            {
+              urls: [origin + "/a", origin + "/b"],
+              profiles: ["128kbps", "1024kbps"],
+              revisitCount: 5,
+              trialTimeoutMs: 20000,
+            },
+            { injectStaleMessage: true },
+          );
           assert.equal(result.finished.status, "completed");
           assert.equal(result.trials.size, 24);
           for (const trial of result.trials.values()) {
