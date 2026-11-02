@@ -52,6 +52,33 @@ async function runClient(port, config, options = {}) {
   const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`);
   const messages = [];
   const trials = new Map();
+  function finishViewport(trial) {
+    if (
+      trial.completionSent ||
+      trial.viewportEndCount === undefined ||
+      options.withholdCompletion ||
+      (trial.phase === "revisit" && !trial.lcpAcknowledged)
+    )
+      return;
+    trial.completionSent = true;
+    ws.send(
+      JSON.stringify(
+        options.failViewport && trial.phase === "revisit"
+          ? {
+              action: "trial:error",
+              trialId: trial.trialId,
+              error: "test_viewport_failed",
+            }
+          : {
+              action: "trial:complete",
+              trialId: trial.trialId,
+              renderedCount: trial.viewportEndCount,
+              viewportMs:
+                trial.phase === "initial" ? 2 : trial.visitIndex * 100 + 40,
+            },
+      ),
+    );
+  }
   const finished = new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       ws.terminate();
@@ -94,22 +121,6 @@ async function runClient(port, config, options = {}) {
         if (message.action === "trial:image") {
           const trial = trials.get(message.trialId);
           trial.images.push(message);
-          if (trial.phase === "revisit" && message.kind === "viewport") {
-            assert.equal(
-              trial.lcpAcknowledged,
-              true,
-              "viewport must wait for the LCP drawing acknowledgement",
-            );
-            if (options.failViewport) {
-              ws.send(
-                JSON.stringify({
-                  action: "trial:error",
-                  trialId: message.trialId,
-                  error: "test_viewport_failed",
-                }),
-              );
-            }
-          }
           if (trial.images.length === 1) {
             ws.send(
               JSON.stringify({
@@ -122,10 +133,7 @@ async function runClient(port, config, options = {}) {
             );
           }
         }
-        if (
-          message.action === "trial:images-end" &&
-          !options.withholdCompletion
-        ) {
+        if (message.action === "trial:images-end") {
           const trial = trials.get(message.trialId);
           assert.equal(trial.images.length, message.imageCount);
           if (message.kind === "lcp") {
@@ -136,15 +144,20 @@ async function runClient(port, config, options = {}) {
             const readyCount = messages.filter(
               (item) => item.action === "trial:ready",
             ).length;
-            await delay(100);
+            const deadline = Date.now() + 5000;
+            while (
+              !trial.images.some((image) => image.kind === "viewport") &&
+              Date.now() < deadline
+            )
+              await delay(10);
             assert.equal(
               messages.filter((item) => item.action === "trial:ready").length,
               readyCount,
               "must wait for every image to be displayed, not just the first metric",
             );
             assert.ok(
-              trial.images.every((image) => image.kind === "lcp"),
-              "no viewport may be sent while LCP drawing is pending",
+              trial.images.some((image) => image.kind === "viewport"),
+              "viewport must be sent without waiting for the LCP drawing notification",
             );
           }
           if (message.kind === "lcp") {
@@ -157,18 +170,11 @@ async function runClient(port, config, options = {}) {
                 lcpImagesMs: trial.visitIndex * 100 + 10,
               }),
             );
+            finishViewport(trial);
             return;
           }
-          if (options.failViewport && trial.phase === "revisit") return;
-          ws.send(
-            JSON.stringify({
-              action: "trial:complete",
-              trialId: message.trialId,
-              renderedCount: message.imageCount,
-              viewportMs:
-                trial.phase === "initial" ? 2 : trial.visitIndex * 100 + 40,
-            }),
-          );
+          trial.viewportEndCount = message.imageCount;
+          finishViewport(trial);
         }
         if (message.action === "run:finished") {
           clearTimeout(timeout);
@@ -396,7 +402,7 @@ test(
         },
       );
       await t.test(
-        "a missing LCP completion acknowledgement never starts viewport rendering",
+        "viewport is sent without a LCP notification, but the next trial still waits for final completion",
         async () => {
           const result = await runClient(
             server.port,
@@ -412,7 +418,7 @@ test(
             (item) => item.phase === "revisit",
           );
           assert.ok(trial.images.length > 0);
-          assert.ok(trial.images.every((image) => image.kind === "lcp"));
+          assert.ok(trial.images.some((image) => image.kind === "viewport"));
           const revisit = result.messages.find(
             (message) =>
               message.action === "trial:saved" &&

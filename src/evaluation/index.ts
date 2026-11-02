@@ -38,6 +38,7 @@ interface ActiveTrial {
   abort: AbortController;
   sentCount: number;
   lcpImageCount: number;
+  lcpImagesSent: boolean;
   lcpImagesMs: number | null;
   viewportMs: number | null;
   imagesEnded: boolean;
@@ -139,11 +140,10 @@ function receive(session: Session, message: ClientMessage): void {
     if (message.action === "trial:lcp-complete") {
       if (
         trial.phase !== "revisit" ||
-        trial.stage !== "lcp" ||
         !trial.metric ||
-        !trial.imagesEnded ||
+        !trial.lcpImagesSent ||
         trial.lcpImagesMs !== null ||
-        message.renderedCount !== trial.sentCount ||
+        message.renderedCount !== trial.lcpImageCount ||
         message.lcpImagesMs < trial.metric.firstImageMs
       ) {
         trial.abort.abort(new Error("invalid_lcp_render_completion"));
@@ -326,6 +326,7 @@ async function renderImages(
     if (trial.sentCount === 0) throw new Error("no_matching_lcp_element");
     check(trial.abort.signal);
     trial.imagesEnded = true;
+    trial.lcpImagesSent = true;
     send(session.ws, {
       action: "trial:images-end",
       trialId: trial.id,
@@ -357,6 +358,7 @@ async function runTrial(
     abort: new AbortController(),
     sentCount: 0,
     lcpImageCount: 0,
+    lcpImagesSent: false,
     lcpImagesMs: null,
     viewportMs: null,
     imagesEnded: false,
@@ -417,16 +419,6 @@ async function runTrial(
         message.action === "trial:complete" && message.trialId === trialId,
       trial.abort.signal,
     );
-    const lcpComplete =
-      phase === "revisit"
-        ? waitFor(
-            session,
-            (message) =>
-              message.action === "trial:lcp-complete" &&
-              message.trialId === trialId,
-            trial.abort.signal,
-          )
-        : null;
     result.finalUrl = await renderImages(
       session,
       page,
@@ -434,10 +426,8 @@ async function runTrial(
       phase,
       trial,
     );
-    if (lcpComplete) {
-      await lcpComplete;
-      check(trial.abort.signal);
-      // Begin viewport capture only after the client confirms every LCP draw.
+    if (phase === "revisit") {
+      // Queue the viewport immediately; the client enforces drawing order.
       await renderViewport(session, page, trial, result.finalUrl);
     }
     const acknowledgement = await complete;
@@ -636,7 +626,7 @@ async function main(): Promise<void> {
           imageSizeBudgetBytes: TARGET_SIZE,
           throttling: "external-charles",
           navigationWaitUntil: "networkidle2",
-          renderingPolicy: "lcp-then-viewport-after-client-ack",
+          renderingPolicy: "lcp-then-viewport-with-client-draw-order",
           protocolVersion: 2,
         },
       );

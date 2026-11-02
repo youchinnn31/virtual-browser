@@ -125,6 +125,49 @@ test(
           ...JSON.parse(event.response.payloadData),
         });
       });
+      // Make the first LCP image slower than viewport delivery, then observe
+      // actual Canvas draws without depending on the client's private state.
+      await page.evaluateOnNewDocument(() => {
+        const frames = [];
+        const images = new WeakMap();
+        window.__evaluationDraws = [];
+        const NativeSocket = WebSocket;
+        window.WebSocket = class extends NativeSocket {
+          constructor(...args) {
+            super(...args);
+            this.addEventListener("message", (event) => {
+              const message = JSON.parse(event.data);
+              if (message.action === "trial:image") frames.push(message);
+            });
+          }
+        };
+        const source = Object.getOwnPropertyDescriptor(
+          HTMLImageElement.prototype,
+          "src",
+        );
+        Object.defineProperty(HTMLImageElement.prototype, "src", {
+          get: source.get,
+          set(value) {
+            const frame = value.startsWith("blob:") ? frames.shift() : null;
+            if (frame) images.set(this, frame);
+            if (frame?.kind === "lcp" && frame.imageIndex === 1) {
+              setTimeout(() => source.set.call(this, value), 750);
+            } else source.set.call(this, value);
+          },
+        });
+        const draw = CanvasRenderingContext2D.prototype.drawImage;
+        CanvasRenderingContext2D.prototype.drawImage = function (...args) {
+          const result = draw.apply(this, args);
+          const frame = images.get(args[0]);
+          if (frame)
+            window.__evaluationDraws.push({
+              trialId: frame.trialId,
+              kind: frame.kind,
+              imageIndex: frame.imageIndex,
+            });
+          return result;
+        };
+      });
       await page.goto(`http://127.0.0.1:${port}/`);
       await page.waitForFunction(
         () => !document.querySelector("#start").disabled,
@@ -175,6 +218,7 @@ test(
         (message) => message.action === "trial:lcp-complete",
       );
       assert.equal(lcpCompleted.length, 5);
+      const draws = await page.evaluate(() => window.__evaluationDraws);
       for (const lcp of lcpCompleted) {
         const viewport = events.find(
           (message) =>
@@ -190,7 +234,18 @@ test(
             message.trialId === lcp.trialId,
         );
         assert.ok(viewport);
-        assert.ok(events.indexOf(acknowledged) < events.indexOf(viewport));
+        assert.ok(
+          events.indexOf(viewport) < events.indexOf(acknowledged),
+          "viewport delivery must not wait for LCP rendering",
+        );
+        const trialDraws = draws.filter((draw) => draw.trialId === lcp.trialId);
+        assert.equal(trialDraws.length, lcp.renderedCount + 1);
+        assert.ok(trialDraws.slice(0, -1).every((draw) => draw.kind === "lcp"));
+        assert.equal(
+          trialDraws.at(-1).kind,
+          "viewport",
+          "viewport must be drawn after every delayed LCP image",
+        );
         const complete = sent.find(
           (message) =>
             message.action === "trial:complete" &&

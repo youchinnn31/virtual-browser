@@ -2,7 +2,6 @@ import {
   parseConfig,
   type ClientMessage,
   type DeviceInfo,
-  type ImageKind,
   type Phase,
   type ServerMessage,
   type Summary,
@@ -34,7 +33,8 @@ interface Trial {
   firstImageMs: number | null;
   lastDrawMs: number;
   expectedCount: number | null;
-  expectedKind: ImageKind | null;
+  expectedLcpCount: number | null;
+  pendingViewport: Extract<ServerMessage, { action: "trial:image" }> | null;
   lcpComplete: boolean;
   viewportIndex: number | null;
   viewportMs: number | null;
@@ -96,6 +96,7 @@ function clearTrial(): void {
   const trial = active;
   active = null;
   if (!trial) return;
+  trial.pendingViewport = null;
   clearTimeout(trial.timer);
   for (const [index, pending] of trial.loading) {
     releaseImage(trial, index);
@@ -150,20 +151,14 @@ function failTrial(trial: Trial, error: string): void {
 }
 
 function completeIfRendered(trial: Trial): void {
-  if (
-    active !== trial ||
-    trial.complete ||
-    trial.expectedCount === null ||
-    trial.received.size !== trial.expectedCount ||
-    trial.rendered.size !== trial.expectedCount ||
-    trial.firstImageMs === null
-  )
-    return;
-  if (trial.expectedKind === "lcp") {
-    if (trial.lcpComplete) return;
+  if (active !== trial || trial.complete || trial.firstImageMs === null) return;
+  if (trial.phase === "revisit" && !trial.lcpComplete) {
+    if (
+      trial.expectedLcpCount === null ||
+      trial.rendered.size !== trial.expectedLcpCount
+    )
+      return;
     trial.lcpComplete = true;
-    trial.expectedCount = null;
-    trial.expectedKind = null;
     statusElement.textContent =
       "全LCP候補を表示しました。ビューポート画像を待っています。";
     send({
@@ -172,9 +167,17 @@ function completeIfRendered(trial: Trial): void {
       lcpImagesMs: trial.lastDrawMs,
       renderedCount: trial.rendered.size,
     });
-    return;
+    const pending = trial.pendingViewport;
+    trial.pendingViewport = null;
+    if (pending) renderImage(pending);
   }
-  if (trial.expectedKind !== "viewport" || trial.viewportMs === null) return;
+  if (
+    trial.expectedCount === null ||
+    trial.received.size !== trial.expectedCount ||
+    trial.rendered.size !== trial.expectedCount ||
+    trial.viewportMs === null
+  )
+    return;
   trial.complete = true;
   clearTimeout(trial.timer);
   send({
@@ -197,11 +200,18 @@ function renderImage(
   if (
     (message.kind === "lcp" &&
       (trial.phase === "initial" || trial.lcpComplete)) ||
-    (message.kind === "viewport" &&
-      (trial.viewportIndex !== null ||
-        (trial.phase === "revisit" && !trial.lcpComplete)))
+    (message.kind === "viewport" && trial.viewportIndex !== null)
   ) {
     failTrial(trial, "invalid_image_stage");
+    return;
+  }
+  if (
+    message.kind === "viewport" &&
+    trial.phase === "revisit" &&
+    !trial.lcpComplete
+  ) {
+    if (trial.pendingViewport) failTrial(trial, "duplicate_or_late_image");
+    else trial.pendingViewport = message;
     return;
   }
   if (message.kind === "viewport") trial.viewportIndex = message.imageIndex;
@@ -330,7 +340,8 @@ function receive(message: ServerMessage): void {
         firstImageMs: null,
         lastDrawMs: 0,
         expectedCount: null,
-        expectedKind: null,
+        expectedLcpCount: null,
+        pendingViewport: null,
         lcpComplete: false,
         viewportIndex: null,
         viewportMs: null,
@@ -356,12 +367,15 @@ function receive(message: ServerMessage): void {
           active.received.size > message.imageCount ||
           (message.kind === "lcp" &&
             (active.phase === "initial" || active.lcpComplete)) ||
-          (message.kind === "viewport" && active.viewportIndex === null)
+          (message.kind === "viewport" &&
+            active.viewportIndex === null &&
+            active.pendingViewport === null)
         ) {
           failTrial(active, "invalid_image_count");
         } else {
-          active.expectedCount = message.imageCount;
-          active.expectedKind = message.kind;
+          if (message.kind === "lcp")
+            active.expectedLcpCount = message.imageCount;
+          else active.expectedCount = message.imageCount;
           completeIfRendered(active);
         }
       }
