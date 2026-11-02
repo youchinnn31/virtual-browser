@@ -13,6 +13,7 @@ export interface DeviceInfo {
 }
 
 export type Phase = "initial" | "revisit";
+export type ImageKind = "lcp" | "viewport";
 export type TrialStatus = "success" | "failed" | "skipped";
 
 export interface Candidate {
@@ -29,9 +30,12 @@ export interface TrialResult {
   finalUrl: string;
   status: TrialStatus;
   firstImageMs: number | null;
+  lcpImagesMs: number | null;
+  viewportMs: number | null;
   allImagesMs: number | null;
   firstImageIndex: number | null;
   imageCount: number;
+  lcpImageCount: number;
   error: string | null;
 }
 
@@ -42,6 +46,8 @@ export interface Summary {
   revisitCount: number;
   successfulCount: number;
   medianMs: number | null;
+  viewportSuccessfulCount: number;
+  viewportMedianMs: number | null;
   status: "complete" | "incomplete";
 }
 
@@ -57,9 +63,15 @@ export type ClientMessage =
       firstImageIndex: number;
     }
   | {
+      action: "trial:lcp-complete";
+      trialId: string;
+      lcpImagesMs: number;
+      renderedCount: number;
+    }
+  | {
       action: "trial:complete";
       trialId: string;
-      allImagesMs: number;
+      viewportMs: number;
       renderedCount: number;
     }
   | { action: "trial:error"; trialId: string; error: string };
@@ -87,13 +99,19 @@ export type ServerMessage =
       action: "trial:image";
       trialId: string;
       imageIndex: number;
+      kind: ImageKind;
       url: string;
       img: { type: "Buffer"; data: number[] };
       x: number;
       y: number;
       xpath: string | null;
     }
-  | { action: "trial:images-end"; trialId: string; imageCount: number }
+  | {
+      action: "trial:images-end";
+      trialId: string;
+      kind: ImageKind;
+      imageCount: number;
+    }
   | { action: "trial:saved"; result: TrialResult }
   | { action: "evaluation:complete"; summary: Summary }
   | {
@@ -206,11 +224,18 @@ export function parseClientMessage(value: unknown): ClientMessage {
         firstImageMs: positive(input["firstImageMs"], "初回画像描画時間"),
         firstImageIndex: integer(input["firstImageIndex"], "画像番号", 1),
       };
+    case "trial:lcp-complete":
+      return {
+        action,
+        trialId: text(input["trialId"], "試行ID"),
+        lcpImagesMs: positive(input["lcpImagesMs"], "全LCP候補描画時間"),
+        renderedCount: integer(input["renderedCount"], "描画枚数", 1),
+      };
     case "trial:complete":
       return {
         action,
         trialId: text(input["trialId"], "試行ID"),
-        allImagesMs: positive(input["allImagesMs"], "全画像描画時間"),
+        viewportMs: positive(input["viewportMs"], "ビューポート描画完了時間"),
         renderedCount: integer(input["renderedCount"], "描画枚数", 1),
       };
     case "trial:error":

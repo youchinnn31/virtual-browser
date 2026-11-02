@@ -2,6 +2,8 @@ import {
   parseConfig,
   type ClientMessage,
   type DeviceInfo,
+  type ImageKind,
+  type Phase,
   type ServerMessage,
   type Summary,
   type TrialResult,
@@ -27,10 +29,15 @@ const downloads = document.querySelector<HTMLElement>("#downloads")!;
 
 interface Trial {
   id: string;
+  phase: Phase;
   startedAt: number;
   firstImageMs: number | null;
   lastDrawMs: number;
   expectedCount: number | null;
+  expectedKind: ImageKind | null;
+  lcpComplete: boolean;
+  viewportIndex: number | null;
+  viewportMs: number | null;
   received: Set<number>;
   rendered: Set<number>;
   loading: Map<number, { image: HTMLImageElement; url: string }>;
@@ -152,12 +159,28 @@ function completeIfRendered(trial: Trial): void {
     trial.firstImageMs === null
   )
     return;
+  if (trial.expectedKind === "lcp") {
+    if (trial.lcpComplete) return;
+    trial.lcpComplete = true;
+    trial.expectedCount = null;
+    trial.expectedKind = null;
+    statusElement.textContent =
+      "全LCP候補を表示しました。ビューポート画像を待っています。";
+    send({
+      action: "trial:lcp-complete",
+      trialId: trial.id,
+      lcpImagesMs: trial.lastDrawMs,
+      renderedCount: trial.rendered.size,
+    });
+    return;
+  }
+  if (trial.expectedKind !== "viewport" || trial.viewportMs === null) return;
   trial.complete = true;
   clearTimeout(trial.timer);
   send({
     action: "trial:complete",
     trialId: trial.id,
-    allImagesMs: trial.lastDrawMs,
+    viewportMs: trial.viewportMs,
     renderedCount: trial.rendered.size,
   });
 }
@@ -171,6 +194,17 @@ function renderImage(
     failTrial(trial, "duplicate_or_late_image");
     return;
   }
+  if (
+    (message.kind === "lcp" &&
+      (trial.phase === "initial" || trial.lcpComplete)) ||
+    (message.kind === "viewport" &&
+      (trial.viewportIndex !== null ||
+        (trial.phase === "revisit" && !trial.lcpComplete)))
+  ) {
+    failTrial(trial, "invalid_image_stage");
+    return;
+  }
+  if (message.kind === "viewport") trial.viewportIndex = message.imageIndex;
   trial.received.add(message.imageIndex);
   const image = new Image();
   const url = URL.createObjectURL(
@@ -183,7 +217,11 @@ function renderImage(
       context.drawImage(image, message.x, message.y);
       const elapsed = performance.now() - trial.startedAt;
       trial.lastDrawMs = elapsed;
-      if (trial.firstImageMs === null) {
+      if (message.kind === "viewport") trial.viewportMs = elapsed;
+      if (
+        trial.firstImageMs === null &&
+        (trial.phase === "initial" || message.kind === "lcp")
+      ) {
         trial.firstImageMs = elapsed;
         send({
           action: "trial:metric",
@@ -191,7 +229,10 @@ function renderImage(
           firstImageMs: elapsed,
           firstImageIndex: message.imageIndex,
         });
-        statusElement.textContent = `初回画像：${formatTime(elapsed)}・残りの画像を表示中`;
+        statusElement.textContent =
+          trial.phase === "initial"
+            ? `ビューポート：${formatTime(elapsed)}`
+            : `LCP初回画像：${formatTime(elapsed)}・残りの候補を表示中`;
       }
       trial.rendered.add(message.imageIndex);
       completeIfRendered(trial);
@@ -221,7 +262,8 @@ function addTrial(result: TrialResult): void {
       ? "初回（中央値の対象外）"
       : `再アクセス ${result.visitIndex}`,
     formatTime(result.firstImageMs),
-    formatTime(result.allImagesMs),
+    formatTime(result.viewportMs),
+    String(result.lcpImageCount),
     String(result.imageCount),
     result.error ? errorLabel(result.error) : "成功",
   ])
@@ -237,6 +279,8 @@ function addSummary(summary: Summary): void {
     summary.profile,
     `${summary.successfulCount} / ${summary.revisitCount}`,
     formatTime(summary.medianMs),
+    `${summary.viewportSuccessfulCount} / ${summary.revisitCount}`,
+    formatTime(summary.viewportMedianMs),
     summary.status === "complete" ? "完了" : "欠測あり",
   ])
     row.insertCell().textContent = value;
@@ -281,10 +325,15 @@ function receive(message: ServerMessage): void {
           : `再アクセス ${message.visitIndex}：LCP画像を準備中`;
       const trial: Trial = {
         id: message.trialId,
+        phase: message.phase,
         startedAt: performance.now(),
         firstImageMs: null,
         lastDrawMs: 0,
         expectedCount: null,
+        expectedKind: null,
+        lcpComplete: false,
+        viewportIndex: null,
+        viewportMs: null,
         received: new Set(),
         rendered: new Set(),
         loading: new Map(),
@@ -304,11 +353,15 @@ function receive(message: ServerMessage): void {
       if (active?.id === message.trialId) {
         if (
           message.imageCount < 1 ||
-          active.received.size > message.imageCount
+          active.received.size > message.imageCount ||
+          (message.kind === "lcp" &&
+            (active.phase === "initial" || active.lcpComplete)) ||
+          (message.kind === "viewport" && active.viewportIndex === null)
         ) {
           failTrial(active, "invalid_image_count");
         } else {
           active.expectedCount = message.imageCount;
+          active.expectedKind = message.kind;
           completeIfRendered(active);
         }
       }

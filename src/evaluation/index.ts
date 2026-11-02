@@ -11,6 +11,7 @@ import {
   type ClientMessage,
   type DeviceInfo,
   type EvaluationConfig,
+  type ImageKind,
   type Phase,
   type ServerMessage,
   type TrialResult,
@@ -32,8 +33,13 @@ interface Waiter {
 
 interface ActiveTrial {
   id: string;
+  phase: Phase;
+  stage: ImageKind;
   abort: AbortController;
   sentCount: number;
+  lcpImageCount: number;
+  lcpImagesMs: number | null;
+  viewportMs: number | null;
   imagesEnded: boolean;
   started: boolean;
   metric: Extract<ClientMessage, { action: "trial:metric" }> | null;
@@ -121,7 +127,8 @@ function receive(session: Session, message: ClientMessage): void {
       if (
         !trial.started ||
         trial.metric ||
-        message.firstImageIndex > trial.sentCount
+        message.firstImageIndex >
+          (trial.phase === "initial" ? trial.sentCount : trial.lcpImageCount)
       ) {
         trial.abort.abort(new Error("invalid_first_image_result"));
       } else {
@@ -129,16 +136,34 @@ function receive(session: Session, message: ClientMessage): void {
       }
       return;
     }
+    if (message.action === "trial:lcp-complete") {
+      if (
+        trial.phase !== "revisit" ||
+        trial.stage !== "lcp" ||
+        !trial.metric ||
+        !trial.imagesEnded ||
+        trial.lcpImagesMs !== null ||
+        message.renderedCount !== trial.sentCount ||
+        message.lcpImagesMs < trial.metric.firstImageMs
+      ) {
+        trial.abort.abort(new Error("invalid_lcp_render_completion"));
+        return;
+      }
+      trial.lcpImagesMs = message.lcpImagesMs;
+    }
     if (message.action === "trial:complete") {
       if (
         !trial.metric ||
         !trial.imagesEnded ||
+        trial.stage !== "viewport" ||
+        (trial.phase === "revisit" && trial.lcpImagesMs === null) ||
         message.renderedCount !== trial.sentCount ||
-        message.allImagesMs < trial.metric.firstImageMs
+        message.viewportMs < (trial.lcpImagesMs ?? trial.metric.firstImageMs)
       ) {
         trial.abort.abort(new Error("invalid_render_completion"));
         return;
       }
+      trial.viewportMs = message.viewportMs;
     }
   }
   for (const waiter of [...session.waiters]) {
@@ -154,6 +179,62 @@ async function compress(screenshot: Buffer): Promise<Buffer> {
     screenshot = await sharp(screenshot).resize(width, null).webp().toBuffer();
   }
   return screenshot;
+}
+
+async function sendTrialImage(
+  session: Session,
+  trial: ActiveTrial,
+  frame: {
+    screenshot: Buffer;
+    url: string;
+    kind: ImageKind;
+    x: number;
+    y: number;
+    xpath: string | null;
+  },
+): Promise<void> {
+  const image = await compress(frame.screenshot);
+  check(trial.abort.signal);
+  trial.sentCount++;
+  if (frame.kind === "lcp") trial.lcpImageCount++;
+  send(session.ws, {
+    action: "trial:image",
+    trialId: trial.id,
+    imageIndex: trial.sentCount,
+    kind: frame.kind,
+    url: frame.url,
+    img: image.toJSON(),
+    x: frame.x,
+    y: frame.y,
+    xpath: frame.xpath,
+  });
+}
+
+async function renderViewport(
+  session: Session,
+  page: Page,
+  trial: ActiveTrial,
+  url: string,
+): Promise<void> {
+  check(trial.abort.signal);
+  trial.stage = "viewport";
+  trial.imagesEnded = false;
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await sendTrialImage(session, trial, {
+    screenshot: await page.screenshot({ type: "webp" }),
+    url,
+    kind: "viewport",
+    x: 0,
+    y: 0,
+    xpath: null,
+  });
+  trial.imagesEnded = true;
+  send(session.ws, {
+    action: "trial:images-end",
+    trialId: trial.id,
+    kind: "viewport",
+    imageCount: trial.sentCount,
+  });
 }
 
 async function renderImages(
@@ -218,29 +299,8 @@ async function renderImages(
       collected.filter((candidate) => candidate.url === finalUrl),
     );
   }
-  const sendImage = async (
-    screenshot: Buffer,
-    x: number,
-    y: number,
-    xpath: string | null,
-  ): Promise<void> => {
-    const image = await compress(screenshot);
-    check(trial.abort.signal);
-    trial.sentCount++;
-    send(session.ws, {
-      action: "trial:image",
-      trialId: trial.id,
-      imageIndex: trial.sentCount,
-      url: finalUrl,
-      img: image.toJSON(),
-      x,
-      y,
-      xpath,
-    });
-  };
   if (phase === "initial") {
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await sendImage(await page.screenshot({ type: "webp" }), 0, 0, null);
+    await renderViewport(session, page, trial, finalUrl);
   } else {
     const candidates = await store.getCandidates(evaluation.evaluationId);
     if (candidates.length === 0) throw new Error("no_lcp_candidates");
@@ -251,25 +311,29 @@ async function renderImages(
       try {
         const box = await element.boundingBox();
         if (!box) continue;
-        await sendImage(
-          await element.screenshot({ type: "webp" }),
-          box.x,
-          box.y,
-          candidate.xpath,
-        );
+        await sendTrialImage(session, trial, {
+          screenshot: await element.screenshot({ type: "webp" }),
+          url: finalUrl,
+          kind: "lcp",
+          x: box.x,
+          y: box.y,
+          xpath: candidate.xpath,
+        });
       } finally {
         await element.dispose();
       }
     }
     if (trial.sentCount === 0) throw new Error("no_matching_lcp_element");
+    check(trial.abort.signal);
+    trial.imagesEnded = true;
+    send(session.ws, {
+      action: "trial:images-end",
+      trialId: trial.id,
+      kind: "lcp",
+      imageCount: trial.sentCount,
+    });
   }
   check(trial.abort.signal);
-  trial.imagesEnded = true;
-  send(session.ws, {
-    action: "trial:images-end",
-    trialId: trial.id,
-    imageCount: trial.sentCount,
-  });
   return finalUrl;
 }
 
@@ -288,8 +352,13 @@ async function runTrial(
   );
   const trial: ActiveTrial = {
     id: trialId,
+    phase,
+    stage: phase === "initial" ? "viewport" : "lcp",
     abort: new AbortController(),
     sentCount: 0,
+    lcpImageCount: 0,
+    lcpImagesMs: null,
+    viewportMs: null,
     imagesEnded: false,
     started: false,
     metric: null,
@@ -315,9 +384,12 @@ async function runTrial(
     finalUrl: "",
     status: "failed",
     firstImageMs: null,
+    lcpImagesMs: null,
+    viewportMs: null,
     allImagesMs: null,
     firstImageIndex: null,
     imageCount: 0,
+    lcpImageCount: 0,
     error: null,
   };
   try {
@@ -345,6 +417,16 @@ async function runTrial(
         message.action === "trial:complete" && message.trialId === trialId,
       trial.abort.signal,
     );
+    const lcpComplete =
+      phase === "revisit"
+        ? waitFor(
+            session,
+            (message) =>
+              message.action === "trial:lcp-complete" &&
+              message.trialId === trialId,
+            trial.abort.signal,
+          )
+        : null;
     result.finalUrl = await renderImages(
       session,
       page,
@@ -352,12 +434,18 @@ async function runTrial(
       phase,
       trial,
     );
+    if (lcpComplete) {
+      await lcpComplete;
+      check(trial.abort.signal);
+      // Begin viewport capture only after the client confirms every LCP draw.
+      await renderViewport(session, page, trial, result.finalUrl);
+    }
     const acknowledgement = await complete;
     check(trial.abort.signal);
     if (acknowledgement.action !== "trial:complete" || !trial.metric)
       throw new Error("missing_render_result");
     result.status = "success";
-    result.allImagesMs = acknowledgement.allImagesMs;
+    result.allImagesMs = acknowledgement.viewportMs;
   } catch (error) {
     result.error = trial.abort.signal.aborted
       ? errorText(signalError(trial.abort.signal))
@@ -377,6 +465,10 @@ async function runTrial(
       result.firstImageIndex = trial.metric.firstImageIndex;
     }
     result.imageCount = trial.sentCount;
+    result.lcpImageCount = trial.lcpImageCount;
+    result.lcpImagesMs = trial.lcpImagesMs;
+    result.viewportMs = trial.viewportMs;
+    result.allImagesMs = trial.viewportMs;
     if (result.finalUrl === "" && !page.isClosed())
       result.finalUrl = page.url();
     session.trial = null;
@@ -409,9 +501,12 @@ async function skipTrials(
       finalUrl: "",
       status: "skipped",
       firstImageMs: null,
+      lcpImagesMs: null,
+      viewportMs: null,
       allImagesMs: null,
       firstImageIndex: null,
       imageCount: 0,
+      lcpImageCount: 0,
       error: reason,
     };
     await session.store!.finishTrial(result);
@@ -541,6 +636,8 @@ async function main(): Promise<void> {
           imageSizeBudgetBytes: TARGET_SIZE,
           throttling: "external-charles",
           navigationWaitUntil: "networkidle2",
+          renderingPolicy: "lcp-then-viewport-after-client-ack",
+          protocolVersion: 2,
         },
       );
       current.store = store;

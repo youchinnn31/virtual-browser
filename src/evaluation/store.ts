@@ -52,7 +52,8 @@ export class EvaluationStore {
           id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES runs(id),
           url TEXT NOT NULL, profile TEXT NOT NULL, revisit_count INTEGER NOT NULL,
           status TEXT NOT NULL DEFAULT 'incomplete', successful_count INTEGER NOT NULL DEFAULT 0,
-          median_ms REAL, UNIQUE(run_id, url, profile)
+          median_ms REAL, viewport_successful_count INTEGER NOT NULL DEFAULT 0,
+          viewport_median_ms REAL, UNIQUE(run_id, url, profile)
         );
         CREATE TABLE candidates (
           id INTEGER PRIMARY KEY, evaluation_id TEXT NOT NULL REFERENCES evaluations(id),
@@ -62,8 +63,9 @@ export class EvaluationStore {
           trial_id TEXT PRIMARY KEY, evaluation_id TEXT NOT NULL REFERENCES evaluations(id),
           phase TEXT NOT NULL, visit_index INTEGER NOT NULL,
           started_at TEXT NOT NULL, ended_at TEXT, final_url TEXT NOT NULL DEFAULT '',
-          status TEXT NOT NULL DEFAULT 'running', first_image_ms REAL, all_images_ms REAL,
-          first_image_index INTEGER, image_count INTEGER NOT NULL DEFAULT 0, error TEXT,
+          status TEXT NOT NULL DEFAULT 'running', first_image_ms REAL, lcp_images_ms REAL,
+          viewport_ms REAL, all_images_ms REAL, first_image_index INTEGER,
+          image_count INTEGER NOT NULL DEFAULT 0, lcp_image_count INTEGER NOT NULL DEFAULT 0, error TEXT,
           UNIQUE(evaluation_id, phase, visit_index)
         );
       `);
@@ -153,15 +155,19 @@ export class EvaluationStore {
   async finishTrial(result: TrialResult): Promise<void> {
     await this.db.run(
       `UPDATE trials SET ended_at = ?, final_url = ?, status = ?, first_image_ms = ?,
-       all_images_ms = ?, first_image_index = ?, image_count = ?, error = ?
+       lcp_images_ms = ?, viewport_ms = ?, all_images_ms = ?, first_image_index = ?,
+       image_count = ?, lcp_image_count = ?, error = ?
        WHERE trial_id = ? AND evaluation_id = ?`,
       new Date().toISOString(),
       result.finalUrl,
       result.status,
       result.firstImageMs,
+      result.lcpImagesMs,
+      result.viewportMs,
       result.allImagesMs,
       result.firstImageIndex,
       result.imageCount,
+      result.lcpImageCount,
       result.error,
       result.trialId,
       result.evaluationId,
@@ -171,8 +177,10 @@ export class EvaluationStore {
   async getTrials(evaluationId?: string): Promise<TrialResult[]> {
     const columns = `trial_id AS trialId, evaluation_id AS evaluationId, phase,
       visit_index AS visitIndex, final_url AS finalUrl, status,
-      first_image_ms AS firstImageMs, all_images_ms AS allImagesMs,
-      first_image_index AS firstImageIndex, image_count AS imageCount, error`;
+      first_image_ms AS firstImageMs, lcp_images_ms AS lcpImagesMs,
+      viewport_ms AS viewportMs, all_images_ms AS allImagesMs,
+      first_image_index AS firstImageIndex, image_count AS imageCount,
+      lcp_image_count AS lcpImageCount, error`;
     return evaluationId === undefined
       ? this.db.all<TrialResult[]>(
           `SELECT ${columns} FROM trials ORDER BY rowid`,
@@ -189,10 +197,12 @@ export class EvaluationStore {
       await this.getTrials(evaluation.evaluationId),
     );
     await this.db.run(
-      "UPDATE evaluations SET status = ?, successful_count = ?, median_ms = ? WHERE id = ?",
+      "UPDATE evaluations SET status = ?, successful_count = ?, median_ms = ?, viewport_successful_count = ?, viewport_median_ms = ? WHERE id = ?",
       summary.status,
       summary.successfulCount,
       summary.medianMs,
+      summary.viewportSuccessfulCount,
+      summary.viewportMedianMs,
       summary.evaluationId,
     );
     return summary;

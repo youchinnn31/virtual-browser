@@ -94,6 +94,22 @@ async function runClient(port, config, options = {}) {
         if (message.action === "trial:image") {
           const trial = trials.get(message.trialId);
           trial.images.push(message);
+          if (trial.phase === "revisit" && message.kind === "viewport") {
+            assert.equal(
+              trial.lcpAcknowledged,
+              true,
+              "viewport must wait for the LCP drawing acknowledgement",
+            );
+            if (options.failViewport) {
+              ws.send(
+                JSON.stringify({
+                  action: "trial:error",
+                  trialId: message.trialId,
+                  error: "test_viewport_failed",
+                }),
+              );
+            }
+          }
           if (trial.images.length === 1) {
             ws.send(
               JSON.stringify({
@@ -112,7 +128,11 @@ async function runClient(port, config, options = {}) {
         ) {
           const trial = trials.get(message.trialId);
           assert.equal(trial.images.length, message.imageCount);
-          if (trial.phase === "revisit" && trial.visitIndex === 1) {
+          if (message.kind === "lcp") {
+            assert.ok(trial.images.every((image) => image.kind === "lcp"));
+            if (options.withholdLcpCompletion) return;
+          }
+          if (message.kind === "lcp" && trial.visitIndex === 1) {
             const readyCount = messages.filter(
               (item) => item.action === "trial:ready",
             ).length;
@@ -122,14 +142,31 @@ async function runClient(port, config, options = {}) {
               readyCount,
               "must wait for every image to be displayed, not just the first metric",
             );
+            assert.ok(
+              trial.images.every((image) => image.kind === "lcp"),
+              "no viewport may be sent while LCP drawing is pending",
+            );
           }
+          if (message.kind === "lcp") {
+            trial.lcpAcknowledged = true;
+            ws.send(
+              JSON.stringify({
+                action: "trial:lcp-complete",
+                trialId: message.trialId,
+                renderedCount: message.imageCount,
+                lcpImagesMs: trial.visitIndex * 100 + 10,
+              }),
+            );
+            return;
+          }
+          if (options.failViewport && trial.phase === "revisit") return;
           ws.send(
             JSON.stringify({
               action: "trial:complete",
               trialId: message.trialId,
               renderedCount: message.imageCount,
-              allImagesMs:
-                trial.phase === "initial" ? 2 : trial.visitIndex * 100 + 10,
+              viewportMs:
+                trial.phase === "initial" ? 2 : trial.visitIndex * 100 + 40,
             }),
           );
         }
@@ -227,14 +264,19 @@ test(
           assert.equal(result.trials.size, 24);
           for (const trial of result.trials.values()) {
             assert.ok(trial.images.length > 0);
-            assert.ok(
-              trial.images.every((image) =>
-                trial.phase === "initial"
-                  ? image.xpath === null
-                  : image.xpath !== null,
-              ),
-            );
+            assert.equal(trial.images.at(-1).kind, "viewport");
+            assert.equal(trial.images.at(-1).xpath, null);
             if (trial.phase === "initial") assert.equal(trial.images.length, 1);
+            else {
+              assert.ok(trial.images.length >= 2);
+              assert.ok(
+                trial.images
+                  .slice(0, -1)
+                  .every(
+                    (image) => image.kind === "lcp" && image.xpath !== null,
+                  ),
+              );
+            }
           }
           const summaries = result.messages.filter(
             (message) => message.action === "evaluation:complete",
@@ -244,7 +286,9 @@ test(
             summaries.every(
               (message) =>
                 message.summary.medianMs === 300 &&
-                message.summary.successfulCount === 5,
+                message.summary.successfulCount === 5 &&
+                message.summary.viewportMedianMs === 340 &&
+                message.summary.viewportSuccessfulCount === 5,
             ),
           );
           const summaryFile = await fetch(
@@ -318,6 +362,65 @@ test(
             ).result.status,
             "skipped",
           );
+        },
+      );
+      await t.test(
+        "viewport failure retains the independently completed LCP measurement",
+        async () => {
+          const result = await runClient(
+            server.port,
+            {
+              urls: [origin + "/viewport-failure"],
+              profiles: ["test"],
+              revisitCount: 1,
+              trialTimeoutMs: 20000,
+            },
+            { failViewport: true },
+          );
+          const revisit = result.messages.find(
+            (message) =>
+              message.action === "trial:saved" &&
+              message.result.phase === "revisit",
+          ).result;
+          assert.equal(revisit.status, "failed");
+          assert.equal(revisit.firstImageMs, 100);
+          assert.equal(revisit.lcpImagesMs, 110);
+          assert.equal(revisit.viewportMs, null);
+          const summary = result.messages.find(
+            (message) => message.action === "evaluation:complete",
+          ).summary;
+          assert.equal(summary.medianMs, 100);
+          assert.equal(summary.successfulCount, 1);
+          assert.equal(summary.viewportMedianMs, null);
+          assert.equal(summary.viewportSuccessfulCount, 0);
+        },
+      );
+      await t.test(
+        "a missing LCP completion acknowledgement never starts viewport rendering",
+        async () => {
+          const result = await runClient(
+            server.port,
+            {
+              urls: [origin + "/lcp-timeout"],
+              profiles: ["test"],
+              revisitCount: 1,
+              trialTimeoutMs: 2500,
+            },
+            { withholdLcpCompletion: true },
+          );
+          const trial = [...result.trials.values()].find(
+            (item) => item.phase === "revisit",
+          );
+          assert.ok(trial.images.length > 0);
+          assert.ok(trial.images.every((image) => image.kind === "lcp"));
+          const revisit = result.messages.find(
+            (message) =>
+              message.action === "trial:saved" &&
+              message.result.phase === "revisit",
+          ).result;
+          assert.equal(revisit.error, "trial_timeout");
+          assert.equal(revisit.lcpImagesMs, null);
+          assert.equal(revisit.viewportMs, null);
         },
       );
       await t.test(

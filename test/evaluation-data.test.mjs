@@ -54,7 +54,7 @@ test("one run keeps candidates isolated and exports only the n revisit values in
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "evaluation-data-"));
   const config = {
     urls: ["https://example.com/"],
-    profiles: ["128kbps", 'slow,"network"'],
+    profiles: ["128kbps", 'slow,"network"', "viewport failure"],
     revisitCount: 5,
     trialTimeoutMs: 60000,
   };
@@ -75,6 +75,11 @@ test("one run keeps candidates isolated and exports only the n revisit values in
       config.profiles[1],
       5,
     );
+    const third = await store.createEvaluation(
+      config.urls[0],
+      config.profiles[2],
+      5,
+    );
     await store.saveCandidates(first.evaluationId, [
       { url: config.urls[0], lcp: 100, xpath: "/early" },
       { url: config.urls[0], lcp: 200, xpath: "/late" },
@@ -84,7 +89,7 @@ test("one run keeps candidates isolated and exports only the n revisit values in
       ["/late", "/early"],
     );
     assert.deepEqual(await store.getCandidates(second.evaluationId), []);
-    for (const evaluation of [first, second]) {
+    for (const evaluation of [first, second, third]) {
       for (let index = 0; index <= 5; index++) {
         const phase = index === 0 ? "initial" : "revisit";
         const trialId = await store.beginTrial(
@@ -92,7 +97,8 @@ test("one run keeps candidates isolated and exports only the n revisit values in
           phase,
           index,
         );
-        const failed = evaluation === second && index === 3;
+        const lcpFailed = evaluation === second && index === 3;
+        const failed = lcpFailed || (evaluation === third && index === 5);
         await store.finishTrial({
           trialId,
           evaluationId: evaluation.evaluationId,
@@ -101,9 +107,12 @@ test("one run keeps candidates isolated and exports only the n revisit values in
           finalUrl: config.urls[0],
           status: failed ? "failed" : "success",
           firstImageMs: index === 0 ? 99999 : index * 100,
+          lcpImagesMs: index === 0 || lcpFailed ? null : index * 100 + 5,
+          viewportMs: failed ? null : 100000,
           allImagesMs: failed ? null : 100000,
           firstImageIndex: 1,
-          imageCount: 2,
+          imageCount: index === 0 ? 1 : 3,
+          lcpImageCount: index === 0 ? 0 : 2,
           error: failed ? "trial_timeout" : null,
         });
       }
@@ -111,10 +120,16 @@ test("one run keeps candidates isolated and exports only the n revisit values in
     const complete = await store.summarize(first);
     assert.equal(complete.medianMs, 300);
     assert.equal(complete.successfulCount, 5);
+    assert.equal(complete.viewportMedianMs, 100000);
     const incomplete = await store.summarize(second);
     assert.equal(incomplete.medianMs, null);
     assert.equal(incomplete.successfulCount, 4);
     assert.equal(incomplete.status, "incomplete");
+    const viewportFailure = await store.summarize(third);
+    assert.equal(viewportFailure.medianMs, 300);
+    assert.equal(viewportFailure.successfulCount, 5);
+    assert.equal(viewportFailure.viewportSuccessfulCount, 4);
+    assert.equal(viewportFailure.viewportMedianMs, null);
     await store.finish("completed", null);
     const raw = await fs.readFile(
       path.join(store.directory, "measurements.csv"),
@@ -124,10 +139,11 @@ test("one run keeps candidates isolated and exports only the n revisit values in
       path.join(store.directory, "summary.csv"),
       "utf8",
     );
-    assert.equal(raw.trim().split("\r\n").length, 13);
+    assert.equal(raw.trim().split("\r\n").length, 19);
     assert.match(raw, /trial_timeout/);
-    assert.match(summary, /5,5,300,complete/);
-    assert.match(summary, /5,4,,incomplete/);
+    assert.match(summary, /5,5,300,5,100000,complete/);
+    assert.match(summary, /5,4,,4,,incomplete/);
+    assert.match(summary, /5,5,300,4,,incomplete/);
     assert.match(summary, /"slow,""network"""/);
     assert.equal((await fs.readdir(root)).length, 1);
   } finally {

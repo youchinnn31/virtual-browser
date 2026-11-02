@@ -24,7 +24,7 @@ export function summarize(
   );
   const values = revisits
     .filter(
-      (trial) => trial.status === "success" && trial.firstImageMs !== null,
+      (trial) => trial.lcpImagesMs !== null && trial.firstImageMs !== null,
     )
     .map((trial) => trial.firstImageMs!);
   const initialSucceeded = trials.some(
@@ -33,15 +33,24 @@ export function summarize(
       trial.phase === "initial" &&
       trial.status === "success",
   );
-  const complete =
+  const viewportValues = revisits
+    .filter((trial) => trial.viewportMs !== null)
+    .map((trial) => trial.viewportMs!);
+  const lcpComplete =
     initialSucceeded &&
     revisits.length === evaluation.revisitCount &&
     values.length === evaluation.revisitCount;
+  const viewportComplete =
+    initialSucceeded &&
+    revisits.length === evaluation.revisitCount &&
+    viewportValues.length === evaluation.revisitCount;
   return {
     ...evaluation,
     successfulCount: values.length,
-    medianMs: complete ? median(values) : null,
-    status: complete ? "complete" : "incomplete",
+    medianMs: lcpComplete ? median(values) : null,
+    viewportSuccessfulCount: viewportValues.length,
+    viewportMedianMs: viewportComplete ? median(viewportValues) : null,
+    status: lcpComplete && viewportComplete ? "complete" : "incomplete",
   };
 }
 
@@ -82,9 +91,12 @@ export async function exportReports(
       "final_url",
       "status",
       "first_image_ms",
+      "lcp_images_ms",
+      "viewport_ms",
       "all_images_ms",
       "first_image_index",
       "image_count",
+      "lcp_image_count",
       "error",
     ],
   ];
@@ -100,9 +112,12 @@ export async function exportReports(
       trial.finalUrl,
       trial.status,
       trial.firstImageMs,
+      trial.lcpImagesMs,
+      trial.viewportMs,
       trial.allImagesMs,
       trial.firstImageIndex,
       trial.imageCount,
+      trial.lcpImageCount,
       trial.error,
     ]);
   }
@@ -114,6 +129,8 @@ export async function exportReports(
       "revisit_count",
       "successful_count",
       "median_client_lcp_image_ms",
+      "viewport_successful_count",
+      "median_viewport_ms",
       "status",
     ],
   ];
@@ -125,6 +142,8 @@ export async function exportReports(
       summary.revisitCount,
       summary.successfulCount,
       summary.medianMs,
+      summary.viewportSuccessfulCount,
+      summary.viewportMedianMs,
       summary.status,
     ]);
   }

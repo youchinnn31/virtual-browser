@@ -113,8 +113,17 @@ test(
       const cdp = await page.createCDPSession();
       await cdp.send("Network.enable");
       const sent = [];
+      const events = [];
       cdp.on("Network.webSocketFrameSent", (event) => {
-        sent.push(JSON.parse(event.response.payloadData));
+        const message = JSON.parse(event.response.payloadData);
+        sent.push(message);
+        events.push({ direction: "sent", ...message });
+      });
+      cdp.on("Network.webSocketFrameReceived", (event) => {
+        events.push({
+          direction: "received",
+          ...JSON.parse(event.response.payloadData),
+        });
       });
       await page.goto(`http://127.0.0.1:${port}/`);
       await page.waitForFunction(
@@ -159,8 +168,35 @@ test(
         const metric = metrics.find(
           (message) => message.trialId === completed.trialId,
         );
-        assert.ok(completed.allImagesMs >= metric.firstImageMs);
+        assert.ok(completed.viewportMs >= metric.firstImageMs);
         assert.ok(sent.indexOf(metric) < sent.indexOf(completed));
+      }
+      const lcpCompleted = sent.filter(
+        (message) => message.action === "trial:lcp-complete",
+      );
+      assert.equal(lcpCompleted.length, 5);
+      for (const lcp of lcpCompleted) {
+        const viewport = events.find(
+          (message) =>
+            message.direction === "received" &&
+            message.action === "trial:image" &&
+            message.kind === "viewport" &&
+            message.trialId === lcp.trialId,
+        );
+        const acknowledged = events.find(
+          (message) =>
+            message.direction === "sent" &&
+            message.action === "trial:lcp-complete" &&
+            message.trialId === lcp.trialId,
+        );
+        assert.ok(viewport);
+        assert.ok(events.indexOf(acknowledged) < events.indexOf(viewport));
+        const complete = sent.find(
+          (message) =>
+            message.action === "trial:complete" &&
+            message.trialId === lcp.trialId,
+        );
+        assert.ok(complete.viewportMs >= lcp.lcpImagesMs);
       }
       const link = await page.$eval(
         '#downloads a[href$="summary.csv"]',
@@ -182,8 +218,19 @@ test(
         );
         assert.equal(values.length, 5);
         assert.equal(evaluations[0].median_ms, values[2].first_image_ms);
+        assert.equal(
+          evaluations[0].viewport_median_ms,
+          [...values].sort((a, b) => a.viewport_ms - b.viewport_ms)[2]
+            .viewport_ms,
+        );
         assert.ok(
-          values.every((value) => value.image_count >= 2),
+          values.every(
+            (value) =>
+              value.lcp_image_count >= 2 &&
+              value.image_count === value.lcp_image_count + 1 &&
+              value.viewport_ms >= value.lcp_images_ms &&
+              value.lcp_images_ms >= value.first_image_ms,
+          ),
           "all saved LCP candidates must be rendered: " +
             JSON.stringify({
               candidates: await db.all(
