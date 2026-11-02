@@ -125,7 +125,7 @@ test(
           ...JSON.parse(event.response.payloadData),
         });
       });
-      // Make the first LCP image slower than viewport delivery, then observe
+      // Make LCP images slower than viewport delivery, then observe
       // actual Canvas draws without depending on the client's private state.
       await page.evaluateOnNewDocument(() => {
         const frames = [];
@@ -150,7 +150,7 @@ test(
           set(value) {
             const frame = value.startsWith("blob:") ? frames.shift() : null;
             if (frame) images.set(this, frame);
-            if (frame?.kind === "lcp" && frame.imageIndex === 1) {
+            if (frame?.kind === "lcp") {
               setTimeout(() => source.set.call(this, value), 750);
             } else source.set.call(this, value);
           },
@@ -240,18 +240,23 @@ test(
         );
         const trialDraws = draws.filter((draw) => draw.trialId === lcp.trialId);
         assert.equal(trialDraws.length, lcp.renderedCount + 1);
-        assert.ok(trialDraws.slice(0, -1).every((draw) => draw.kind === "lcp"));
+        assert.ok(trialDraws.slice(1).every((draw) => draw.kind === "lcp"));
         assert.equal(
-          trialDraws.at(-1).kind,
+          trialDraws[0].kind,
           "viewport",
-          "viewport must be drawn after every delayed LCP image",
+          "legacy rendering must draw the ready viewport without waiting for delayed LCP images",
         );
         const complete = sent.find(
           (message) =>
             message.action === "trial:complete" &&
             message.trialId === lcp.trialId,
         );
-        assert.ok(complete.viewportMs >= lcp.lcpImagesMs);
+        assert.ok(complete.viewportMs < lcp.lcpImagesMs);
+        const metric = metrics.find(
+          (message) => message.trialId === lcp.trialId,
+        );
+        assert.equal(metric.firstImageIndex, trialDraws[0].imageIndex);
+        assert.equal(metric.firstImageMs, complete.viewportMs);
       }
       const link = await page.$eval(
         '#downloads a[href$="summary.csv"]',
@@ -283,7 +288,8 @@ test(
             (value) =>
               value.lcp_image_count >= 2 &&
               value.image_count === value.lcp_image_count + 1 &&
-              value.viewport_ms >= value.lcp_images_ms &&
+              value.viewport_ms < value.lcp_images_ms &&
+              value.first_image_ms === value.viewport_ms &&
               value.lcp_images_ms >= value.first_image_ms,
           ),
           "all saved LCP candidates must be rendered: " +

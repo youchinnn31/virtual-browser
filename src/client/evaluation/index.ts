@@ -31,10 +31,9 @@ interface Trial {
   phase: Phase;
   startedAt: number;
   firstImageMs: number | null;
-  lastDrawMs: number;
+  lastLcpDrawMs: number | null;
   expectedCount: number | null;
   expectedLcpCount: number | null;
-  pendingViewport: Extract<ServerMessage, { action: "trial:image" }> | null;
   lcpComplete: boolean;
   viewportIndex: number | null;
   viewportMs: number | null;
@@ -96,7 +95,6 @@ function clearTrial(): void {
   const trial = active;
   active = null;
   if (!trial) return;
-  trial.pendingViewport = null;
   clearTimeout(trial.timer);
   for (const [index, pending] of trial.loading) {
     releaseImage(trial, index);
@@ -153,23 +151,22 @@ function failTrial(trial: Trial, error: string): void {
 function completeIfRendered(trial: Trial): void {
   if (active !== trial || trial.complete || trial.firstImageMs === null) return;
   if (trial.phase === "revisit" && !trial.lcpComplete) {
+    const lcpRenderedCount =
+      trial.rendered.size - (trial.viewportMs === null ? 0 : 1);
     if (
       trial.expectedLcpCount === null ||
-      trial.rendered.size !== trial.expectedLcpCount
+      lcpRenderedCount !== trial.expectedLcpCount ||
+      trial.lastLcpDrawMs === null
     )
       return;
     trial.lcpComplete = true;
-    statusElement.textContent =
-      "全LCP候補を表示しました。ビューポート画像を待っています。";
+    statusElement.textContent = "全LCP候補の描画が完了しました。";
     send({
       action: "trial:lcp-complete",
       trialId: trial.id,
-      lcpImagesMs: trial.lastDrawMs,
-      renderedCount: trial.rendered.size,
+      lcpImagesMs: trial.lastLcpDrawMs,
+      renderedCount: lcpRenderedCount,
     });
-    const pending = trial.pendingViewport;
-    trial.pendingViewport = null;
-    if (pending) renderImage(pending);
   }
   if (
     trial.expectedCount === null ||
@@ -205,15 +202,6 @@ function renderImage(
     failTrial(trial, "invalid_image_stage");
     return;
   }
-  if (
-    message.kind === "viewport" &&
-    trial.phase === "revisit" &&
-    !trial.lcpComplete
-  ) {
-    if (trial.pendingViewport) failTrial(trial, "duplicate_or_late_image");
-    else trial.pendingViewport = message;
-    return;
-  }
   if (message.kind === "viewport") trial.viewportIndex = message.imageIndex;
   trial.received.add(message.imageIndex);
   const image = new Image();
@@ -226,12 +214,9 @@ function renderImage(
       if (active !== trial || abortRequested) return;
       context.drawImage(image, message.x, message.y);
       const elapsed = performance.now() - trial.startedAt;
-      trial.lastDrawMs = elapsed;
+      if (message.kind === "lcp") trial.lastLcpDrawMs = elapsed;
       if (message.kind === "viewport") trial.viewportMs = elapsed;
-      if (
-        trial.firstImageMs === null &&
-        (trial.phase === "initial" || message.kind === "lcp")
-      ) {
+      if (trial.firstImageMs === null) {
         trial.firstImageMs = elapsed;
         send({
           action: "trial:metric",
@@ -242,7 +227,7 @@ function renderImage(
         statusElement.textContent =
           trial.phase === "initial"
             ? `ビューポート：${formatTime(elapsed)}`
-            : `LCP初回画像：${formatTime(elapsed)}・残りの候補を表示中`;
+            : `初回画像：${formatTime(elapsed)}・残りの画像を表示中`;
       }
       trial.rendered.add(message.imageIndex);
       completeIfRendered(trial);
@@ -338,10 +323,9 @@ function receive(message: ServerMessage): void {
         phase: message.phase,
         startedAt: performance.now(),
         firstImageMs: null,
-        lastDrawMs: 0,
+        lastLcpDrawMs: null,
         expectedCount: null,
         expectedLcpCount: null,
-        pendingViewport: null,
         lcpComplete: false,
         viewportIndex: null,
         viewportMs: null,
@@ -367,9 +351,7 @@ function receive(message: ServerMessage): void {
           active.received.size > message.imageCount ||
           (message.kind === "lcp" &&
             (active.phase === "initial" || active.lcpComplete)) ||
-          (message.kind === "viewport" &&
-            active.viewportIndex === null &&
-            active.pendingViewport === null)
+          (message.kind === "viewport" && active.viewportIndex === null)
         ) {
           failTrial(active, "invalid_image_count");
         } else {

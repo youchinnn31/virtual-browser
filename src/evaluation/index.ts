@@ -128,8 +128,7 @@ function receive(session: Session, message: ClientMessage): void {
       if (
         !trial.started ||
         trial.metric ||
-        message.firstImageIndex >
-          (trial.phase === "initial" ? trial.sentCount : trial.lcpImageCount)
+        message.firstImageIndex > trial.sentCount
       ) {
         trial.abort.abort(new Error("invalid_first_image_result"));
       } else {
@@ -158,7 +157,7 @@ function receive(session: Session, message: ClientMessage): void {
         trial.stage !== "viewport" ||
         (trial.phase === "revisit" && trial.lcpImagesMs === null) ||
         message.renderedCount !== trial.sentCount ||
-        message.viewportMs < (trial.lcpImagesMs ?? trial.metric.firstImageMs)
+        message.viewportMs < trial.metric.firstImageMs
       ) {
         trial.abort.abort(new Error("invalid_render_completion"));
         return;
@@ -427,7 +426,7 @@ async function runTrial(
       trial,
     );
     if (phase === "revisit") {
-      // Queue the viewport immediately; the client enforces drawing order.
+      // Match the normal server: queue viewport processing after LCP sends.
       await renderViewport(session, page, trial, result.finalUrl);
     }
     const acknowledgement = await complete;
@@ -626,7 +625,7 @@ async function main(): Promise<void> {
           imageSizeBudgetBytes: TARGET_SIZE,
           throttling: "external-charles",
           navigationWaitUntil: "networkidle2",
-          renderingPolicy: "lcp-then-viewport-with-client-draw-order",
+          renderingPolicy: "legacy-load-completion-order",
           protocolVersion: 2,
         },
       );

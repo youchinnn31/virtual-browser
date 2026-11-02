@@ -74,7 +74,9 @@ async function runClient(port, config, options = {}) {
               trialId: trial.trialId,
               renderedCount: trial.viewportEndCount,
               viewportMs:
-                trial.phase === "initial" ? 2 : trial.visitIndex * 100 + 40,
+                trial.phase === "initial"
+                  ? 2
+                  : trial.visitIndex * 100 + (options.viewportFirst ? 0 : 40),
             },
       ),
     );
@@ -121,7 +123,11 @@ async function runClient(port, config, options = {}) {
         if (message.action === "trial:image") {
           const trial = trials.get(message.trialId);
           trial.images.push(message);
-          if (trial.images.length === 1) {
+          if (
+            options.viewportFirst && trial.phase === "revisit"
+              ? message.kind === "viewport"
+              : trial.images.length === 1
+          ) {
             ws.send(
               JSON.stringify({
                 action: "trial:metric",
@@ -140,7 +146,10 @@ async function runClient(port, config, options = {}) {
             assert.ok(trial.images.every((image) => image.kind === "lcp"));
             if (options.withholdLcpCompletion) return;
           }
-          if (message.kind === "lcp" && trial.visitIndex === 1) {
+          if (
+            message.kind === "lcp" &&
+            (trial.visitIndex === 1 || options.viewportFirst)
+          ) {
             const readyCount = messages.filter(
               (item) => item.action === "trial:ready",
             ).length;
@@ -368,6 +377,31 @@ test(
             ).result.status,
             "skipped",
           );
+        },
+      );
+      await t.test(
+        "legacy first-image timing accepts a viewport drawn before LCP candidates",
+        async () => {
+          const result = await runClient(
+            server.port,
+            {
+              urls: [origin + "/viewport-first"],
+              profiles: ["test"],
+              revisitCount: 1,
+              trialTimeoutMs: 20000,
+            },
+            { viewportFirst: true },
+          );
+          const revisit = result.messages.find(
+            (message) =>
+              message.action === "trial:saved" &&
+              message.result.phase === "revisit",
+          ).result;
+          assert.equal(revisit.status, "success");
+          assert.equal(revisit.firstImageIndex, revisit.imageCount);
+          assert.equal(revisit.firstImageMs, 100);
+          assert.equal(revisit.viewportMs, 100);
+          assert.equal(revisit.lcpImagesMs, 110);
         },
       );
       await t.test(
