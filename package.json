@@ -18,7 +18,11 @@
     "lint:eslint": "eslint src/**/*.ts",
     "lint:prettier": "prettier --check .",
     "lint:tsc": "tsc",
-    "start": "node dist/server"
+    "start": "node dist/server",
+    "evaluation:build": "node build.evaluation.mjs",
+    "evaluation:start": "node dist/evaluation/server/index.js",
+    "evaluation:test": "node --test test/evaluation-*.test.mjs",
+    "evaluation": "npm-run-all evaluation:build evaluation:start"
   },
   "keywords": [],
   "author": "",
