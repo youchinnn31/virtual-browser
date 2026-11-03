@@ -9,6 +9,11 @@ import {
 } from "../../evaluation/protocol";
 
 const settings = document.querySelector<HTMLFormElement>("#settings")!;
+const controls = document.querySelector<HTMLElement>("#evaluation-controls")!;
+const showBrowserButton =
+  document.querySelector<HTMLButtonElement>("#show-browser")!;
+const urlButton = document.querySelector<HTMLButtonElement>("#url-button")!;
+const urlInput = document.querySelector<HTMLInputElement>("#url-input")!;
 const fields = document.querySelector<HTMLFieldSetElement>("#fields")!;
 const startButton = document.querySelector<HTMLButtonElement>("#start")!;
 const stopButton = document.querySelector<HTMLButtonElement>("#stop")!;
@@ -64,7 +69,6 @@ function errorLabel(error: string): string {
     initial_access_failed: "初回アクセス失敗のためスキップ",
     evaluation_browser_closed: "評価用ブラウザの終了によりスキップ",
     client_hidden: "ページが前面から外れました",
-    client_viewport_changed: "画面幅が変更されました",
     user_aborted: "中断ボタンが押されました",
     client_disconnected: "端末との接続が切れました",
     server_shutdown: "評価サーバが停止しました",
@@ -124,7 +128,7 @@ function reset(): void {
   abortRequested = false;
   profile = null;
   profilePanel.hidden = true;
-  canvas.hidden = true;
+  controls.hidden = false;
   trialUrl.hidden = true;
   settings.hidden = false;
   fields.disabled = false;
@@ -139,6 +143,7 @@ function abort(reason: string): void {
   profilePanel.hidden = true;
   stopButton.disabled = true;
   statusElement.textContent = "評価を中断しています…";
+  controls.hidden = false;
   send({ action: "run:abort", reason });
 }
 
@@ -204,6 +209,7 @@ function renderImage(
   }
   if (message.kind === "viewport") trial.viewportIndex = message.imageIndex;
   trial.received.add(message.imageIndex);
+  urlInput.value = message.url;
   const image = new Image();
   const url = URL.createObjectURL(
     new Blob([new Uint8Array(message.img.data)], { type: "image/webp" }),
@@ -296,6 +302,7 @@ function receive(message: ServerMessage): void {
       profile = message;
       profileName.textContent = message.profile;
       profilePanel.hidden = false;
+      controls.hidden = false;
       statusElement.textContent = "Charlesの設定確認を待っています。";
       break;
     case "trial:ready": {
@@ -390,6 +397,23 @@ function connect(): void {
   const url = new URL("/ws", window.location.href);
   url.protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   socket = new WebSocket(url);
+  socket.addEventListener("open", () => {
+    const browserTop: number = canvas.getBoundingClientRect().top;
+    const width: number = Math.trunc(
+      canvas.clientWidth / window.devicePixelRatio,
+    );
+    const height: number = Math.trunc(
+      (window.innerHeight - browserTop) / window.devicePixelRatio,
+    );
+    canvas.width = width;
+    canvas.height = height;
+    device = {
+      width,
+      height,
+      devicePixelRatio: window.devicePixelRatio,
+      userAgent: window.navigator.userAgent,
+    };
+  });
   socket.addEventListener("message", (event: MessageEvent<string>) => {
     try {
       receive(JSON.parse(event.data) as ServerMessage);
@@ -400,6 +424,7 @@ function connect(): void {
   });
   socket.addEventListener("close", () => {
     const wasRunning = running;
+    device = null;
     reset();
     connectionElement.textContent = "切断・再接続待ち";
     startButton.disabled = true;
@@ -417,7 +442,7 @@ function connect(): void {
 
 settings.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (running || socket?.readyState !== WebSocket.OPEN) return;
+  if (running || !device || socket?.readyState !== WebSocket.OPEN) return;
   try {
     const lines = (id: string): string[] =>
       document
@@ -442,7 +467,7 @@ settings.addEventListener("submit", (event) => {
     runId = null;
     fields.disabled = true;
     settings.hidden = true;
-    canvas.hidden = false;
+    controls.hidden = true;
     trialUrl.hidden = false;
     stopButton.disabled = false;
     summaries.replaceChildren();
@@ -450,18 +475,6 @@ settings.addEventListener("submit", (event) => {
     descriptions.clear();
     downloads.hidden = true;
     trialUrl.textContent = "";
-    window.scrollTo(0, 0);
-    canvas.width = Math.max(1, Math.floor(canvas.clientWidth));
-    canvas.height = Math.max(
-      160,
-      Math.floor(window.innerHeight - canvas.getBoundingClientRect().top - 12),
-    );
-    device = {
-      width: canvas.width,
-      height: canvas.height,
-      devicePixelRatio: window.devicePixelRatio,
-      userAgent: navigator.userAgent,
-    };
     statusElement.textContent = "評価を準備しています…";
     send({ action: "run:start", config, device });
   } catch (error) {
@@ -480,14 +493,17 @@ confirmButton.addEventListener("click", () => {
   });
   profile = null;
   profilePanel.hidden = true;
+  controls.hidden = true;
   statusElement.textContent = "評価を進めています…";
 });
 stopButton.addEventListener("click", () => abort("user_aborted"));
 document.addEventListener("visibilitychange", () => {
   if (running && document.visibilityState !== "visible") abort("client_hidden");
 });
-window.addEventListener("resize", () => {
-  if (running && device && Math.floor(canvas.clientWidth) !== device.width)
-    abort("client_viewport_changed");
+urlButton.addEventListener("click", () => {
+  controls.hidden = false;
+});
+showBrowserButton.addEventListener("click", () => {
+  controls.hidden = true;
 });
 connect();

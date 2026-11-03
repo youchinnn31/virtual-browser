@@ -10,13 +10,37 @@ import puppeteer from "puppeteer";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import sharp from "sharp";
+import { transform } from "esbuild";
+
+function canvasGeometry() {
+  const canvas = document.querySelector("#browser");
+  const rect = canvas.getBoundingClientRect();
+  return {
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    devicePixelRatio: window.devicePixelRatio,
+    width: canvas.width,
+    height: canvas.height,
+    clientWidth: canvas.clientWidth,
+    left: rect.left,
+    top: rect.top,
+    cssWidth: rect.width,
+    cssHeight: rect.height,
+  };
+}
 
 test(
-  "mobile evaluation page renders real images, exports the n-value median, and aborts when backgrounded",
+  "mobile evaluation preserves the normal page geometry, renders images, exports medians, and aborts when backgrounded",
   { timeout: 90000 },
   async () => {
     const root = await fs.mkdtemp(
       path.join(os.tmpdir(), "evaluation-browser-"),
+    );
+    // The normal page retains origin/main's layout and connection-time sizing.
+    const legacyHtml = await fs.readFile("src/client/index.html", "utf8");
+    const legacyClient = await transform(
+      await fs.readFile("src/client/index.ts", "utf8"),
+      { loader: "ts" },
     );
     const visits = new Map();
     const hero = await sharp(
@@ -32,6 +56,18 @@ test(
       .toBuffer();
     const fixture = http.createServer((req, res) => {
       res.setHeader("Cache-Control", "no-store");
+      if (req.url === "/legacy-reference") {
+        res.setHeader("Content-Type", "text/html");
+        res.end(
+          legacyHtml.replace('src="index.js"', 'src="/legacy-client.js"'),
+        );
+        return;
+      }
+      if (req.url === "/legacy-client.js") {
+        res.setHeader("Content-Type", "application/javascript");
+        res.end(legacyClient.code);
+        return;
+      }
       if (req.url === "/hero.png") {
         setTimeout(() => {
           res.setHeader("Content-Type", "image/png");
@@ -168,10 +204,63 @@ test(
           return result;
         };
       });
-      await page.goto(`http://127.0.0.1:${port}/`);
-      await page.waitForFunction(
-        () => !document.querySelector("#start").disabled,
+      const reference = await browser.newPage();
+      await reference.setUserAgent(
+        await page.evaluate(() => navigator.userAgent),
       );
+      await reference.evaluateOnNewDocument(() => {
+        // Exercise the normal client's own open handler without a normal server.
+        window.WebSocket = class extends EventTarget {
+          constructor() {
+            super();
+            setTimeout(() => this.dispatchEvent(new Event("open")), 0);
+          }
+          send(data) {
+            const message = JSON.parse(data);
+            if (message.action === "init") window.__legacyDevice = message;
+          }
+        };
+      });
+      let legacyDevice;
+      for (const deviceScaleFactor of [1, 3, 2]) {
+        const viewport = {
+          width: 390,
+          height: 844,
+          deviceScaleFactor,
+          isMobile: true,
+          hasTouch: true,
+        };
+        await reference.setViewport(viewport);
+        await reference.goto(origin + "/legacy-reference");
+        await reference.waitForFunction(() => window.__legacyDevice);
+        await page.setViewport(viewport);
+        await page.bringToFront();
+        await page.goto(`http://127.0.0.1:${port}/`);
+        await page.waitForFunction(
+          () => !document.querySelector("#start").disabled,
+        );
+        const expected = await reference.evaluate(canvasGeometry);
+        assert.deepEqual(await page.evaluate(canvasGeometry), expected);
+        assert.equal(await page.$('meta[name="viewport"]'), null);
+        await page.click("#show-browser");
+        assert.deepEqual(await page.evaluate(canvasGeometry), expected);
+        await page.click("#url-button");
+        assert.deepEqual(await page.evaluate(canvasGeometry), expected);
+        legacyDevice = await reference.evaluate(() => window.__legacyDevice);
+      }
+      // A viewport change after connecting must not recompute the stored size.
+      const resized = {
+        width: 390,
+        height: 900,
+        deviceScaleFactor: 2,
+        isMobile: true,
+        hasTouch: true,
+      };
+      await reference.setViewport(resized);
+      await page.setViewport(resized);
+      const expectedGeometry = await reference.evaluate(canvasGeometry);
+      assert.deepEqual(await page.evaluate(canvasGeometry), expectedGeometry);
+      await reference.close();
       await page.$eval(
         "#urls",
         (element, value) => {
@@ -184,6 +273,20 @@ test(
       });
       await page.click("#start");
       await page.waitForSelector("#profile-panel:not([hidden])");
+      assert.deepEqual(await page.evaluate(canvasGeometry), expectedGeometry);
+      const start = sent.find((message) => message.action === "run:start");
+      assert.deepEqual(start.device, {
+        width: legacyDevice.width,
+        height: legacyDevice.height,
+        devicePixelRatio: 2,
+        userAgent: legacyDevice.userAgent,
+      });
+      await page.evaluate(() => window.dispatchEvent(new Event("resize")));
+      assert.ok(
+        (
+          await page.$eval("#status", (element) => element.textContent)
+        ).includes("Charles"),
+      );
       assert.equal(await page.$$eval("#trials tr", (rows) => rows.length), 0);
       await page.click("#confirm-profile");
       await page.waitForFunction(
@@ -192,6 +295,7 @@ test(
         { timeout: 45000 },
       );
       assert.deepEqual(errors, []);
+      assert.deepEqual(await page.evaluate(canvasGeometry), expectedGeometry);
       assert.equal(await page.$$eval("#trials tr", (rows) => rows.length), 12);
       assert.deepEqual(
         await page.$$eval("#summaries tr", (rows) =>
@@ -313,6 +417,8 @@ test(
         );
         const run = await db.get("SELECT * FROM runs");
         assert.equal(JSON.parse(run.device_json).devicePixelRatio, 2);
+        assert.equal(JSON.parse(run.device_json).width, legacyDevice.width);
+        assert.equal(JSON.parse(run.device_json).height, legacyDevice.height);
         assert.equal(
           JSON.parse(run.metadata_json).throttling,
           "external-charles",

@@ -2,59 +2,74 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LCP画像の連続評価</title>
+    <title>仮想Webブラウザ</title>
     <style>
-      * {
-        box-sizing: border-box;
-      }
       body {
         margin: 0;
+      }
+      canvas {
+        width: 100%;
+        vertical-align: bottom;
+      }
+      #nav * {
+        font-size: 2em;
+      }
+    </style>
+    <style>
+      #evaluation-controls,
+      #evaluation-controls * {
+        box-sizing: border-box;
+      }
+      #evaluation-controls {
+        position: fixed;
+        inset: 0;
+        overflow: auto;
+        z-index: 1;
         font-family: system-ui, sans-serif;
         color: #17212b;
         background: #f5f7fa;
       }
-      main {
+      #evaluation-controls main {
         max-width: 960px;
         margin: auto;
         padding: 12px;
       }
-      h1 {
+      #evaluation-controls h1 {
         font-size: 1.25rem;
         margin: 0 0 8px;
       }
-      h2 {
+      #evaluation-controls h2 {
         font-size: 1.05rem;
       }
-      p {
+      #evaluation-controls p {
         line-height: 1.5;
       }
-      label {
+      #evaluation-controls label {
         display: block;
         margin: 14px 0 6px;
         font-weight: 600;
       }
-      textarea,
-      input,
-      button {
+      #evaluation-controls textarea,
+      #evaluation-controls input,
+      #evaluation-controls button {
         font: inherit;
       }
-      textarea,
-      input {
+      #evaluation-controls textarea,
+      #evaluation-controls input {
         width: 100%;
         padding: 10px;
         border: 1px solid #aeb9c4;
         border-radius: 5px;
       }
-      textarea {
+      #evaluation-controls textarea {
         min-height: 96px;
       }
-      fieldset {
+      #evaluation-controls fieldset {
         border: 0;
         padding: 0;
         margin: 0;
       }
-      button {
+      #evaluation-controls button {
         min-height: 44px;
         padding: 8px 14px;
         border: 0;
@@ -63,199 +78,203 @@
         color: white;
         cursor: pointer;
       }
-      button:disabled {
+      #evaluation-controls button:disabled {
         opacity: 0.5;
         cursor: default;
       }
-      #stop {
+      #evaluation-controls #stop {
         background: #8a2530;
       }
-      .toolbar {
+      #evaluation-controls .toolbar {
         display: flex;
         gap: 8px;
         align-items: center;
       }
-      #status,
-      #trial-url {
+      #evaluation-controls #status,
+      #evaluation-controls #trial-url {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      #status {
+      #evaluation-controls #status {
         min-height: 1.5em;
         margin: 8px 0;
       }
-      #trial-url {
+      #evaluation-controls #trial-url {
         min-height: 1.4em;
         font-size: 0.85rem;
         color: #445;
       }
-      #profile-panel {
+      #evaluation-controls #profile-panel {
         padding: 12px;
         margin: 12px 0;
         background: #fff2ca;
         border: 1px solid #d5b660;
       }
-      #profile-name {
+      #evaluation-controls #profile-name {
         overflow-wrap: anywhere;
       }
-      #browser {
-        display: block;
-        width: 100%;
-        background: white;
-        border: 1px solid #cbd2da;
-      }
-      .scroll {
+      #evaluation-controls .scroll {
         overflow-x: auto;
       }
-      table {
+      #evaluation-controls table {
         width: 100%;
         min-width: 640px;
         border-collapse: collapse;
         background: white;
         font-size: 0.85rem;
       }
-      th,
-      td {
+      #evaluation-controls th,
+      #evaluation-controls td {
         padding: 8px;
         text-align: left;
         border-bottom: 1px solid #dbe0e6;
         vertical-align: top;
       }
-      th {
+      #evaluation-controls th {
         white-space: nowrap;
       }
-      #trial-table {
+      #evaluation-controls #trial-table {
         min-width: 900px;
       }
-      td {
+      #evaluation-controls td {
         overflow-wrap: anywhere;
       }
-      #downloads a {
+      #evaluation-controls #downloads a {
         display: inline-block;
         margin: 4px 16px 8px 0;
       }
-      .note {
+      #evaluation-controls .note {
         font-size: 0.85rem;
         color: #465361;
       }
-      [hidden] {
+      #evaluation-controls[hidden],
+      #evaluation-controls [hidden] {
         display: none !important;
       }
     </style>
     <script src="index.js" defer></script>
   </head>
   <body>
-    <main>
-      <h1>LCP画像の連続評価</h1>
-      <div class="toolbar">
-        <span id="connection" role="status">接続中…</span>
-        <button id="stop" type="button" disabled>中断</button>
-      </div>
-      <p id="status" role="status" aria-live="polite">
-        設定を入力してください。
-      </p>
-      <form id="settings">
-        <fieldset id="fields">
-          <label for="urls">評価するURL（1行に1件）</label>
-          <textarea
-            id="urls"
-            required
-            placeholder="https://example.com/"
-          ></textarea>
-          <label for="profiles">Charlesの通信条件名（1行に1条件）</label>
-          <textarea id="profiles" required>128kbps</textarea>
-          <label for="revisit-count">再アクセス回数 n</label>
-          <input
-            id="revisit-count"
-            type="number"
-            min="1"
-            step="1"
-            value="5"
-            required
-          />
-          <label for="timeout">1アクセス全体の上限（秒）</label>
-          <input
-            id="timeout"
-            type="number"
-            min="1"
-            step="1"
-            value="60"
-            required
-          />
-          <p class="note">
-            各サイトで初回1回＋再アクセスn回を実行します。再アクセスの最初の画像描画時間（LCP値）とビューポート完了時間、それぞれの中央値を記録します。初回は中央値に含めません。
-          </p>
-          <p class="note">
-            通信速度はCharlesで設定してください。評価中はこのページを前面に表示し、端末の向きと画面幅を固定してください。
-          </p>
-          <button id="start" type="submit" disabled>評価を開始</button>
-        </fieldset>
-      </form>
-      <section id="profile-panel" hidden aria-label="Charlesの設定確認">
-        <p>
-          Charlesを
-          <strong id="profile-name"></strong> の条件に設定してください。
-        </p>
-        <button id="confirm-profile" type="button">
-          設定済み・評価を進める
-        </button>
-      </section>
-      <div id="trial-url" hidden></div>
-      <canvas
-        id="browser"
-        width="375"
-        height="300"
-        aria-label="評価対象サイトの画像"
-        hidden
-      ></canvas>
-      <section
-        id="downloads"
-        hidden
-        aria-label="評価全体の結果ファイル"
-      ></section>
-      <section>
-        <h2>サイト・通信条件ごとの評価結果</h2>
-        <div class="scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>URL</th>
-                <th>通信条件</th>
-                <th>LCP成功 / n</th>
-                <th>LCP中央値</th>
-                <th>ビューポート成功 / n</th>
-                <th>ビューポート中央値</th>
-                <th>状態</th>
-              </tr>
-            </thead>
-            <tbody id="summaries"></tbody>
-          </table>
+    <h1>仮想Webブラウザ</h1>
+    <div id="nav">
+      <label for="url-input">URL:</label>
+      <input id="url-input" type="url" name="url" />
+      <button id="url-button" type="submit">送信</button>
+    </div>
+    <!--
+    <h1>
+       LCP: <span id="lcp-value">-</span> ms
+    </h1>
+  -->
+    <canvas id="browser"></canvas>
+    <section id="evaluation-controls" aria-label="評価設定と進捗">
+      <main>
+        <h1>LCP画像の連続評価</h1>
+        <div class="toolbar">
+          <span id="connection" role="status">接続中…</span>
+          <button id="stop" type="button" disabled>中断</button>
+          <button id="show-browser" type="button">計測画面を表示</button>
         </div>
-      </section>
-      <section>
-        <h2>各アクセスの記録</h2>
-        <div class="scroll">
-          <table id="trial-table">
-            <thead>
-              <tr>
-                <th>URL</th>
-                <th>通信条件</th>
-                <th>アクセス</th>
-                <th>初回画像描画</th>
-                <th>ビューポート完了</th>
-                <th>LCP枚数</th>
-                <th>総枚数</th>
-                <th>状態</th>
-              </tr>
-            </thead>
-            <tbody id="trials"></tbody>
-          </table>
-        </div>
-        <p class="note">
-          時間はクライアントで測定した経過時間です。標準LCPとは定義が異なります。
+        <p class="note">計測画面の「送信」ボタンで設定・進捗を開けます。</p>
+        <p id="status" role="status" aria-live="polite">
+          設定を入力してください。
         </p>
-      </section>
-    </main>
+        <form id="settings">
+          <fieldset id="fields">
+            <label for="urls">評価するURL（1行に1件）</label>
+            <textarea
+              id="urls"
+              required
+              placeholder="https://example.com/"
+            ></textarea>
+            <label for="profiles">Charlesの通信条件名（1行に1条件）</label>
+            <textarea id="profiles" required>128kbps</textarea>
+            <label for="revisit-count">再アクセス回数 n</label>
+            <input
+              id="revisit-count"
+              type="number"
+              min="1"
+              step="1"
+              value="5"
+              required
+            />
+            <label for="timeout">1アクセス全体の上限（秒）</label>
+            <input
+              id="timeout"
+              type="number"
+              min="1"
+              step="1"
+              value="60"
+              required
+            />
+            <p class="note">
+              各サイトで初回1回＋再アクセスn回を実行します。再アクセスの最初の画像描画時間（LCP値）とビューポート完了時間、それぞれの中央値を記録します。初回は中央値に含めません。
+            </p>
+            <p class="note">
+              通信速度はCharlesで設定してください。評価中はこのページを前面に表示し、端末の向きと画面幅を固定してください。
+            </p>
+            <button id="start" type="submit" disabled>評価を開始</button>
+          </fieldset>
+        </form>
+        <section id="profile-panel" hidden aria-label="Charlesの設定確認">
+          <p>
+            Charlesを
+            <strong id="profile-name"></strong> の条件に設定してください。
+          </p>
+          <button id="confirm-profile" type="button">
+            設定済み・評価を進める
+          </button>
+        </section>
+        <div id="trial-url" hidden></div>
+        <section
+          id="downloads"
+          hidden
+          aria-label="評価全体の結果ファイル"
+        ></section>
+        <section>
+          <h2>サイト・通信条件ごとの評価結果</h2>
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>URL</th>
+                  <th>通信条件</th>
+                  <th>LCP成功 / n</th>
+                  <th>LCP中央値</th>
+                  <th>ビューポート成功 / n</th>
+                  <th>ビューポート中央値</th>
+                  <th>状態</th>
+                </tr>
+              </thead>
+              <tbody id="summaries"></tbody>
+            </table>
+          </div>
+        </section>
+        <section>
+          <h2>各アクセスの記録</h2>
+          <div class="scroll">
+            <table id="trial-table">
+              <thead>
+                <tr>
+                  <th>URL</th>
+                  <th>通信条件</th>
+                  <th>アクセス</th>
+                  <th>初回画像描画</th>
+                  <th>ビューポート完了</th>
+                  <th>LCP枚数</th>
+                  <th>総枚数</th>
+                  <th>状態</th>
+                </tr>
+              </thead>
+              <tbody id="trials"></tbody>
+            </table>
+          </div>
+          <p class="note">
+            時間はクライアントで測定した経過時間です。標準LCPとは定義が異なります。
+          </p>
+        </section>
+      </main>
+    </section>
   </body>
 </html>
