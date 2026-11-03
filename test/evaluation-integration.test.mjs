@@ -16,7 +16,11 @@ async function startServer(root, cwd = process.cwd()) {
   const child = spawn(
     process.execPath,
     [path.resolve("dist/evaluation/server/index.js")],
-    { cwd, env, stdio: ["ignore", "pipe", "pipe"] },
+    {
+      cwd,
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    },
   );
   let logs = "";
   child.stderr.on("data", (chunk) => {
@@ -57,37 +61,9 @@ async function runClient(port, config, options = {}) {
   const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`);
   const messages = [];
   const trials = new Map();
-  function finishViewport(trial) {
-    if (
-      trial.completionSent ||
-      trial.viewportEndCount === undefined ||
-      options.withholdCompletion ||
-      (trial.phase === "revisit" && !trial.lcpAcknowledged)
-    )
-      return;
-    trial.completionSent = true;
-    ws.send(
-      JSON.stringify(
-        options.failViewport && trial.phase === "revisit"
-          ? {
-              action: "trial:error",
-              trialId: trial.trialId,
-              error: "test_viewport_failed",
-            }
-          : {
-              action: "trial:complete",
-              trialId: trial.trialId,
-              renderedCount: trial.viewportEndCount,
-              viewportMs:
-                trial.phase === "initial"
-                  ? 2
-                  : trial.visitIndex * 100 + (options.viewportFirst ? 0 : 40),
-            },
-      ),
-    );
-  }
+  let timeout;
   const finished = new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
+    timeout = setTimeout(() => {
       ws.terminate();
       reject(new Error("Test client timed out"));
     }, 90000);
@@ -97,7 +73,9 @@ async function runClient(port, config, options = {}) {
         const message = JSON.parse(raw.toString());
         messages.push(message);
         if (message.action === "error") throw new Error(message.error);
+        options.onMessage?.(message, messages);
         if (message.action === "profile:required") {
+          if (options.profileDelayMs) await delay(options.profileDelayMs);
           ws.send(
             JSON.stringify(
               options.abortAtProfile
@@ -128,72 +106,56 @@ async function runClient(port, config, options = {}) {
         if (message.action === "trial:image") {
           const trial = trials.get(message.trialId);
           trial.images.push(message);
-          if (
-            options.viewportFirst && trial.phase === "revisit"
-              ? message.kind === "viewport"
-              : trial.images.length === 1
-          ) {
+          assert.equal(message.kind, "viewport");
+          assert.equal(message.imageIndex, 1);
+          if (options.failWarmup && trial.phase === "warmup") {
             ws.send(
               JSON.stringify({
-                action: "trial:metric",
-                trialId: message.trialId,
-                firstImageMs:
-                  trial.phase === "initial" ? 1 : trial.visitIndex * 100,
-                firstImageIndex: message.imageIndex,
+                action: "trial:error",
+                trialId: trial.trialId,
+                error: "image_decode_failed",
               }),
             );
           }
         }
         if (message.action === "trial:images-end") {
           const trial = trials.get(message.trialId);
-          assert.equal(trial.images.length, message.imageCount);
-          if (message.kind === "lcp") {
-            assert.ok(trial.images.every((image) => image.kind === "lcp"));
-            if (options.withholdLcpCompletion) return;
-          }
+          assert.equal(message.imageCount, 1);
+          assert.equal(trial.images.length, 1);
           if (
-            message.kind === "lcp" &&
-            (trial.visitIndex === 1 || options.viewportFirst)
+            (options.failWarmup && trial.phase === "warmup") ||
+            (options.withholdMeasurementCompletion &&
+              trial.phase === "measurement")
+          )
+            return;
+          if (
+            options.delayCompletion &&
+            trial.phase === "measurement" &&
+            trial.measurementIndex === 1
           ) {
             const readyCount = messages.filter(
               (item) => item.action === "trial:ready",
             ).length;
-            const deadline = Date.now() + 5000;
-            while (
-              !trial.images.some((image) => image.kind === "viewport") &&
-              Date.now() < deadline
-            )
-              await delay(10);
+            await delay(100);
             assert.equal(
               messages.filter((item) => item.action === "trial:ready").length,
               readyCount,
-              "must wait for every image to be displayed, not just the first metric",
-            );
-            assert.ok(
-              trial.images.some((image) => image.kind === "viewport"),
-              "viewport must be sent without waiting for the LCP drawing notification",
+              "the next access must wait for the viewport draw acknowledgement",
             );
           }
-          if (message.kind === "lcp") {
-            trial.lcpAcknowledged = true;
-            ws.send(
-              JSON.stringify({
-                action: "trial:lcp-complete",
-                trialId: message.trialId,
-                renderedCount: message.imageCount,
-                lcpImagesMs: trial.visitIndex * 100 + 10,
-              }),
-            );
-            finishViewport(trial);
-            return;
-          }
-          trial.viewportEndCount = message.imageCount;
-          finishViewport(trial);
+          ws.send(
+            JSON.stringify({
+              action: "trial:complete",
+              trialId: trial.trialId,
+              renderedCount:
+                options.invalidCount && trial.phase === "measurement" ? 2 : 1,
+              viewportMs:
+                trial.phase === "warmup" ? 99999 : trial.measurementIndex * 100,
+            }),
+          );
         }
-        if (message.action === "run:finished") {
-          clearTimeout(timeout);
+        if (message.action === "run:finished")
           resolve({ messages, trials, finished: message });
-        }
       })().catch((error) => {
         clearTimeout(timeout);
         ws.terminate();
@@ -211,50 +173,60 @@ async function runClient(port, config, options = {}) {
           width: 375,
           height: 600,
           devicePixelRatio: 2,
-          userAgent: "Mobile evaluation integration test",
+          userAgent: "Mobile viewport evaluation integration test",
         },
       }),
     );
     return await finished;
   } finally {
+    clearTimeout(timeout);
     ws.close();
   }
 }
 
 test(
-  "standalone evaluation server preserves first/revisit boundaries, rendering completion, and partial results",
+  "viewport evaluation waits for networkidle2, excludes warmup, and preserves trial boundaries and results",
   { timeout: 120000 },
   async (t) => {
     const root = await fs.mkdtemp(
-      path.join(os.tmpdir(), "evaluation-integration-"),
+      path.join(os.tmpdir(), "viewport-integration-"),
     );
+    const accesses = [];
     const visits = new Map();
+    let holdEnabled = false;
+    let held = [];
+    let holdReady;
+    function releaseHeld() {
+      holdEnabled = false;
+      for (const res of held)
+        if (!res.destroyed && !res.writableEnded) res.end("ready");
+      held = [];
+    }
     const fixture = http.createServer((req, res) => {
-      const url = req.url;
       res.setHeader("Cache-Control", "no-store");
-      if (url === "/favicon.ico") {
+      if (req.url === "/favicon.ico") {
         res.writeHead(204).end();
         return;
       }
-      if (url === "/hero.svg") {
-        setTimeout(() => {
-          res.setHeader("Content-Type", "image/svg+xml");
-          res.end(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="navy"/><circle cx="150" cy="100" r="70" fill="orange"/></svg>',
-          );
-        }, 100);
+      if (req.url.startsWith("/held?")) {
+        if (holdEnabled) {
+          held.push(res);
+          if (held.length === 3) holdReady?.();
+        } else res.end("ready");
         return;
       }
-      const visit = (visits.get(url) ?? 0) + 1;
-      visits.set(url, visit);
+      const visit = (visits.get(req.url) ?? 0) + 1;
+      visits.set(req.url, visit);
+      accesses.push({ url: req.url, cookie: req.headers.cookie ?? "" });
+      res.setHeader("Set-Cookie", "evaluation_seen=1; Path=/");
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      if (url === "/missing") {
+      if (req.url === "/network-idle") {
         res.end(
-          `<html><body><h1 id="${visit === 1 ? "initial-only" : "replacement"}">Visible content</h1></body></html>`,
+          '<html><body><h1>Viewport</h1><script>Promise.all([0,1,2].map(i => fetch("/held?i="+i).then(res => res.text()))).then(() => document.querySelector("h1").textContent="Ready")</script></body></html>',
         );
       } else {
         res.end(
-          '<html><body><h1 id="heading">Title</h1><img id="hero" width="300" height="200" src="/hero.svg"></body></html>',
+          `<html><body><h1 id="${visit === 1 ? "original" : "changed"}">Viewport ${visit}</h1><script>console.trace("unrelated trace")</script></body></html>`,
         );
       }
     });
@@ -264,62 +236,46 @@ test(
     try {
       server = await startServer(root, root);
       assert.equal(server.resultsDirectory, root);
-      assert.equal(
-        (await fetch(`http://127.0.0.1:${server.port}/health`)).status,
-        200,
-      );
       await t.test(
-        "the default results directory stays in the project when launched from another folder",
+        "default output stays in the project's viewport folder from another working directory",
         async () => {
-          const defaultServer = await startServer(undefined, root);
+          const defaults = await startServer(undefined, root);
           try {
             assert.equal(
-              defaultServer.resultsDirectory,
-              path.resolve("evaluation/results"),
+              defaults.resultsDirectory,
+              path.resolve("evaluation/results/viewport"),
             );
           } finally {
-            await defaultServer.close();
+            await defaults.close();
           }
         },
       );
       await t.test(
-        "n=5 runs six visits per evaluation and excludes the viewport value from the median",
+        "one warmup plus n=5 measurements sends one viewport per access and isolates each evaluation",
         async () => {
           const result = await runClient(
             server.port,
             {
               urls: [origin + "/a", origin + "/b"],
               profiles: ["128kbps", "1024kbps"],
-              revisitCount: 5,
+              measurementCount: 5,
               trialTimeoutMs: 20000,
             },
-            { injectStaleMessage: true },
+            { injectStaleMessage: true, delayCompletion: true },
           );
           assert.equal(result.finished.status, "completed");
-          const created = result.messages.find(
-            (message) => message.action === "run:created",
-          );
-          assert.equal(
-            created.resultsDirectory,
-            path.join(root, result.finished.runId),
-          );
           assert.equal(result.trials.size, 24);
           for (const trial of result.trials.values()) {
-            assert.ok(trial.images.length > 0);
-            assert.equal(trial.images.at(-1).kind, "viewport");
-            assert.equal(trial.images.at(-1).xpath, null);
-            if (trial.phase === "initial") assert.equal(trial.images.length, 1);
-            else {
-              assert.ok(trial.images.length >= 2);
-              assert.ok(
-                trial.images
-                  .slice(0, -1)
-                  .every(
-                    (image) => image.kind === "lcp" && image.xpath !== null,
-                  ),
-              );
-            }
+            assert.equal(trial.images.length, 1);
+            assert.equal(trial.images[0].kind, "viewport");
+            assert.equal(trial.images[0].x, 0);
+            assert.equal(trial.images[0].y, 0);
           }
+          const warmups = [...result.trials.values()].filter(
+            (trial) => trial.phase === "warmup",
+          );
+          assert.equal(warmups.length, 4);
+          assert.ok(warmups.every((trial) => trial.measurementIndex === 0));
           const summaries = result.messages.filter(
             (message) => message.action === "evaluation:complete",
           );
@@ -327,185 +283,172 @@ test(
           assert.ok(
             summaries.every(
               (message) =>
-                message.summary.medianMs === 300 &&
+                message.summary.viewportMedianMs === 300 &&
                 message.summary.successfulCount === 5 &&
-                message.summary.viewportMedianMs === 340 &&
-                message.summary.viewportSuccessfulCount === 5,
+                message.summary.method === "viewport",
             ),
           );
-          const summaryFile = await fetch(
+          const created = result.messages.find(
+            (message) => message.action === "run:created",
+          );
+          assert.equal(
+            created.resultsDirectory,
+            path.join(root, result.finished.runId),
+          );
+          const csv = await fetch(
             `http://127.0.0.1:${server.port}/results/${result.finished.runId}/summary.csv`,
           );
-          assert.equal(summaryFile.status, 200);
-          assert.equal(
-            (await summaryFile.text()).trim().split("\r\n").length,
-            5,
-          );
-          await fs.access(path.join(created.resultsDirectory, "summary.csv"));
+          assert.equal(csv.status, 200);
+          assert.equal((await csv.text()).trim().split("\r\n").length, 5);
           await fs.access(
             path.join(created.resultsDirectory, "measurements.csv"),
           );
+          const recorded = accesses.filter((access) =>
+            ["/a", "/b"].includes(access.url),
+          );
+          assert.equal(recorded.length, 24);
+          for (let i = 0; i < recorded.length; i += 6) {
+            assert.equal(recorded[i].cookie, "");
+            assert.ok(
+              recorded
+                .slice(i + 1, i + 6)
+                .every((access) => access.cookie.includes("evaluation_seen=1")),
+            );
+          }
         },
       );
       await t.test(
-        "missing DOM never falls back to viewport rendering",
+        "no viewport image is sent while three requests prevent networkidle2",
         async () => {
-          const result = await runClient(server.port, {
-            urls: [origin + "/missing"],
-            profiles: ["test"],
-            revisitCount: 2,
-            trialTimeoutMs: 20000,
+          holdEnabled = true;
+          const pending = new Promise((resolve) => {
+            holdReady = resolve;
           });
-          const revisits = result.messages.filter(
-            (message) =>
-              message.action === "trial:saved" &&
-              message.result.phase === "revisit",
+          const messages = [];
+          const running = runClient(
+            server.port,
+            {
+              urls: [origin + "/network-idle"],
+              profiles: ["test"],
+              measurementCount: 1,
+              trialTimeoutMs: 20000,
+            },
+            { onMessage: (message) => messages.push(message) },
           );
-          assert.equal(revisits.length, 2);
-          assert.ok(
-            revisits.every(
-              (message) =>
-                message.result.status === "failed" &&
-                message.result.error === "no_matching_lcp_element" &&
-                message.result.imageCount === 0,
+          void running.catch(() => undefined);
+          try {
+            await pending;
+            await delay(650);
+            assert.equal(
+              messages.filter((message) => message.action === "trial:image")
+                .length,
+              0,
+            );
+          } finally {
+            releaseHeld();
+          }
+          const result = await running;
+          assert.equal(
+            result.trials.size,
+            2,
+            JSON.stringify(
+              result.messages.filter(
+                (message) => message.action === "trial:saved",
+              ),
             ),
           );
-          assert.equal(
-            result.messages.find(
-              (message) => message.action === "evaluation:complete",
-            ).summary.medianMs,
-            null,
-          );
+          assert.equal(result.finished.status, "completed");
         },
       );
       await t.test(
-        "the deadline also covers remaining images after receiving a first-image metric",
+        "missing final acknowledgement times out and skips the remaining measurements",
         async () => {
           const result = await runClient(
             server.port,
             {
               urls: [origin + "/timeout"],
               profiles: ["test"],
-              revisitCount: 1,
+              measurementCount: 2,
               trialTimeoutMs: 2500,
             },
-            { withholdCompletion: true },
+            { withholdMeasurementCompletion: true },
           );
-          const initial = result.messages.find(
-            (message) =>
-              message.action === "trial:saved" &&
-              message.result.phase === "initial",
-          ).result;
-          assert.equal(initial.status, "failed");
-          assert.equal(initial.firstImageMs, 1);
-          assert.equal(initial.allImagesMs, null);
-          assert.equal(initial.error, "trial_timeout");
+          const rows = result.messages
+            .filter((message) => message.action === "trial:saved")
+            .map((message) => message.result);
+          assert.equal(rows[0].phase, "warmup");
+          assert.equal(rows[0].status, "success");
+          assert.equal(rows[1].error, "trial_timeout");
+          assert.equal(rows[1].viewportMs, null);
+          assert.equal(rows[2].status, "skipped");
           assert.equal(
             result.messages.find(
-              (message) =>
-                message.action === "trial:saved" &&
-                message.result.phase === "revisit",
-            ).result.status,
-            "skipped",
+              (message) => message.action === "evaluation:complete",
+            ).summary.viewportMedianMs,
+            null,
           );
         },
       );
       await t.test(
-        "legacy first-image timing accepts a viewport drawn before LCP candidates",
+        "a failed warmup is recorded and excludes all subsequent measurements",
         async () => {
           const result = await runClient(
             server.port,
             {
-              urls: [origin + "/viewport-first"],
+              urls: [origin + "/decode-error"],
               profiles: ["test"],
-              revisitCount: 1,
+              measurementCount: 2,
               trialTimeoutMs: 20000,
             },
-            { viewportFirst: true },
+            { failWarmup: true },
           );
-          const revisit = result.messages.find(
-            (message) =>
-              message.action === "trial:saved" &&
-              message.result.phase === "revisit",
-          ).result;
-          assert.equal(revisit.status, "success");
-          assert.equal(revisit.firstImageIndex, revisit.imageCount);
-          assert.equal(revisit.firstImageMs, 100);
-          assert.equal(revisit.viewportMs, 100);
-          assert.equal(revisit.lcpImagesMs, 110);
+          const rows = result.messages
+            .filter((message) => message.action === "trial:saved")
+            .map((message) => message.result);
+          assert.equal(rows[0].error, "image_decode_failed");
+          assert.ok(
+            rows
+              .slice(1)
+              .every(
+                (row) =>
+                  row.status === "skipped" && row.error === "warmup_failed",
+              ),
+          );
         },
       );
       await t.test(
-        "viewport failure retains the independently completed LCP measurement",
+        "invalid completion counts fail the trial without producing an official median",
         async () => {
           const result = await runClient(
             server.port,
             {
-              urls: [origin + "/viewport-failure"],
+              urls: [origin + "/invalid"],
               profiles: ["test"],
-              revisitCount: 1,
+              measurementCount: 1,
               trialTimeoutMs: 20000,
             },
-            { failViewport: true },
+            { invalidCount: true },
           );
-          const revisit = result.messages.find(
-            (message) =>
-              message.action === "trial:saved" &&
-              message.result.phase === "revisit",
-          ).result;
-          assert.equal(revisit.status, "failed");
-          assert.equal(revisit.firstImageMs, 100);
-          assert.equal(revisit.lcpImagesMs, 110);
-          assert.equal(revisit.viewportMs, null);
-          const summary = result.messages.find(
-            (message) => message.action === "evaluation:complete",
-          ).summary;
-          assert.equal(summary.medianMs, 100);
-          assert.equal(summary.successfulCount, 1);
-          assert.equal(summary.viewportMedianMs, null);
-          assert.equal(summary.viewportSuccessfulCount, 0);
+          assert.equal(
+            result.messages.filter(
+              (message) => message.action === "trial:saved",
+            )[1].result.error,
+            "invalid_render_completion",
+          );
         },
       );
       await t.test(
-        "viewport is sent without a LCP notification, but the next trial still waits for final completion",
-        async () => {
-          const result = await runClient(
-            server.port,
-            {
-              urls: [origin + "/lcp-timeout"],
-              profiles: ["test"],
-              revisitCount: 1,
-              trialTimeoutMs: 2500,
-            },
-            { withholdLcpCompletion: true },
-          );
-          const trial = [...result.trials.values()].find(
-            (item) => item.phase === "revisit",
-          );
-          assert.ok(trial.images.length > 0);
-          assert.ok(trial.images.some((image) => image.kind === "viewport"));
-          const revisit = result.messages.find(
-            (message) =>
-              message.action === "trial:saved" &&
-              message.result.phase === "revisit",
-          ).result;
-          assert.equal(revisit.error, "trial_timeout");
-          assert.equal(revisit.lcpImagesMs, null);
-          assert.equal(revisit.viewportMs, null);
-        },
-      );
-      await t.test(
-        "manual Charles confirmation has no timeout, and an aborted run still exports results",
+        "manual Charles confirmation has no timeout and an aborted run exports CSV",
         async () => {
           const result = await runClient(
             server.port,
             {
               urls: [origin + "/abort"],
               profiles: ["test"],
-              revisitCount: 1,
-              trialTimeoutMs: 1000,
+              measurementCount: 1,
+              trialTimeoutMs: 50,
             },
-            { abortAtProfile: true },
+            { abortAtProfile: true, profileDelayMs: 150 },
           );
           assert.equal(result.finished.status, "aborted");
           assert.equal(result.trials.size, 0);
@@ -518,6 +461,7 @@ test(
         },
       );
     } finally {
+      releaseHeld();
       await server?.close();
       await new Promise((resolve) => fixture.close(resolve));
       await fs.rm(root, { recursive: true, force: true });

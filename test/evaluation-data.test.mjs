@@ -26,12 +26,12 @@ test("configuration validates URLs, counts, deadlines, and numeric results", () 
   const config = {
     urls: ["https://example.com/"],
     profiles: ["128kbps"],
-    revisitCount: 5,
+    measurementCount: 5,
     trialTimeoutMs: 60000,
   };
   assert.deepEqual(parseConfig(config), config);
   for (const change of [
-    { revisitCount: 0 },
+    { measurementCount: 0 },
     { urls: ["file:///tmp/a"] },
     { trialTimeoutMs: 0 },
     { profiles: [] },
@@ -40,22 +40,22 @@ test("configuration validates URLs, counts, deadlines, and numeric results", () 
   }
   assert.throws(() =>
     parseClientMessage({
-      action: "trial:metric",
+      action: "trial:complete",
       trialId: "a",
-      firstImageMs: NaN,
-      firstImageIndex: 1,
+      viewportMs: NaN,
+      renderedCount: 1,
     }),
   );
   assert.equal(median([5, 1, 3]), 3);
   assert.equal(median([4, 1, 3, 2]), 2.5);
 });
 
-test("one run keeps candidates isolated and exports only the n revisit values into each median", async () => {
+test("one run stores viewport measurements and excludes the warmup from complete and incomplete medians", async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "evaluation-data-"));
   const config = {
     urls: ["https://example.com/"],
-    profiles: ["128kbps", 'slow,"network"', "viewport failure"],
-    revisitCount: 5,
+    profiles: ["128kbps", 'slow,"network"'],
+    measurementCount: 5,
     trialTimeoutMs: 60000,
   };
   const store = await EvaluationStore.create(root, config, {
@@ -75,61 +75,35 @@ test("one run keeps candidates isolated and exports only the n revisit values in
       config.profiles[1],
       5,
     );
-    const third = await store.createEvaluation(
-      config.urls[0],
-      config.profiles[2],
-      5,
-    );
-    await store.saveCandidates(first.evaluationId, [
-      { url: config.urls[0], lcp: 100, xpath: "/early" },
-      { url: config.urls[0], lcp: 200, xpath: "/late" },
-    ]);
-    assert.deepEqual(
-      (await store.getCandidates(first.evaluationId)).map((c) => c.xpath),
-      ["/late", "/early"],
-    );
-    assert.deepEqual(await store.getCandidates(second.evaluationId), []);
-    for (const evaluation of [first, second, third]) {
+    for (const evaluation of [first, second]) {
       for (let index = 0; index <= 5; index++) {
-        const phase = index === 0 ? "initial" : "revisit";
+        const phase = index === 0 ? "warmup" : "measurement";
         const trialId = await store.beginTrial(
           evaluation.evaluationId,
           phase,
           index,
         );
-        const lcpFailed = evaluation === second && index === 3;
-        const failed = lcpFailed || (evaluation === third && index === 5);
+        const failed = evaluation === second && index === 3;
         await store.finishTrial({
           trialId,
           evaluationId: evaluation.evaluationId,
           phase,
-          visitIndex: index,
+          measurementIndex: index,
           finalUrl: config.urls[0],
           status: failed ? "failed" : "success",
-          firstImageMs: index === 0 ? 99999 : index * 100,
-          lcpImagesMs: index === 0 || lcpFailed ? null : index * 100 + 5,
-          viewportMs: failed ? null : 100000,
-          allImagesMs: failed ? null : 100000,
-          firstImageIndex: 1,
-          imageCount: index === 0 ? 1 : 3,
-          lcpImageCount: index === 0 ? 0 : 2,
+          viewportMs: failed ? null : index === 0 ? 99999 : index * 100,
+          imageCount: 1,
           error: failed ? "trial_timeout" : null,
         });
       }
     }
     const complete = await store.summarize(first);
-    assert.equal(complete.medianMs, 300);
+    assert.equal(complete.viewportMedianMs, 300);
     assert.equal(complete.successfulCount, 5);
-    assert.equal(complete.viewportMedianMs, 100000);
     const incomplete = await store.summarize(second);
-    assert.equal(incomplete.medianMs, null);
+    assert.equal(incomplete.viewportMedianMs, null);
     assert.equal(incomplete.successfulCount, 4);
     assert.equal(incomplete.status, "incomplete");
-    const viewportFailure = await store.summarize(third);
-    assert.equal(viewportFailure.medianMs, 300);
-    assert.equal(viewportFailure.successfulCount, 5);
-    assert.equal(viewportFailure.viewportSuccessfulCount, 4);
-    assert.equal(viewportFailure.viewportMedianMs, null);
     await store.finish("completed", null);
     const raw = await fs.readFile(
       path.join(store.directory, "measurements.csv"),
@@ -139,12 +113,14 @@ test("one run keeps candidates isolated and exports only the n revisit values in
       path.join(store.directory, "summary.csv"),
       "utf8",
     );
-    assert.equal(raw.trim().split("\r\n").length, 19);
+    assert.equal(raw.trim().split("\r\n").length, 13);
     assert.match(raw, /trial_timeout/);
-    assert.match(summary, /5,5,300,5,100000,complete/);
-    assert.match(summary, /5,4,,4,,incomplete/);
-    assert.match(summary, /5,5,300,4,,incomplete/);
+    assert.match(summary, /5,5,300,complete/);
+    assert.match(summary, /5,4,,incomplete/);
     assert.match(summary, /"slow,""network"""/);
+    assert.match(raw, /viewport/);
+    assert.match(raw, /warmup,0/);
+    assert.doesNotMatch(raw, /lcp/);
     assert.equal((await fs.readdir(root)).length, 1);
   } finally {
     await store.close();

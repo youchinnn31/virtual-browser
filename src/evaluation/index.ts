@@ -5,13 +5,10 @@ import puppeteer, { type BrowserContext, type Page } from "puppeteer";
 import sharp from "sharp";
 import WebSocket, { WebSocketServer } from "ws";
 import {
-  parseCandidate,
   parseClientMessage,
-  type Candidate,
   type ClientMessage,
   type DeviceInfo,
   type EvaluationConfig,
-  type ImageKind,
   type Phase,
   type ServerMessage,
   type TrialResult,
@@ -23,7 +20,7 @@ const TARGET_SIZE = (128 / 8) * 1000 * 4;
 const ROOT = path.resolve(__dirname, "..");
 const RESULTS = path.resolve(
   process.env["EVALUATION_RESULTS_DIR"] ??
-    path.join(ROOT, "..", "..", "evaluation", "results"),
+    path.join(ROOT, "..", "..", "evaluation", "results", "viewport"),
 );
 
 interface Waiter {
@@ -34,17 +31,11 @@ interface Waiter {
 
 interface ActiveTrial {
   id: string;
-  phase: Phase;
-  stage: ImageKind;
   abort: AbortController;
   sentCount: number;
-  lcpImageCount: number;
-  lcpImagesSent: boolean;
-  lcpImagesMs: number | null;
   viewportMs: number | null;
   imagesEnded: boolean;
   started: boolean;
-  metric: Extract<ClientMessage, { action: "trial:metric" }> | null;
 }
 
 interface Session {
@@ -125,40 +116,13 @@ function receive(session: Session, message: ClientMessage): void {
       trial.abort.abort(new Error(message.error));
       return;
     }
-    if (message.action === "trial:metric") {
-      if (
-        !trial.started ||
-        trial.metric ||
-        message.firstImageIndex > trial.sentCount
-      ) {
-        trial.abort.abort(new Error("invalid_first_image_result"));
-      } else {
-        trial.metric = message;
-      }
-      return;
-    }
-    if (message.action === "trial:lcp-complete") {
-      if (
-        trial.phase !== "revisit" ||
-        !trial.metric ||
-        !trial.lcpImagesSent ||
-        trial.lcpImagesMs !== null ||
-        message.renderedCount !== trial.lcpImageCount ||
-        message.lcpImagesMs < trial.metric.firstImageMs
-      ) {
-        trial.abort.abort(new Error("invalid_lcp_render_completion"));
-        return;
-      }
-      trial.lcpImagesMs = message.lcpImagesMs;
-    }
     if (message.action === "trial:complete") {
       if (
-        !trial.metric ||
+        !trial.started ||
         !trial.imagesEnded ||
-        trial.stage !== "viewport" ||
-        (trial.phase === "revisit" && trial.lcpImagesMs === null) ||
-        message.renderedCount !== trial.sentCount ||
-        message.viewportMs < trial.metric.firstImageMs
+        trial.viewportMs !== null ||
+        trial.sentCount !== 1 ||
+        message.renderedCount !== 1
       ) {
         trial.abort.abort(new Error("invalid_render_completion"));
         return;
@@ -181,35 +145,6 @@ async function compress(screenshot: Buffer): Promise<Buffer> {
   return screenshot;
 }
 
-async function sendTrialImage(
-  session: Session,
-  trial: ActiveTrial,
-  frame: {
-    screenshot: Buffer;
-    url: string;
-    kind: ImageKind;
-    x: number;
-    y: number;
-    xpath: string | null;
-  },
-): Promise<void> {
-  const image = await compress(frame.screenshot);
-  check(trial.abort.signal);
-  trial.sentCount++;
-  if (frame.kind === "lcp") trial.lcpImageCount++;
-  send(session.ws, {
-    action: "trial:image",
-    trialId: trial.id,
-    imageIndex: trial.sentCount,
-    kind: frame.kind,
-    url: frame.url,
-    img: image.toJSON(),
-    x: frame.x,
-    y: frame.y,
-    xpath: frame.xpath,
-  });
-}
-
 async function renderViewport(
   session: Session,
   page: Page,
@@ -217,125 +152,27 @@ async function renderViewport(
   url: string,
 ): Promise<void> {
   check(trial.abort.signal);
-  trial.stage = "viewport";
-  trial.imagesEnded = false;
   await page.evaluate(() => window.scrollTo(0, 0));
-  await sendTrialImage(session, trial, {
-    screenshot: await page.screenshot({ type: "webp" }),
-    url,
+  const image = await compress(await page.screenshot({ type: "webp" }));
+  check(trial.abort.signal);
+  trial.sentCount = 1;
+  send(session.ws, {
+    action: "trial:image",
+    trialId: trial.id,
+    imageIndex: 1,
     kind: "viewport",
+    url,
+    img: image.toJSON(),
     x: 0,
     y: 0,
-    xpath: null,
   });
   trial.imagesEnded = true;
   send(session.ws, {
     action: "trial:images-end",
     trialId: trial.id,
     kind: "viewport",
-    imageCount: trial.sentCount,
+    imageCount: 1,
   });
-}
-
-async function renderImages(
-  session: Session,
-  page: Page,
-  evaluation: EvaluationRecord,
-  phase: Phase,
-  trial: ActiveTrial,
-): Promise<string> {
-  const store = session.store!;
-  const collected: Candidate[] = [];
-  const collect = (msg: import("puppeteer").ConsoleMessage): void => {
-    if (msg.type() !== "trace") return;
-    try {
-      const candidate = parseCandidate(JSON.parse(msg.text()));
-      if (candidate) collected.push(candidate);
-    } catch {
-      // The target site may emit unrelated console.trace messages.
-    }
-  };
-  if (phase === "initial") page.on("console", collect);
-  try {
-    // Do not override Puppeteer's default navigation timeout.
-    await page.goto(evaluation.url, { waitUntil: "networkidle2" });
-    if (phase === "initial") {
-      // Drain entries already queued at the boundary, without another wait period.
-      await page.evaluate(() => {
-        const observer = (
-          window as Window & { __evaluationLcpObserver?: PerformanceObserver }
-        ).__evaluationLcpObserver;
-        if (observer) {
-          for (const entry of observer.takeRecords()) {
-            const candidate = entry as PerformanceEntry & { element?: Element };
-            const getXPath = (
-              window as Window & {
-                getElementXPath?: (element: Element) => string;
-              }
-            ).getElementXPath;
-            if (candidate.element && getXPath) {
-              console.trace(
-                JSON.stringify({
-                  url: location.href,
-                  lcp: entry.startTime,
-                  xpath: getXPath(candidate.element),
-                }),
-              );
-            }
-          }
-          observer.disconnect();
-        }
-      });
-    }
-  } finally {
-    page.off("console", collect);
-  }
-  check(trial.abort.signal);
-  const finalUrl = page.url();
-  if (phase === "initial") {
-    // Ignore candidates from a redirect document that is no longer displayed.
-    await store.saveCandidates(
-      evaluation.evaluationId,
-      collected.filter((candidate) => candidate.url === finalUrl),
-    );
-  }
-  if (phase === "initial") {
-    await renderViewport(session, page, trial, finalUrl);
-  } else {
-    const candidates = await store.getCandidates(evaluation.evaluationId);
-    if (candidates.length === 0) throw new Error("no_lcp_candidates");
-    for (const candidate of candidates) {
-      check(trial.abort.signal);
-      const [element] = await page.$x(candidate.xpath);
-      if (!element) continue;
-      try {
-        const box = await element.boundingBox();
-        if (!box) continue;
-        await sendTrialImage(session, trial, {
-          screenshot: await element.screenshot({ type: "webp" }),
-          url: finalUrl,
-          kind: "lcp",
-          x: box.x,
-          y: box.y,
-          xpath: candidate.xpath,
-        });
-      } finally {
-        await element.dispose();
-      }
-    }
-    if (trial.sentCount === 0) throw new Error("no_matching_lcp_element");
-    check(trial.abort.signal);
-    trial.imagesEnded = true;
-    trial.lcpImagesSent = true;
-    send(session.ws, {
-      action: "trial:images-end",
-      trialId: trial.id,
-      kind: "lcp",
-      imageCount: trial.sentCount,
-    });
-  }
-  check(trial.abort.signal);
-  return finalUrl;
 }
 
 async function runTrial(
@@ -343,35 +180,30 @@ async function runTrial(
   page: Page,
   evaluation: EvaluationRecord,
   phase: Phase,
-  visitIndex: number,
+  measurementIndex: number,
 ): Promise<TrialResult> {
   const store = session.store!;
   const trialId = await store.beginTrial(
     evaluation.evaluationId,
     phase,
-    visitIndex,
+    measurementIndex,
   );
   const trial: ActiveTrial = {
     id: trialId,
-    phase,
-    stage: phase === "initial" ? "viewport" : "lcp",
     abort: new AbortController(),
     sentCount: 0,
-    lcpImageCount: 0,
-    lcpImagesSent: false,
-    lcpImagesMs: null,
     viewportMs: null,
     imagesEnded: false,
     started: false,
-    metric: null,
   };
   session.trial = trial;
   const onAbort = (): void =>
     trial.abort.abort(signalError(session.abort.signal));
   session.abort.signal.addEventListener("abort", onAbort, { once: true });
   if (session.abort.signal.aborted) onAbort();
+  let pageClosing: Promise<void> | null = null;
   const closePage = (): void => {
-    void page.close().catch(() => undefined);
+    pageClosing = page.close().catch(() => undefined);
   };
   trial.abort.signal.addEventListener("abort", closePage, { once: true });
   const timer = setTimeout(
@@ -382,16 +214,11 @@ async function runTrial(
     trialId,
     evaluationId: evaluation.evaluationId,
     phase,
-    visitIndex,
+    measurementIndex,
     finalUrl: "",
     status: "failed",
-    firstImageMs: null,
-    lcpImagesMs: null,
     viewportMs: null,
-    allImagesMs: null,
-    firstImageIndex: null,
     imageCount: 0,
-    lcpImageCount: 0,
     error: null,
   };
   try {
@@ -408,7 +235,7 @@ async function runTrial(
       url: evaluation.url,
       profile: evaluation.profile,
       phase,
-      visitIndex,
+      measurementIndex,
       timeoutMs: session.config.trialTimeoutMs,
     });
     await start;
@@ -419,46 +246,32 @@ async function runTrial(
         message.action === "trial:complete" && message.trialId === trialId,
       trial.abort.signal,
     );
-    result.finalUrl = await renderImages(
-      session,
-      page,
-      evaluation,
-      phase,
-      trial,
-    );
-    if (phase === "revisit") {
-      // Match the normal server: queue viewport processing after LCP sends.
-      await renderViewport(session, page, trial, result.finalUrl);
-    }
+    // Keep Puppeteer's navigation timeout and wait for networkidle2 on every access.
+    await page.goto(evaluation.url, { waitUntil: "networkidle2" });
+    check(trial.abort.signal);
+    result.finalUrl = page.url();
+    await renderViewport(session, page, trial, result.finalUrl);
     const acknowledgement = await complete;
     check(trial.abort.signal);
-    if (acknowledgement.action !== "trial:complete" || !trial.metric)
+    if (
+      acknowledgement.action !== "trial:complete" ||
+      trial.viewportMs === null
+    )
       throw new Error("missing_render_result");
     result.status = "success";
-    result.allImagesMs = acknowledgement.viewportMs;
   } catch (error) {
     result.error = trial.abort.signal.aborted
       ? errorText(signalError(trial.abort.signal))
       : errorText(error);
-    if (
-      !trial.abort.signal.aborted &&
-      !["no_lcp_candidates", "no_matching_lcp_element"].includes(result.error)
-    ) {
+    if (!trial.abort.signal.aborted) {
       trial.abort.abort(error);
     }
   } finally {
     clearTimeout(timer);
     session.abort.signal.removeEventListener("abort", onAbort);
     trial.abort.signal.removeEventListener("abort", closePage);
-    if (trial.metric) {
-      result.firstImageMs = trial.metric.firstImageMs;
-      result.firstImageIndex = trial.metric.firstImageIndex;
-    }
     result.imageCount = trial.sentCount;
-    result.lcpImageCount = trial.lcpImageCount;
-    result.lcpImagesMs = trial.lcpImagesMs;
     result.viewportMs = trial.viewportMs;
-    result.allImagesMs = trial.viewportMs;
     if (result.finalUrl === "" && !page.isClosed())
       result.finalUrl = page.url();
     session.trial = null;
@@ -466,6 +279,7 @@ async function runTrial(
     if (!trial.abort.signal.aborted)
       trial.abort.abort(new Error("trial_finished"));
   }
+  await pageClosing;
   await store.finishTrial(result);
   notify(session.ws, { action: "trial:saved", result });
   return result;
@@ -477,26 +291,21 @@ async function skipTrials(
   startIndex: number,
   reason: string,
 ): Promise<void> {
-  for (let index = startIndex; index <= evaluation.revisitCount; index++) {
+  for (let index = startIndex; index <= evaluation.measurementCount; index++) {
     const trialId = await session.store!.beginTrial(
       evaluation.evaluationId,
-      "revisit",
+      "measurement",
       index,
     );
     const result: TrialResult = {
       trialId,
       evaluationId: evaluation.evaluationId,
-      phase: "revisit",
-      visitIndex: index,
+      phase: "measurement",
+      measurementIndex: index,
       finalUrl: "",
       status: "skipped",
-      firstImageMs: null,
-      lcpImagesMs: null,
       viewportMs: null,
-      allImagesMs: null,
-      firstImageIndex: null,
       imageCount: 0,
-      lcpImageCount: 0,
       error: reason,
     };
     await session.store!.finishTrial(result);
@@ -508,7 +317,6 @@ async function runEvaluation(
   session: Session,
   context: BrowserContext,
   evaluation: EvaluationRecord,
-  lcpScript: string,
 ): Promise<void> {
   const page = await context.newPage();
   await page.setBypassCSP(true);
@@ -520,23 +328,19 @@ async function runEvaluation(
     deviceScaleFactor: 1,
     isMobile: true,
   });
-  // Reuse lcp.js and expose its observer only to freeze the initial snapshot.
-  await page.evaluateOnNewDocument(
-    lcpScript + "\nwindow.__evaluationLcpObserver = observer;",
-  );
   try {
-    const initial = await runTrial(session, page, evaluation, "initial", 0);
-    if (initial.status !== "success") {
-      await skipTrials(session, evaluation, 1, "initial_access_failed");
+    const warmup = await runTrial(session, page, evaluation, "warmup", 0);
+    if (warmup.status !== "success") {
+      await skipTrials(session, evaluation, 1, "warmup_failed");
       return;
     }
-    for (let index = 1; index <= evaluation.revisitCount; index++) {
+    for (let index = 1; index <= evaluation.measurementCount; index++) {
       check(session.abort.signal);
       const result = await runTrial(
         session,
         page,
         evaluation,
-        "revisit",
+        "measurement",
         index,
       );
       if (result.status !== "success" && page.isClosed()) {
@@ -566,7 +370,6 @@ async function main(): Promise<void> {
     ignoreHTTPSErrors: true,
     args,
   });
-  const lcpScript = await fs.readFile(path.join(ROOT, "lcp.js"), "utf8");
   const buildInfo: unknown = JSON.parse(
     await fs.readFile(path.join(ROOT, "build-info.json"), "utf8"),
   );
@@ -626,8 +429,9 @@ async function main(): Promise<void> {
           imageSizeBudgetBytes: TARGET_SIZE,
           throttling: "external-charles",
           navigationWaitUntil: "networkidle2",
-          renderingPolicy: "legacy-load-completion-order",
-          protocolVersion: 2,
+          renderingPolicy: "viewport-only",
+          warmupCount: 1,
+          protocolVersion: 3,
         },
       );
       current.store = store;
@@ -660,11 +464,11 @@ async function main(): Promise<void> {
           const evaluation = await store.createEvaluation(
             url,
             profile,
-            current.config.revisitCount,
+            current.config.measurementCount,
           );
           const context = await browser.createIncognitoBrowserContext();
           try {
-            await runEvaluation(current, context, evaluation, lcpScript);
+            await runEvaluation(current, context, evaluation);
           } finally {
             await context.close().catch(() => undefined);
             const summary = await store.summarize(evaluation);

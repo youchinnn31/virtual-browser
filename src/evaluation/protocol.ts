@@ -1,7 +1,7 @@
 export interface EvaluationConfig {
   urls: string[];
   profiles: string[];
-  revisitCount: number;
+  measurementCount: number;
   trialTimeoutMs: number;
 }
 
@@ -12,30 +12,18 @@ export interface DeviceInfo {
   devicePixelRatio: number;
 }
 
-export type Phase = "initial" | "revisit";
-export type ImageKind = "lcp" | "viewport";
+export type Phase = "warmup" | "measurement";
 export type TrialStatus = "success" | "failed" | "skipped";
-
-export interface Candidate {
-  url: string;
-  lcp: number;
-  xpath: string;
-}
 
 export interface TrialResult {
   trialId: string;
   evaluationId: string;
   phase: Phase;
-  visitIndex: number;
+  measurementIndex: number;
   finalUrl: string;
   status: TrialStatus;
-  firstImageMs: number | null;
-  lcpImagesMs: number | null;
   viewportMs: number | null;
-  allImagesMs: number | null;
-  firstImageIndex: number | null;
   imageCount: number;
-  lcpImageCount: number;
   error: string | null;
 }
 
@@ -43,10 +31,9 @@ export interface Summary {
   evaluationId: string;
   url: string;
   profile: string;
-  revisitCount: number;
+  method: "viewport";
+  measurementCount: number;
   successfulCount: number;
-  medianMs: number | null;
-  viewportSuccessfulCount: number;
   viewportMedianMs: number | null;
   status: "complete" | "incomplete";
 }
@@ -56,18 +43,6 @@ export type ClientMessage =
   | { action: "run:abort"; reason: string }
   | { action: "profile:confirmed"; runId: string; profileIndex: number }
   | { action: "trial:start"; trialId: string }
-  | {
-      action: "trial:metric";
-      trialId: string;
-      firstImageMs: number;
-      firstImageIndex: number;
-    }
-  | {
-      action: "trial:lcp-complete";
-      trialId: string;
-      lcpImagesMs: number;
-      renderedCount: number;
-    }
   | {
       action: "trial:complete";
       trialId: string;
@@ -97,24 +72,23 @@ export type ServerMessage =
       url: string;
       profile: string;
       phase: Phase;
-      visitIndex: number;
+      measurementIndex: number;
       timeoutMs: number;
     }
   | {
       action: "trial:image";
       trialId: string;
       imageIndex: number;
-      kind: ImageKind;
+      kind: "viewport";
       url: string;
       img: { type: "Buffer"; data: number[] };
       x: number;
       y: number;
-      xpath: string | null;
     }
   | {
       action: "trial:images-end";
       trialId: string;
-      kind: ImageKind;
+      kind: "viewport";
       imageCount: number;
     }
   | { action: "trial:saved"; result: TrialResult }
@@ -182,7 +156,7 @@ export function parseConfig(value: unknown): EvaluationConfig {
   return {
     urls,
     profiles: strings(input["profiles"], "Charlesの通信条件名"),
-    revisitCount: integer(input["revisitCount"], "再アクセス回数", 1),
+    measurementCount: integer(input["measurementCount"], "計測回数", 1),
     trialTimeoutMs,
   };
 }
@@ -222,20 +196,6 @@ export function parseClientMessage(value: unknown): ClientMessage {
       };
     case "trial:start":
       return { action, trialId: text(input["trialId"], "試行ID") };
-    case "trial:metric":
-      return {
-        action,
-        trialId: text(input["trialId"], "試行ID"),
-        firstImageMs: positive(input["firstImageMs"], "初回画像描画時間"),
-        firstImageIndex: integer(input["firstImageIndex"], "画像番号", 1),
-      };
-    case "trial:lcp-complete":
-      return {
-        action,
-        trialId: text(input["trialId"], "試行ID"),
-        lcpImagesMs: positive(input["lcpImagesMs"], "全LCP候補描画時間"),
-        renderedCount: integer(input["renderedCount"], "描画枚数", 1),
-      };
     case "trial:complete":
       return {
         action,
@@ -251,18 +211,5 @@ export function parseClientMessage(value: unknown): ClientMessage {
       };
     default:
       throw new Error("未対応のメッセージです。");
-  }
-}
-
-export function parseCandidate(value: unknown): Candidate | null {
-  try {
-    const input = record(value);
-    return {
-      url: text(input["url"], "URL"),
-      lcp: positive(input["lcp"], "LCP候補の時刻"),
-      xpath: text(input["xpath"], "XPath"),
-    };
-  } catch {
-    return null;
   }
 }

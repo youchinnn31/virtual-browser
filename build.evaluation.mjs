@@ -14,7 +14,6 @@ await build({
   packages: "external",
   outfile: path.join(output, "server/index.js"),
 });
-await fs.copyFile(path.join(root, "lcp.js"), path.join(output, "lcp.js"));
 await build({
   entryPoints: [path.join(root, "src/client/evaluation/index.ts")],
   bundle: true,

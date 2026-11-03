@@ -30,7 +30,7 @@ function canvasGeometry() {
 }
 
 test(
-  "mobile evaluation preserves the normal page geometry, renders images, exports medians, and aborts when backgrounded",
+  "viewport evaluation preserves normal geometry, measures one image per access, excludes warmup, and aborts when backgrounded",
   { timeout: 90000 },
   async () => {
     const root = await fs.mkdtemp(
@@ -161,12 +161,12 @@ test(
           ...JSON.parse(event.response.payloadData),
         });
       });
-      // Make LCP images slower than viewport delivery, then observe
-      // actual Canvas draws without depending on the client's private state.
+      // Observe actual Canvas draws and request times independently of client state.
       await page.evaluateOnNewDocument(() => {
         const frames = [];
         const images = new WeakMap();
         window.__evaluationDraws = [];
+        window.__evaluationStarts = {};
         const NativeSocket = WebSocket;
         window.WebSocket = class extends NativeSocket {
           constructor(...args) {
@@ -175,6 +175,12 @@ test(
               const message = JSON.parse(event.data);
               if (message.action === "trial:image") frames.push(message);
             });
+          }
+          send(data) {
+            const message = JSON.parse(data);
+            if (message.action === "trial:start")
+              window.__evaluationStarts[message.trialId] = performance.now();
+            super.send(data);
           }
         };
         const source = Object.getOwnPropertyDescriptor(
@@ -186,9 +192,7 @@ test(
           set(value) {
             const frame = value.startsWith("blob:") ? frames.shift() : null;
             if (frame) images.set(this, frame);
-            if (frame?.kind === "lcp") {
-              setTimeout(() => source.set.call(this, value), 750);
-            } else source.set.call(this, value);
+            source.set.call(this, value);
           },
         });
         const draw = CanvasRenderingContext2D.prototype.drawImage;
@@ -200,6 +204,8 @@ test(
               trialId: frame.trialId,
               kind: frame.kind,
               imageIndex: frame.imageIndex,
+              elapsed:
+                performance.now() - window.__evaluationStarts[frame.trialId],
             });
           return result;
         };
@@ -301,66 +307,27 @@ test(
         await page.$$eval("#summaries tr", (rows) =>
           rows.map((row) => row.dataset.status),
         ),
-        ["complete", "incomplete"],
+        ["complete", "complete"],
       );
-      const metrics = sent.filter(
-        (message) => message.action === "trial:metric",
-      );
-      const complete = sent.filter(
+      const completed = sent.filter(
         (message) => message.action === "trial:complete",
       );
-      assert.equal(metrics.length, 7);
-      assert.equal(complete.length, 7);
-      for (const completed of complete) {
-        const metric = metrics.find(
-          (message) => message.trialId === completed.trialId,
-        );
-        assert.ok(completed.viewportMs >= metric.firstImageMs);
-        assert.ok(sent.indexOf(metric) < sent.indexOf(completed));
-      }
-      const lcpCompleted = sent.filter(
-        (message) => message.action === "trial:lcp-complete",
-      );
-      assert.equal(lcpCompleted.length, 5);
+      assert.equal(completed.length, 12);
       const draws = await page.evaluate(() => window.__evaluationDraws);
-      for (const lcp of lcpCompleted) {
-        const viewport = events.find(
-          (message) =>
-            message.direction === "received" &&
-            message.action === "trial:image" &&
-            message.kind === "viewport" &&
-            message.trialId === lcp.trialId,
+      assert.equal(draws.length, 12);
+      for (const result of completed) {
+        const trialDraws = draws.filter(
+          (draw) => draw.trialId === result.trialId,
         );
-        const acknowledged = events.find(
-          (message) =>
-            message.direction === "sent" &&
-            message.action === "trial:lcp-complete" &&
-            message.trialId === lcp.trialId,
-        );
-        assert.ok(viewport);
+        assert.equal(trialDraws.length, 1);
+        assert.equal(trialDraws[0].kind, "viewport");
+        assert.equal(trialDraws[0].imageIndex, 1);
+        assert.equal(result.renderedCount, 1);
+        assert.ok(result.viewportMs >= trialDraws[0].elapsed);
         assert.ok(
-          events.indexOf(viewport) < events.indexOf(acknowledged),
-          "viewport delivery must not wait for LCP rendering",
+          trialDraws[0].elapsed >= 400,
+          "the client duration must include navigation and networkidle2",
         );
-        const trialDraws = draws.filter((draw) => draw.trialId === lcp.trialId);
-        assert.equal(trialDraws.length, lcp.renderedCount + 1);
-        assert.ok(trialDraws.slice(1).every((draw) => draw.kind === "lcp"));
-        assert.equal(
-          trialDraws[0].kind,
-          "viewport",
-          "legacy rendering must draw the ready viewport without waiting for delayed LCP images",
-        );
-        const complete = sent.find(
-          (message) =>
-            message.action === "trial:complete" &&
-            message.trialId === lcp.trialId,
-        );
-        assert.ok(complete.viewportMs < lcp.lcpImagesMs);
-        const metric = metrics.find(
-          (message) => message.trialId === lcp.trialId,
-        );
-        assert.equal(metric.firstImageIndex, trialDraws[0].imageIndex);
-        assert.equal(metric.firstImageMs, complete.viewportMs);
       }
       const link = await page.$eval(
         '#downloads a[href$="summary.csv"]',
@@ -384,45 +351,49 @@ test(
           "SELECT * FROM evaluations ORDER BY rowid",
         );
         const values = await db.all(
-          "SELECT * FROM trials WHERE evaluation_id = ? AND phase = 'revisit' ORDER BY first_image_ms",
+          "SELECT * FROM trials WHERE evaluation_id = ? AND phase = 'measurement' ORDER BY viewport_ms",
           evaluations[0].id,
         );
         assert.equal(values.length, 5);
-        assert.equal(evaluations[0].median_ms, values[2].first_image_ms);
-        assert.equal(
-          evaluations[0].viewport_median_ms,
-          [...values].sort((a, b) => a.viewport_ms - b.viewport_ms)[2]
-            .viewport_ms,
-        );
+        assert.equal(evaluations[0].viewport_median_ms, values[2].viewport_ms);
         assert.ok(
           values.every(
-            (value) =>
-              value.lcp_image_count >= 2 &&
-              value.image_count === value.lcp_image_count + 1 &&
-              value.viewport_ms < value.lcp_images_ms &&
-              value.first_image_ms === value.viewport_ms &&
-              value.lcp_images_ms >= value.first_image_ms,
+            (value) => value.image_count === 1 && value.status === "success",
           ),
-          "all saved LCP candidates must be rendered: " +
-            JSON.stringify({
-              candidates: await db.all(
-                "SELECT * FROM candidates WHERE evaluation_id = ?",
-                evaluations[0].id,
-              ),
-              imageCounts: values.map((value) => value.image_count),
-            }),
         );
-        assert.equal(evaluations[1].median_ms, null);
-        const missing = await db.all(
-          "SELECT * FROM trials WHERE evaluation_id = ? AND phase = 'revisit'",
+        const warmups = await db.all(
+          "SELECT * FROM trials WHERE phase = 'warmup'",
+        );
+        assert.equal(warmups.length, 2);
+        assert.ok(
+          warmups.every(
+            (value) => value.measurement_index === 0 && value.image_count === 1,
+          ),
+        );
+        assert.equal(
+          await db.get(
+            "SELECT name FROM sqlite_master WHERE name = 'candidates'",
+          ),
+          undefined,
+        );
+        const changedDom = await db.all(
+          "SELECT * FROM trials WHERE evaluation_id = ? AND phase = 'measurement'",
           evaluations[1].id,
         );
+        assert.equal(changedDom.length, 5);
         assert.ok(
-          missing.every(
-            (value) => value.status === "failed" && value.image_count === 0,
+          changedDom.every(
+            (value) => value.status === "success" && value.image_count === 1,
           ),
         );
         const run = await db.get("SELECT * FROM runs");
+        assert.equal(run.method, "viewport");
+        assert.equal(JSON.parse(run.config_json).measurementCount, 5);
+        assert.equal(
+          JSON.parse(run.metadata_json).renderingPolicy,
+          "viewport-only",
+        );
+        assert.equal(JSON.parse(run.metadata_json).warmupCount, 1);
         assert.equal(JSON.parse(run.device_json).devicePixelRatio, 2);
         assert.equal(JSON.parse(run.device_json).width, legacyDevice.width);
         assert.equal(JSON.parse(run.device_json).height, legacyDevice.height);
