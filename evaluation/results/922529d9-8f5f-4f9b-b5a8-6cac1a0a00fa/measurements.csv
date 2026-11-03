@@ -1,0 +1,43 @@
+﻿evaluation_id,url,charles_profile,trial_id,phase,visit_index,final_url,status,first_image_ms,lcp_images_ms,viewport_ms,all_images_ms,first_image_index,image_count,lcp_image_count,error
+2f2763b7-724e-4dfe-9aae-eed3694ff617,https://tenki.jp/lite/,1024kbps,cfcb8c62-9041-4d83-8825-a225cac23010,initial,0,https://tenki.jp/lite/,success,7465.200000017881,,7465.200000017881,7465.200000017881,1,1,0,
+2f2763b7-724e-4dfe-9aae-eed3694ff617,https://tenki.jp/lite/,1024kbps,0dc9c3d3-5802-47aa-92d5-35aa230aed83,revisit,1,https://tenki.jp/lite/,success,5497.0999999940395,5497.0999999940395,6541.799999982119,6541.799999982119,1,2,1,
+2f2763b7-724e-4dfe-9aae-eed3694ff617,https://tenki.jp/lite/,1024kbps,7a51c614-de20-4cee-8665-dcc3e0a52e68,revisit,2,https://tenki.jp/lite/,success,3976.9000000059605,3976.9000000059605,5478.5999999940395,5478.5999999940395,1,2,1,
+2f2763b7-724e-4dfe-9aae-eed3694ff617,https://tenki.jp/lite/,1024kbps,3ba5d3b2-d201-43e5-a2f1-d079d65a1af0,revisit,3,https://tenki.jp/lite/,success,7045.199999988079,7045.199999988079,8484,8484,1,2,1,
+2f2763b7-724e-4dfe-9aae-eed3694ff617,https://tenki.jp/lite/,1024kbps,6c736eb3-0995-4d29-a2a4-1e908207b4c2,revisit,4,https://tenki.jp/lite/,failed,,,,,,0,0,Navigation timeout of 30000 ms exceeded
+2f2763b7-724e-4dfe-9aae-eed3694ff617,https://tenki.jp/lite/,1024kbps,701432ac-d398-4e7e-ae6a-bab1c2bf5aef,revisit,5,,failed,,,,,,0,0,Requesting main frame too early!
+ab97906b-5463-4c30-84e5-6188de9755bb,https://www.instagram.com/,1024kbps,f7687a0e-0a58-4165-a708-8d84c94f29a7,initial,0,https://www.instagram.com/,success,2517.100000023842,,2517.100000023842,2517.100000023842,1,1,0,
+ab97906b-5463-4c30-84e5-6188de9755bb,https://www.instagram.com/,1024kbps,465867c0-5648-4717-bf77-47e9c4735171,revisit,1,https://www.instagram.com/,success,1576,1766.0999999940395,2648.7999999821186,2648.7999999821186,1,3,2,
+ab97906b-5463-4c30-84e5-6188de9755bb,https://www.instagram.com/,1024kbps,1676627d-39dd-4821-ba1a-e64845717a0b,revisit,2,https://www.instagram.com/,success,1418.5999999940395,1669.5999999940395,2569.399999976158,2569.399999976158,1,3,2,
+ab97906b-5463-4c30-84e5-6188de9755bb,https://www.instagram.com/,1024kbps,294c5f42-f1a2-4c5b-ae6d-103db1d755b2,revisit,3,https://www.instagram.com/,success,1567.4000000059605,1762.4000000059605,2579.5,2579.5,1,3,2,
+ab97906b-5463-4c30-84e5-6188de9755bb,https://www.instagram.com/,1024kbps,aef6ae80-2b9f-41ac-a484-fafa70aa787b,revisit,4,https://www.instagram.com/,success,1302.199999988079,1541.8999999761581,2310.5999999940395,2310.5999999940395,1,3,2,
+ab97906b-5463-4c30-84e5-6188de9755bb,https://www.instagram.com/,1024kbps,dc706ec5-61f8-48b3-9f5d-94d9cd0e5c6b,revisit,5,https://www.instagram.com/,success,1449.199999988079,1650.2999999821186,2430.0999999940395,2430.0999999940395,1,3,2,
+f21e8858-e5f4-4f05-a85a-6c03941eaf0c,https://portal.auone.jp/,1024kbps,8f8d010c-dba2-42ce-8d55-851391afba08,initial,0,https://portal.auone.jp/,success,6535.5,,6535.5,6535.5,1,1,0,
+f21e8858-e5f4-4f05-a85a-6c03941eaf0c,https://portal.auone.jp/,1024kbps,9d9a0763-9f83-4569-929c-00d89cf3a6e6,revisit,1,https://portal.auone.jp/,failed,,,,,,0,0,Navigation timeout of 30000 ms exceeded
+f21e8858-e5f4-4f05-a85a-6c03941eaf0c,https://portal.auone.jp/,1024kbps,2bed4d9c-5ff3-4259-a81f-70db449c44dd,revisit,2,,failed,,,,,,0,0,Requesting main frame too early!
+f21e8858-e5f4-4f05-a85a-6c03941eaf0c,https://portal.auone.jp/,1024kbps,a50a75b7-5c26-4864-a355-341f11af37c1,revisit,3,,skipped,,,,,,0,0,evaluation_browser_closed
+f21e8858-e5f4-4f05-a85a-6c03941eaf0c,https://portal.auone.jp/,1024kbps,7fe37088-d706-4eee-bb81-5ce0b285f32b,revisit,4,,skipped,,,,,,0,0,evaluation_browser_closed
+f21e8858-e5f4-4f05-a85a-6c03941eaf0c,https://portal.auone.jp/,1024kbps,86d7f03f-4c02-4ce6-9339-0b9d5448da4b,revisit,5,,skipped,,,,,,0,0,evaluation_browser_closed
+bf16fde4-e83e-460a-840a-f727277009ed,https://sp.nicovideo.jp/,1024kbps,3f275cdc-5086-4167-b564-cc80654a21e5,initial,0,https://sp.nicovideo.jp/,failed,,,,,,0,0,Navigation timeout of 30000 ms exceeded
+bf16fde4-e83e-460a-840a-f727277009ed,https://sp.nicovideo.jp/,1024kbps,9fedec71-1937-49d8-992c-0d6a1b484445,revisit,1,,skipped,,,,,,0,0,initial_access_failed
+bf16fde4-e83e-460a-840a-f727277009ed,https://sp.nicovideo.jp/,1024kbps,9d4b5b91-52ca-452c-95e8-e14e6d60340e,revisit,2,,skipped,,,,,,0,0,initial_access_failed
+bf16fde4-e83e-460a-840a-f727277009ed,https://sp.nicovideo.jp/,1024kbps,96f5ee89-63ce-4b6d-ae2a-9085f4faf76a,revisit,3,,skipped,,,,,,0,0,initial_access_failed
+bf16fde4-e83e-460a-840a-f727277009ed,https://sp.nicovideo.jp/,1024kbps,0e57275b-1dab-48d6-a9aa-a2ee98d56092,revisit,4,,skipped,,,,,,0,0,initial_access_failed
+bf16fde4-e83e-460a-840a-f727277009ed,https://sp.nicovideo.jp/,1024kbps,b503f5a6-3ee2-4ba9-a099-7ea53271122f,revisit,5,,skipped,,,,,,0,0,initial_access_failed
+394c1c21-63e3-4bd0-9b10-70e59aac450d,https://weathernews.jp/,1024kbps,510379c3-948b-48f2-a615-0258f7a81b29,initial,0,https://weathernews.jp/,success,6776.5,,6776.5,6776.5,1,1,0,
+394c1c21-63e3-4bd0-9b10-70e59aac450d,https://weathernews.jp/,1024kbps,e3c02119-2257-4394-b804-610ca6cfd553,revisit,1,https://weathernews.jp/,success,5827.9000000059605,7387.5999999940395,9092.40000000596,9092.40000000596,1,4,3,
+394c1c21-63e3-4bd0-9b10-70e59aac450d,https://weathernews.jp/,1024kbps,d7d5658d-305e-4855-bd2b-0d1baefee793,revisit,2,https://weathernews.jp/,success,5221.4000000059605,6742,8469.09999999404,8469.09999999404,1,4,3,
+394c1c21-63e3-4bd0-9b10-70e59aac450d,https://weathernews.jp/,1024kbps,e62167d5-e9fb-40b7-9183-b5db10c3726c,revisit,3,https://weathernews.jp/,success,6138.4000000059605,7789.0999999940395,9459.300000011921,9459.300000011921,1,4,3,
+394c1c21-63e3-4bd0-9b10-70e59aac450d,https://weathernews.jp/,1024kbps,db73c059-b3d3-4528-9865-c3d43b422bea,revisit,4,https://weathernews.jp/,failed,,,,,,0,0,Navigation timeout of 30000 ms exceeded
+394c1c21-63e3-4bd0-9b10-70e59aac450d,https://weathernews.jp/,1024kbps,e97ea311-d78f-4da1-be5d-63600cb9a64c,revisit,5,,failed,,,,,,0,0,Protocol error (Page.navigate): Session closed. Most likely the page has been closed.
+ecd07d4f-7183-4294-a893-91c5fba28bd5,https://syosetu.com/,1024kbps,879671d8-6f2f-434f-9c64-d341cdea1920,initial,0,https://syosetu.com/,failed,,,,,,0,0,Navigation timeout of 30000 ms exceeded
+ecd07d4f-7183-4294-a893-91c5fba28bd5,https://syosetu.com/,1024kbps,f6b03e41-440f-4a56-9c5c-adb17af9ea45,revisit,1,,skipped,,,,,,0,0,initial_access_failed
+ecd07d4f-7183-4294-a893-91c5fba28bd5,https://syosetu.com/,1024kbps,54687db5-710f-4d61-8ccd-1a8c98cb6b7a,revisit,2,,skipped,,,,,,0,0,initial_access_failed
+ecd07d4f-7183-4294-a893-91c5fba28bd5,https://syosetu.com/,1024kbps,d200f3c9-4e13-42a9-b5b2-326a290678c7,revisit,3,,skipped,,,,,,0,0,initial_access_failed
+ecd07d4f-7183-4294-a893-91c5fba28bd5,https://syosetu.com/,1024kbps,a4ecf984-b88f-49ff-8340-7879b4e4b67e,revisit,4,,skipped,,,,,,0,0,initial_access_failed
+ecd07d4f-7183-4294-a893-91c5fba28bd5,https://syosetu.com/,1024kbps,6f803d7b-6356-46ff-a48b-643d47b53b1b,revisit,5,,skipped,,,,,,0,0,initial_access_failed
+f9affc3b-ab77-471b-9756-5c9885ae6c7e,https://www.mercari.com/,1024kbps,032fa124-3363-4d90-9e41-6be16de1f033,initial,0,https://www.mercari.com/,success,4941,,4941,4941,1,1,0,
+f9affc3b-ab77-471b-9756-5c9885ae6c7e,https://www.mercari.com/,1024kbps,1f6a97a0-5aed-4894-8eda-e577486e3a4c,revisit,1,https://www.mercari.com/,failed,,,,,,0,0,no_matching_lcp_element
+f9affc3b-ab77-471b-9756-5c9885ae6c7e,https://www.mercari.com/,1024kbps,03e925fb-bfc3-4aa1-b76b-837678ee070f,revisit,2,https://www.mercari.com/,failed,,,,,,0,0,no_matching_lcp_element
+f9affc3b-ab77-471b-9756-5c9885ae6c7e,https://www.mercari.com/,1024kbps,450d59f6-797e-4e69-af24-05cc2c6bdc7f,revisit,3,https://www.mercari.com/,failed,,,,,,0,0,no_matching_lcp_element
+f9affc3b-ab77-471b-9756-5c9885ae6c7e,https://www.mercari.com/,1024kbps,b8a477fb-68ff-4913-8207-a0913d4eb3f0,revisit,4,https://www.mercari.com/,failed,,,,,,0,0,no_matching_lcp_element
+f9affc3b-ab77-471b-9756-5c9885ae6c7e,https://www.mercari.com/,1024kbps,ceb6e541-6335-46ad-87f3-d0d5f8c110a2,revisit,5,https://www.mercari.com/,failed,,,,,,0,0,no_matching_lcp_element

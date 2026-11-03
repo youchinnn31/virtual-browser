@@ -1,0 +1,8 @@
+﻿evaluation_id,url,charles_profile,revisit_count,successful_count,median_client_lcp_image_ms,viewport_successful_count,median_viewport_ms,status
+2f2763b7-724e-4dfe-9aae-eed3694ff617,https://tenki.jp/lite/,1024kbps,5,3,,3,,incomplete
+ab97906b-5463-4c30-84e5-6188de9755bb,https://www.instagram.com/,1024kbps,5,5,1449.199999988079,5,2569.399999976158,complete
+f21e8858-e5f4-4f05-a85a-6c03941eaf0c,https://portal.auone.jp/,1024kbps,5,0,,0,,incomplete
+bf16fde4-e83e-460a-840a-f727277009ed,https://sp.nicovideo.jp/,1024kbps,5,0,,0,,incomplete
+394c1c21-63e3-4bd0-9b10-70e59aac450d,https://weathernews.jp/,1024kbps,5,3,,3,,incomplete
+ecd07d4f-7183-4294-a893-91c5fba28bd5,https://syosetu.com/,1024kbps,5,0,,0,,incomplete
+f9affc3b-ab77-471b-9756-5c9885ae6c7e,https://www.mercari.com/,1024kbps,5,0,,0,,incomplete
