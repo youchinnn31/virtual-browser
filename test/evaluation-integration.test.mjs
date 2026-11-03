@@ -9,16 +9,20 @@ import { setTimeout as delay } from "node:timers/promises";
 import { test } from "node:test";
 import WebSocket from "ws";
 
-async function startServer(root) {
-  const child = spawn(process.execPath, ["dist/evaluation/server/index.js"], {
-    env: { ...process.env, EVALUATION_PORT: "0", EVALUATION_RESULTS_DIR: root },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+async function startServer(root, cwd = process.cwd()) {
+  const env = { ...process.env, EVALUATION_PORT: "0" };
+  if (root === undefined) delete env.EVALUATION_RESULTS_DIR;
+  else env.EVALUATION_RESULTS_DIR = root;
+  const child = spawn(
+    process.execPath,
+    [path.resolve("dist/evaluation/server/index.js")],
+    { cwd, env, stdio: ["ignore", "pipe", "pipe"] },
+  );
   let logs = "";
   child.stderr.on("data", (chunk) => {
     logs += chunk;
   });
-  const port = await new Promise((resolve, reject) => {
+  const address = await new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       child.kill("SIGTERM");
       reject(new Error("Server startup timed out: " + logs));
@@ -33,12 +37,13 @@ async function startServer(root) {
       for (const line of lines.split("\n")) {
         if (!line.includes('"evaluation:listening"')) continue;
         clearTimeout(timer);
-        resolve(JSON.parse(line).port);
+        resolve(JSON.parse(line));
       }
     });
   });
   return {
-    port,
+    port: address.port,
+    resultsDirectory: address.resultsDirectory,
     async close() {
       if (child.exitCode !== null) return;
       const exited = once(child, "exit");
@@ -257,10 +262,25 @@ test(
     const origin = `http://127.0.0.1:${fixture.address().port}`;
     let server;
     try {
-      server = await startServer(root);
+      server = await startServer(root, root);
+      assert.equal(server.resultsDirectory, root);
       assert.equal(
         (await fetch(`http://127.0.0.1:${server.port}/health`)).status,
         200,
+      );
+      await t.test(
+        "the default results directory stays in the project when launched from another folder",
+        async () => {
+          const defaultServer = await startServer(undefined, root);
+          try {
+            assert.equal(
+              defaultServer.resultsDirectory,
+              path.resolve("evaluation/results"),
+            );
+          } finally {
+            await defaultServer.close();
+          }
+        },
       );
       await t.test(
         "n=5 runs six visits per evaluation and excludes the viewport value from the median",
@@ -276,6 +296,13 @@ test(
             { injectStaleMessage: true },
           );
           assert.equal(result.finished.status, "completed");
+          const created = result.messages.find(
+            (message) => message.action === "run:created",
+          );
+          assert.equal(
+            created.resultsDirectory,
+            path.join(root, result.finished.runId),
+          );
           assert.equal(result.trials.size, 24);
           for (const trial of result.trials.values()) {
             assert.ok(trial.images.length > 0);
@@ -313,6 +340,10 @@ test(
           assert.equal(
             (await summaryFile.text()).trim().split("\r\n").length,
             5,
+          );
+          await fs.access(path.join(created.resultsDirectory, "summary.csv"));
+          await fs.access(
+            path.join(created.resultsDirectory, "measurements.csv"),
           );
         },
       );

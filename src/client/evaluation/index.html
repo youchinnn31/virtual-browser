@@ -148,6 +148,9 @@
         font-size: 0.85rem;
         color: #465361;
       }
+      #evaluation-controls #results-directory {
+        overflow-wrap: anywhere;
+      }
       #evaluation-controls[hidden],
       #evaluation-controls [hidden] {
         display: none !important;
@@ -254,6 +257,8 @@ https://www.mercari.com/</textarea
           </button>
         </section>
         <div id="trial-url" hidden></div>
+        <p id="results-directory" hidden></p>
+        <p class="note">CSVは各サイト・通信条件の評価終了時に保存されます。</p>
         <section
           id="downloads"
           hidden

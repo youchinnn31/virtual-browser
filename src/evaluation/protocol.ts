@@ -78,7 +78,12 @@ export type ClientMessage =
 
 export type ServerMessage =
   | { action: "connection:ready" }
-  | { action: "run:created"; runId: string; evaluationCount: number }
+  | {
+      action: "run:created";
+      runId: string;
+      resultsDirectory: string;
+      evaluationCount: number;
+    }
   | {
       action: "profile:required";
       runId: string;

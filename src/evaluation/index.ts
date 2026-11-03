@@ -22,7 +22,8 @@ import { EvaluationStore, type EvaluationRecord } from "./store";
 const TARGET_SIZE = (128 / 8) * 1000 * 4;
 const ROOT = path.resolve(__dirname, "..");
 const RESULTS = path.resolve(
-  process.env["EVALUATION_RESULTS_DIR"] ?? "evaluation/results",
+  process.env["EVALUATION_RESULTS_DIR"] ??
+    path.join(ROOT, "..", "..", "evaluation", "results"),
 );
 
 interface Waiter {
@@ -634,6 +635,7 @@ async function main(): Promise<void> {
       send(current.ws, {
         action: "run:created",
         runId: store.runId,
+        resultsDirectory: store.directory,
         evaluationCount:
           current.config.urls.length * current.config.profiles.length,
       });
@@ -679,9 +681,24 @@ async function main(): Promise<void> {
       if (current.store) {
         try {
           await current.store.finish(status, failure);
+          console.log(
+            JSON.stringify({
+              event: "evaluation:results-saved",
+              runId: current.store.runId,
+              resultsDirectory: current.store.directory,
+            }),
+          );
         } catch (error) {
           status = "failed";
           failure = errorText(error);
+          console.error(
+            JSON.stringify({
+              event: "evaluation:save-failed",
+              runId: current.store.runId,
+              resultsDirectory: current.store.directory,
+              error: failure,
+            }),
+          );
         }
         try {
           await current.store.close();
@@ -758,6 +775,7 @@ async function main(): Promise<void> {
       JSON.stringify({
         event: "evaluation:listening",
         port: typeof address === "object" && address ? address.port : port,
+        resultsDirectory: RESULTS,
       }),
     );
   });

@@ -367,6 +367,13 @@ test(
         (element) => element.href,
       );
       const runId = new URL(link).pathname.split("/")[2];
+      assert.equal(
+        await page.$eval(
+          "#results-directory",
+          (element) => element.textContent,
+        ),
+        `サーバPCの保存先：${path.join(root, runId)}`,
+      );
       const db = await open({
         filename: path.join(root, runId, "evaluation.sqlite"),
         driver: sqlite3.Database,

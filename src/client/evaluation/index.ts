@@ -30,6 +30,8 @@ const summaries =
   document.querySelector<HTMLTableSectionElement>("#summaries")!;
 const trials = document.querySelector<HTMLTableSectionElement>("#trials")!;
 const downloads = document.querySelector<HTMLElement>("#downloads")!;
+const resultsDirectoryElement =
+  document.querySelector<HTMLElement>("#results-directory")!;
 
 interface Trial {
   id: string;
@@ -295,6 +297,8 @@ function receive(message: ServerMessage): void {
       break;
     case "run:created":
       runId = message.runId;
+      resultsDirectoryElement.textContent = `サーバPCの保存先：${message.resultsDirectory}`;
+      resultsDirectoryElement.hidden = false;
       statusElement.textContent = `${message.evaluationCount}件の評価を開始します。`;
       break;
     case "profile:required":
@@ -474,6 +478,7 @@ settings.addEventListener("submit", (event) => {
     trials.replaceChildren();
     descriptions.clear();
     downloads.hidden = true;
+    resultsDirectoryElement.hidden = true;
     trialUrl.textContent = "";
     statusElement.textContent = "評価を準備しています…";
     send({ action: "run:start", config, device });
