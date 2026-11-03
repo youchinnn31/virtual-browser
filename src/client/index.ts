@@ -1,6 +1,5 @@
 "use strict";
 
-const PORT = 3000;
 let startTime = 0;
 let endTime = 0;
 let lcp = 0;
@@ -68,7 +67,8 @@ const renderSite = async (blob: Blob, x: number, y: number): Promise<void> => {
   image.src = imgUrl;
 };
 
-const webSocket: WebSocket = new WebSocket(`ws://localhost:${PORT}`);
+const wsScheme = location.protocol === "https:" ? "wss://" : "ws://";
+const webSocket = new WebSocket(wsScheme + location.host);
 const browser: HTMLCanvasElement = getBrowser();
 const urlButton: HTMLButtonElement = getButton("url-button");
 const urlInput: HTMLInputElement = getUrlInput();
@@ -84,6 +84,14 @@ urlButton.addEventListener("click", () => {
     url: url,
   };
   webSocket.send(JSON.stringify(data));
+});
+
+// Canvasの表示座標を、サーバ側ビューポートと同じ内部座標へ変換する。
+browser.addEventListener("click", (event) => {
+  const rect: DOMRect = browser.getBoundingClientRect();
+  const x = (event.clientX - rect.left) * (browser.width / rect.width);
+  const y = (event.clientY - rect.top) * (browser.height / rect.height);
+  webSocket.send(JSON.stringify({ action: "click", x, y }));
 });
 
 let scrollStartY: number;

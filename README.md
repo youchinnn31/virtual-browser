@@ -1,5 +1,24 @@
 # virtual-browser
 
+## 通常利用のブラウザ
+
+```sh
+npm run build:server
+npm run build:client
+npm run copy:client -- --overwrite
+npm start
+```
+
+端末で `http://<サーバPCのIPアドレス>:3000/` を開き、対象URLを送信します。
+Canvas上をクリック・タップすると、サーバのブラウザへ座標を転送し、更新後のビューポート画像を表示します。
+WebSocketは表示中のページと同じホスト・ポートに接続します。自動評価の起動は `npm run evaluation` です。
+
+通常利用のクリック転送は、ローカルHTTPページとChromiumを使って確認できます。
+
+```sh
+node --test test/normal-click.test.mjs
+```
+
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.

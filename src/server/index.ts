@@ -106,31 +106,48 @@ async function main(): Promise<void> {
   // WebSocketサーバの処理
   wss.on("connection", (ws: WebSocket) => {
     console.log("Client connected.");
+    let queue = Promise.resolve();
 
     // リクエストの処理
-    ws.on("message", async (data: string) => {
-      const req: WSRequest = JSON.parse(data);
-      switch (req.action) {
-        case "image": {
-          await getImage(req);
-          break;
-        }
-        case "lcp": {
-          await processSentLcp(req);
-          break;
-        }
-        case "scroll": {
-          await scrollBrowser(req);
-          break;
-        }
-        case "init": {
-          await setConfig(req);
-          break;
-        }
-        default: {
-          break;
-        }
-      }
+    ws.on("message", (data) => {
+      const text =
+        data instanceof ArrayBuffer
+          ? Buffer.from(data).toString("utf8")
+          : Array.isArray(data)
+            ? Buffer.concat(data).toString("utf8")
+            : data.toString("utf8");
+      queue = queue
+        .then(async () => {
+          let req: WSRequest;
+          try {
+            req = JSON.parse(text);
+          } catch (error) {
+            console.error("Invalid WS message (JSON parse failed)", error);
+            return;
+          }
+          switch (req.action) {
+            case "image":
+              await getImage(req);
+              return;
+            case "lcp":
+              await processSentLcp(req);
+              return;
+            case "scroll":
+              await scrollBrowser(req);
+              return;
+            case "init":
+              await setConfig(req);
+              return;
+            case "click":
+              await clickBrowser(req);
+              return;
+            default:
+              return;
+          }
+        })
+        .catch((error) => {
+          console.error("WS handler error", error);
+        });
     });
 
     /**
@@ -278,6 +295,37 @@ async function main(): Promise<void> {
       };
 
       // クライアントにビューポート画像を送信
+      ws.send(JSON.stringify(res));
+    };
+
+    /**
+     * クライアントのクリックを転送し、更新後のビューポート画像を送信する。
+     */
+    const clickBrowser = async (req: WSRequest): Promise<void> => {
+      const navigation = page
+        .waitForNavigation({ waitUntil: "domcontentloaded", timeout: 30000 })
+        .catch(() => null);
+      await page.mouse.click(req.x, req.y);
+      await Promise.race([
+        navigation,
+        new Promise((resolve) => setTimeout(resolve, 300)),
+      ]);
+
+      let screenshot: Buffer = await page.screenshot({ type: "webp" });
+      let resizedWidth =
+        (await sharp(screenshot).metadata()).width ?? DEFAULT_WIDTH;
+      while (screenshot.length > TARGET_SIZE) {
+        resizedWidth = Math.trunc(resizedWidth / 2);
+        screenshot = await sharp(screenshot)
+          .resize(resizedWidth, null)
+          .toBuffer();
+      }
+      const res: WSResponse = {
+        url: page.url(),
+        img: screenshot,
+        x: 0,
+        y: 0,
+      };
       ws.send(JSON.stringify(res));
     };
 
