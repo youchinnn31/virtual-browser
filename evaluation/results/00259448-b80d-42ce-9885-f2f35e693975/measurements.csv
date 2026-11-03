@@ -1,0 +1,7 @@
+﻿evaluation_id,url,charles_profile,trial_id,phase,visit_index,final_url,status,first_image_ms,lcp_images_ms,viewport_ms,all_images_ms,first_image_index,image_count,lcp_image_count,error
+70f576a4-348d-4e06-9759-3fbe7e161e69,https://www.yahoo.co.jp/,128kbps,de80902e-02a9-4682-8c04-d3260389b461,initial,0,https://www.yahoo.co.jp/,success,2767.2999999523163,,2767.2999999523163,2767.2999999523163,1,1,0,
+70f576a4-348d-4e06-9759-3fbe7e161e69,https://www.yahoo.co.jp/,128kbps,441258cc-d9e5-4317-9c9c-9b00b8917bf1,revisit,1,https://www.yahoo.co.jp/,success,2785.5999999046326,2785.5999999046326,3128.0999999046326,3128.0999999046326,1,2,1,
+70f576a4-348d-4e06-9759-3fbe7e161e69,https://www.yahoo.co.jp/,128kbps,61862b86-84dc-49d3-824f-820783782ec1,revisit,2,https://www.yahoo.co.jp/,success,2201.2999999523163,2201.2999999523163,2523.9000000953674,2523.9000000953674,1,2,1,
+70f576a4-348d-4e06-9759-3fbe7e161e69,https://www.yahoo.co.jp/,128kbps,1e5ee4ff-e795-4431-8b55-62b4ec3c15a0,revisit,3,https://www.yahoo.co.jp/,success,1807.0999999046326,1807.0999999046326,2105.2999999523163,2105.2999999523163,1,2,1,
+70f576a4-348d-4e06-9759-3fbe7e161e69,https://www.yahoo.co.jp/,128kbps,e5e84242-49a2-4fec-b471-47f61609e661,revisit,4,https://www.yahoo.co.jp/,success,2035.2999999523163,2035.2999999523163,2334.199999809265,2334.199999809265,1,2,1,
+70f576a4-348d-4e06-9759-3fbe7e161e69,https://www.yahoo.co.jp/,128kbps,17d13b82-0c7d-4ae9-802e-90dc76018bfa,revisit,5,https://www.yahoo.co.jp/,success,2188.9000000953674,2188.9000000953674,2591.5999999046326,2591.5999999046326,1,2,1,
