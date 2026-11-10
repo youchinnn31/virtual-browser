@@ -36,6 +36,9 @@ export function summarize(
   const viewportValues = revisits
     .filter((trial) => trial.viewportMs !== null)
     .map((trial) => trial.viewportMs!);
+  const navigationValues = revisits
+    .filter((trial) => trial.navigationMs !== null)
+    .map((trial) => trial.navigationMs!);
   const lcpComplete =
     initialSucceeded &&
     revisits.length === evaluation.revisitCount &&
@@ -44,12 +47,18 @@ export function summarize(
     initialSucceeded &&
     revisits.length === evaluation.revisitCount &&
     viewportValues.length === evaluation.revisitCount;
+  const navigationComplete =
+    initialSucceeded &&
+    revisits.length === evaluation.revisitCount &&
+    navigationValues.length === evaluation.revisitCount;
   return {
     ...evaluation,
     successfulCount: values.length,
     medianMs: lcpComplete ? median(values) : null,
     viewportSuccessfulCount: viewportValues.length,
     viewportMedianMs: viewportComplete ? median(viewportValues) : null,
+    navigationCompletedCount: navigationValues.length,
+    navigationMedianMs: navigationComplete ? median(navigationValues) : null,
     status: lcpComplete && viewportComplete ? "complete" : "incomplete",
   };
 }
@@ -98,6 +107,7 @@ export async function exportReports(
       "image_count",
       "lcp_image_count",
       "error",
+      "navigation_ms",
     ],
   ];
   for (const trial of trials) {
@@ -119,6 +129,7 @@ export async function exportReports(
       trial.imageCount,
       trial.lcpImageCount,
       trial.error,
+      trial.navigationMs,
     ]);
   }
   const aggregate: unknown[][] = [
@@ -132,6 +143,8 @@ export async function exportReports(
       "viewport_successful_count",
       "median_viewport_ms",
       "status",
+      "navigation_completed_count",
+      "median_navigation_ms",
     ],
   ];
   for (const summary of summaries) {
@@ -145,6 +158,8 @@ export async function exportReports(
       summary.viewportSuccessfulCount,
       summary.viewportMedianMs,
       summary.status,
+      summary.navigationCompletedCount,
+      summary.navigationMedianMs,
     ]);
   }
   for (const [name, rows] of [

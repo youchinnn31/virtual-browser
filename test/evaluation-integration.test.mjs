@@ -247,6 +247,10 @@ test(
       }
       const visit = (visits.get(url) ?? 0) + 1;
       visits.set(url, visit);
+      if (url === "/navigation-failure" && visit > 1) {
+        req.socket.destroy();
+        return;
+      }
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       if (url === "/missing") {
         res.end(
@@ -324,6 +328,31 @@ test(
             (message) => message.action === "evaluation:complete",
           );
           assert.equal(summaries.length, 4);
+          const saved = result.messages
+            .filter((message) => message.action === "trial:saved")
+            .map((message) => message.result);
+          assert.ok(
+            saved
+              .filter((trial) => trial.phase === "initial")
+              .every((trial) => trial.navigationMs === null),
+          );
+          for (const { summary } of summaries) {
+            const navigationValues = saved
+              .filter(
+                (trial) =>
+                  trial.evaluationId === summary.evaluationId &&
+                  trial.phase === "revisit",
+              )
+              .map((trial) => trial.navigationMs)
+              .sort((a, b) => a - b);
+            assert.ok(
+              navigationValues.every(
+                (value) => Number.isFinite(value) && value > 0,
+              ),
+            );
+            assert.equal(summary.navigationCompletedCount, 5);
+            assert.equal(summary.navigationMedianMs, navigationValues[2]);
+          }
           assert.ok(
             summaries.every(
               (message) =>
@@ -367,7 +396,8 @@ test(
               (message) =>
                 message.result.status === "failed" &&
                 message.result.error === "no_matching_lcp_element" &&
-                message.result.imageCount === 0,
+                message.result.imageCount === 0 &&
+                message.result.navigationMs > 0,
             ),
           );
           assert.equal(
@@ -376,6 +406,35 @@ test(
             ).summary.medianMs,
             null,
           );
+          const summary = result.messages.find(
+            (message) => message.action === "evaluation:complete",
+          ).summary;
+          assert.equal(summary.navigationCompletedCount, 2);
+          assert.ok(summary.navigationMedianMs > 0);
+        },
+      );
+      await t.test(
+        "failed navigation has no duration or formal navigation median",
+        async () => {
+          const result = await runClient(server.port, {
+            urls: [origin + "/navigation-failure"],
+            profiles: ["test"],
+            revisitCount: 1,
+            trialTimeoutMs: 20000,
+          });
+          const revisit = result.messages.find(
+            (message) =>
+              message.action === "trial:saved" &&
+              message.result.phase === "revisit",
+          ).result;
+          assert.equal(revisit.status, "failed");
+          assert.equal(revisit.navigationMs, null);
+          assert.match(revisit.error, /net::ERR_/);
+          const summary = result.messages.find(
+            (message) => message.action === "evaluation:complete",
+          ).summary;
+          assert.equal(summary.navigationCompletedCount, 0);
+          assert.equal(summary.navigationMedianMs, null);
         },
       );
       await t.test(
@@ -399,15 +458,15 @@ test(
           assert.equal(initial.status, "failed");
           assert.equal(initial.firstImageMs, 1);
           assert.equal(initial.allImagesMs, null);
+          assert.equal(initial.navigationMs, null);
           assert.equal(initial.error, "trial_timeout");
-          assert.equal(
-            result.messages.find(
-              (message) =>
-                message.action === "trial:saved" &&
-                message.result.phase === "revisit",
-            ).result.status,
-            "skipped",
-          );
+          const skipped = result.messages.find(
+            (message) =>
+              message.action === "trial:saved" &&
+              message.result.phase === "revisit",
+          ).result;
+          assert.equal(skipped.status, "skipped");
+          assert.equal(skipped.navigationMs, null);
         },
       );
       await t.test(
@@ -464,6 +523,9 @@ test(
           assert.equal(summary.successfulCount, 1);
           assert.equal(summary.viewportMedianMs, null);
           assert.equal(summary.viewportSuccessfulCount, 0);
+          assert.ok(revisit.navigationMs > 0);
+          assert.equal(summary.navigationCompletedCount, 1);
+          assert.equal(summary.navigationMedianMs, revisit.navigationMs);
         },
       );
       await t.test(
@@ -492,6 +554,8 @@ test(
           assert.equal(revisit.error, "trial_timeout");
           assert.equal(revisit.lcpImagesMs, null);
           assert.equal(revisit.viewportMs, null);
+          assert.ok(revisit.navigationMs > 0);
+          assert.ok(revisit.navigationMs < 2500);
         },
       );
       await t.test(

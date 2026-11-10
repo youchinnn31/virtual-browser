@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { performance } from "node:perf_hooks";
 import express from "express";
 import puppeteer, { type BrowserContext, type Page } from "puppeteer";
 import sharp from "sharp";
@@ -42,6 +43,7 @@ interface ActiveTrial {
   lcpImagesSent: boolean;
   lcpImagesMs: number | null;
   viewportMs: number | null;
+  navigationMs: number | null;
   imagesEnded: boolean;
   started: boolean;
   metric: Extract<ClientMessage, { action: "trial:metric" }> | null;
@@ -258,7 +260,10 @@ async function renderImages(
   if (phase === "initial") page.on("console", collect);
   try {
     // Do not override Puppeteer's default navigation timeout.
+    const navigationStartedAt = phase === "revisit" ? performance.now() : null;
     await page.goto(evaluation.url, { waitUntil: "networkidle2" });
+    if (navigationStartedAt !== null)
+      trial.navigationMs = performance.now() - navigationStartedAt;
     if (phase === "initial") {
       // Drain entries already queued at the boundary, without another wait period.
       await page.evaluate(() => {
@@ -361,6 +366,7 @@ async function runTrial(
     lcpImagesSent: false,
     lcpImagesMs: null,
     viewportMs: null,
+    navigationMs: null,
     imagesEnded: false,
     started: false,
     metric: null,
@@ -389,6 +395,7 @@ async function runTrial(
     lcpImagesMs: null,
     viewportMs: null,
     allImagesMs: null,
+    navigationMs: null,
     firstImageIndex: null,
     imageCount: 0,
     lcpImageCount: 0,
@@ -459,6 +466,7 @@ async function runTrial(
     result.lcpImagesMs = trial.lcpImagesMs;
     result.viewportMs = trial.viewportMs;
     result.allImagesMs = trial.viewportMs;
+    result.navigationMs = trial.navigationMs;
     if (result.finalUrl === "" && !page.isClosed())
       result.finalUrl = page.url();
     session.trial = null;
@@ -494,6 +502,7 @@ async function skipTrials(
       lcpImagesMs: null,
       viewportMs: null,
       allImagesMs: null,
+      navigationMs: null,
       firstImageIndex: null,
       imageCount: 0,
       lcpImageCount: 0,

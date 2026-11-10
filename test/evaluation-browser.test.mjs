@@ -389,6 +389,12 @@ test(
         );
         assert.equal(values.length, 5);
         assert.equal(evaluations[0].median_ms, values[2].first_image_ms);
+        assert.equal(evaluations[0].navigation_completed_count, 5);
+        assert.equal(
+          evaluations[0].navigation_median_ms,
+          [...values].sort((a, b) => a.navigation_ms - b.navigation_ms)[2]
+            .navigation_ms,
+        );
         assert.equal(
           evaluations[0].viewport_median_ms,
           [...values].sort((a, b) => a.viewport_ms - b.viewport_ms)[2]
@@ -400,6 +406,7 @@ test(
               value.lcp_image_count >= 2 &&
               value.image_count === value.lcp_image_count + 1 &&
               value.viewport_ms < value.lcp_images_ms &&
+              value.navigation_ms > 0 &&
               value.first_image_ms === value.viewport_ms &&
               value.lcp_images_ms >= value.first_image_ms,
           ),
@@ -413,15 +420,24 @@ test(
             }),
         );
         assert.equal(evaluations[1].median_ms, null);
+        assert.equal(evaluations[1].navigation_completed_count, 5);
+        assert.ok(evaluations[1].navigation_median_ms > 0);
         const missing = await db.all(
           "SELECT * FROM trials WHERE evaluation_id = ? AND phase = 'revisit'",
           evaluations[1].id,
         );
         assert.ok(
           missing.every(
-            (value) => value.status === "failed" && value.image_count === 0,
+            (value) =>
+              value.status === "failed" &&
+              value.image_count === 0 &&
+              value.navigation_ms > 0,
           ),
         );
+        const initial = await db.all(
+          "SELECT navigation_ms FROM trials WHERE phase = 'initial'",
+        );
+        assert.ok(initial.every((value) => value.navigation_ms === null));
         const run = await db.get("SELECT * FROM runs");
         assert.equal(JSON.parse(run.device_json).devicePixelRatio, 2);
         assert.equal(JSON.parse(run.device_json).width, legacyDevice.width);

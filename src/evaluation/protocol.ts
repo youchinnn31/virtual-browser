@@ -33,6 +33,7 @@ export interface TrialResult {
   lcpImagesMs: number | null;
   viewportMs: number | null;
   allImagesMs: number | null;
+  navigationMs: number | null;
   firstImageIndex: number | null;
   imageCount: number;
   lcpImageCount: number;
@@ -48,6 +49,8 @@ export interface Summary {
   medianMs: number | null;
   viewportSuccessfulCount: number;
   viewportMedianMs: number | null;
+  navigationCompletedCount: number;
+  navigationMedianMs: number | null;
   status: "complete" | "incomplete";
 }
 

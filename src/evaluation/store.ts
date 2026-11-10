@@ -53,7 +53,8 @@ export class EvaluationStore {
           url TEXT NOT NULL, profile TEXT NOT NULL, revisit_count INTEGER NOT NULL,
           status TEXT NOT NULL DEFAULT 'incomplete', successful_count INTEGER NOT NULL DEFAULT 0,
           median_ms REAL, viewport_successful_count INTEGER NOT NULL DEFAULT 0,
-          viewport_median_ms REAL, UNIQUE(run_id, url, profile)
+          viewport_median_ms REAL, navigation_completed_count INTEGER NOT NULL DEFAULT 0,
+          navigation_median_ms REAL, UNIQUE(run_id, url, profile)
         );
         CREATE TABLE candidates (
           id INTEGER PRIMARY KEY, evaluation_id TEXT NOT NULL REFERENCES evaluations(id),
@@ -66,6 +67,7 @@ export class EvaluationStore {
           status TEXT NOT NULL DEFAULT 'running', first_image_ms REAL, lcp_images_ms REAL,
           viewport_ms REAL, all_images_ms REAL, first_image_index INTEGER,
           image_count INTEGER NOT NULL DEFAULT 0, lcp_image_count INTEGER NOT NULL DEFAULT 0, error TEXT,
+          navigation_ms REAL,
           UNIQUE(evaluation_id, phase, visit_index)
         );
       `);
@@ -156,7 +158,7 @@ export class EvaluationStore {
     await this.db.run(
       `UPDATE trials SET ended_at = ?, final_url = ?, status = ?, first_image_ms = ?,
        lcp_images_ms = ?, viewport_ms = ?, all_images_ms = ?, first_image_index = ?,
-       image_count = ?, lcp_image_count = ?, error = ?
+       image_count = ?, lcp_image_count = ?, error = ?, navigation_ms = ?
        WHERE trial_id = ? AND evaluation_id = ?`,
       new Date().toISOString(),
       result.finalUrl,
@@ -169,6 +171,7 @@ export class EvaluationStore {
       result.imageCount,
       result.lcpImageCount,
       result.error,
+      result.navigationMs,
       result.trialId,
       result.evaluationId,
     );
@@ -180,7 +183,7 @@ export class EvaluationStore {
       first_image_ms AS firstImageMs, lcp_images_ms AS lcpImagesMs,
       viewport_ms AS viewportMs, all_images_ms AS allImagesMs,
       first_image_index AS firstImageIndex, image_count AS imageCount,
-      lcp_image_count AS lcpImageCount, error`;
+      lcp_image_count AS lcpImageCount, error, navigation_ms AS navigationMs`;
     return evaluationId === undefined
       ? this.db.all<TrialResult[]>(
           `SELECT ${columns} FROM trials ORDER BY rowid`,
@@ -197,12 +200,14 @@ export class EvaluationStore {
       await this.getTrials(evaluation.evaluationId),
     );
     await this.db.run(
-      "UPDATE evaluations SET status = ?, successful_count = ?, median_ms = ?, viewport_successful_count = ?, viewport_median_ms = ? WHERE id = ?",
+      "UPDATE evaluations SET status = ?, successful_count = ?, median_ms = ?, viewport_successful_count = ?, viewport_median_ms = ?, navigation_completed_count = ?, navigation_median_ms = ? WHERE id = ?",
       summary.status,
       summary.successfulCount,
       summary.medianMs,
       summary.viewportSuccessfulCount,
       summary.viewportMedianMs,
+      summary.navigationCompletedCount,
+      summary.navigationMedianMs,
       summary.evaluationId,
     );
     return summary;

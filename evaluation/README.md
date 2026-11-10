@@ -145,6 +145,10 @@ evaluation/results/<runId>/
 - `measurements.csv`: 初回と各再アクセスの生データ。`first_image_ms` が最初の画像描画時間、`lcp_images_ms` が全LCP候補描画完了時間、`viewport_ms` がビューポート完了時間です。初回の `first_image_ms` は参考値です。
 - `summary.csv`: 全サイト・通信条件を並べた、LCP中央値 (`median_client_lcp_image_ms`) とビューポート中央値 (`median_viewport_ms`)、それぞれの成功数・指定n回・評価状態。
 
+`measurements.csv` の末尾の `navigation_ms` は、再アクセス時にサーバ側で `page.goto()` を呼び出す直前から、`waitUntil: "networkidle2"` で解決した直後までの経過時間です。単位はミリ秒で、サーバの単調時計を使います。初回アクセスは計測対象外で空欄です。画像化・転送・端末描画の時間は含めません。
+`summary.csv` の末尾には `navigation_completed_count` と `median_navigation_ms` を出力します。初回を除く指定n回すべてでページ遷移時間を取得できた場合に中央値を算出し、欠測があれば中央値は空欄とします。
+`goto` が成功していれば、その後の候補取得・画像処理・描画が失敗してもページ遷移時間を保存・集計します。`goto` のタイムアウト・エラーとスキップはNULLで、タイムアウト上限を計測値として代入しません。既存のLCP・ビューポートの成功数や評価状態とは独立した集計です。
+
 画面のLCP枚数は候補画像の送信数、総枚数は候補画像とビューポート画像を合わせた送信数です。
 互換用の `all_images_ms` 列は `viewport_ms` と同じ値です。新規評価のDBに列を追加する方式で、以前の評価DBは書き換えません。
 

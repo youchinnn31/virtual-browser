@@ -110,6 +110,7 @@ test("one run keeps candidates isolated and exports only the n revisit values in
           lcpImagesMs: index === 0 || lcpFailed ? null : index * 100 + 5,
           viewportMs: failed ? null : 100000,
           allImagesMs: failed ? null : 100000,
+          navigationMs: index === 0 || lcpFailed ? null : index * 10,
           firstImageIndex: 1,
           imageCount: index === 0 ? 1 : 3,
           lcpImageCount: index === 0 ? 0 : 2,
@@ -121,15 +122,29 @@ test("one run keeps candidates isolated and exports only the n revisit values in
     assert.equal(complete.medianMs, 300);
     assert.equal(complete.successfulCount, 5);
     assert.equal(complete.viewportMedianMs, 100000);
+    assert.equal(complete.navigationCompletedCount, 5);
+    assert.equal(complete.navigationMedianMs, 30);
     const incomplete = await store.summarize(second);
     assert.equal(incomplete.medianMs, null);
     assert.equal(incomplete.successfulCount, 4);
     assert.equal(incomplete.status, "incomplete");
+    assert.equal(incomplete.navigationCompletedCount, 4);
+    assert.equal(incomplete.navigationMedianMs, null);
     const viewportFailure = await store.summarize(third);
     assert.equal(viewportFailure.medianMs, 300);
     assert.equal(viewportFailure.successfulCount, 5);
     assert.equal(viewportFailure.viewportSuccessfulCount, 4);
     assert.equal(viewportFailure.viewportMedianMs, null);
+    assert.equal(viewportFailure.navigationCompletedCount, 5);
+    assert.equal(viewportFailure.navigationMedianMs, 30);
+    const stored = await store.getTrials(first.evaluationId);
+    assert.deepEqual(
+      stored.map((trial) => trial.navigationMs),
+      [null, 10, 20, 30, 40, 50],
+    );
+    const failed = (await store.getTrials(third.evaluationId)).at(-1);
+    assert.equal(failed.status, "failed");
+    assert.equal(failed.navigationMs, 50);
     await store.finish("completed", null);
     const raw = await fs.readFile(
       path.join(store.directory, "measurements.csv"),
@@ -145,6 +160,17 @@ test("one run keeps candidates isolated and exports only the n revisit values in
     assert.match(summary, /5,4,,4,,incomplete/);
     assert.match(summary, /5,5,300,4,,incomplete/);
     assert.match(summary, /"slow,""network"""/);
+    assert.ok(raw.split("\r\n")[0].endsWith(",navigation_ms"));
+    assert.ok(raw.split("\r\n")[1].endsWith(","));
+    assert.ok(raw.split("\r\n")[6].endsWith(",50"));
+    assert.ok(
+      summary
+        .split("\r\n")[0]
+        .endsWith(",navigation_completed_count,median_navigation_ms"),
+    );
+    assert.ok(summary.split("\r\n")[1].endsWith(",complete,5,30"));
+    assert.ok(summary.split("\r\n")[2].endsWith(",incomplete,4,"));
+    assert.ok(summary.split("\r\n")[3].endsWith(",incomplete,5,30"));
     assert.equal((await fs.readdir(root)).length, 1);
   } finally {
     await store.close();
