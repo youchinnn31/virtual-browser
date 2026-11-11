@@ -1,0 +1,3 @@
+﻿evaluation_id,url,charles_profile,revisit_count,successful_count,median_client_lcp_image_ms,viewport_successful_count,median_viewport_ms,status,navigation_completed_count,median_navigation_ms
+fa18331c-c08e-40d3-a7b9-0f0618010d4b,https://www.google.com/,128kbps,5,0,,0,,incomplete,5,1034.2933380000013
+5b5d4756-1c01-406a-9c44-b7eb9b621db8,https://m.yahoo.co.jp/,128kbps,5,1,,1,,incomplete,1,

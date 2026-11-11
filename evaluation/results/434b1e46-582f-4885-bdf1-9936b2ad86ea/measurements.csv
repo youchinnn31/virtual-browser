@@ -1,0 +1,13 @@
+﻿evaluation_id,url,charles_profile,trial_id,phase,visit_index,final_url,status,first_image_ms,lcp_images_ms,viewport_ms,all_images_ms,first_image_index,image_count,lcp_image_count,error,navigation_ms
+fa18331c-c08e-40d3-a7b9-0f0618010d4b,https://www.google.com/,128kbps,a3c03c67-9604-441c-ac11-ba50d12aa825,initial,0,https://www.google.com/?zx=1794324292608,success,1302.1000000014901,,1302.1000000014901,1302.1000000014901,1,1,0,,
+fa18331c-c08e-40d3-a7b9-0f0618010d4b,https://www.google.com/,128kbps,49aedd74-1cf0-4e68-bacd-556f5a7c0757,revisit,1,https://www.google.com/,failed,,,,,,0,0,no_matching_lcp_element,1034.2933380000013
+fa18331c-c08e-40d3-a7b9-0f0618010d4b,https://www.google.com/,128kbps,b4336153-ee8a-4315-a268-b92d34ebf3da,revisit,2,https://www.google.com/,failed,,,,,,0,0,no_matching_lcp_element,1097.7614130000002
+fa18331c-c08e-40d3-a7b9-0f0618010d4b,https://www.google.com/,128kbps,c2687cef-925c-4a02-a915-d5a1cc5cfd1e,revisit,3,https://www.google.com/,failed,,,,,,0,0,no_matching_lcp_element,909.9558080000006
+fa18331c-c08e-40d3-a7b9-0f0618010d4b,https://www.google.com/,128kbps,102034fd-aab1-446a-b08f-36aace0df02e,revisit,4,https://www.google.com/,failed,,,,,,0,0,no_matching_lcp_element,855.6715740000018
+fa18331c-c08e-40d3-a7b9-0f0618010d4b,https://www.google.com/,128kbps,fa2ba3a9-addf-4e57-a03e-846f329e43ba,revisit,5,https://www.google.com/,failed,,,,,,0,0,no_matching_lcp_element,1040.7868999999992
+5b5d4756-1c01-406a-9c44-b7eb9b621db8,https://m.yahoo.co.jp/,128kbps,afdc3a09-2e38-448e-9f76-14db59f58388,initial,0,https://www.yahoo.co.jp/,success,7406.19999999553,,7406.19999999553,7406.19999999553,1,1,0,,
+5b5d4756-1c01-406a-9c44-b7eb9b621db8,https://m.yahoo.co.jp/,128kbps,8dd4069c-59bf-443b-9f60-c3861ec86b6c,revisit,1,https://www.yahoo.co.jp/,success,8883.69999999553,8883.69999999553,8986.60000000149,8986.60000000149,1,2,1,,8748.614896
+5b5d4756-1c01-406a-9c44-b7eb9b621db8,https://m.yahoo.co.jp/,128kbps,c44112e9-c7f8-46fe-92fe-0bf80ee41e9e,revisit,2,,failed,,,,,,0,0,client_hidden,
+5b5d4756-1c01-406a-9c44-b7eb9b621db8,https://m.yahoo.co.jp/,128kbps,2ada045d-0b6e-45db-bdd1-8f0923e9c044,revisit,3,,skipped,,,,,,0,0,evaluation_browser_closed,
+5b5d4756-1c01-406a-9c44-b7eb9b621db8,https://m.yahoo.co.jp/,128kbps,0132ebed-3d94-4d40-a745-4612ee23ef75,revisit,4,,skipped,,,,,,0,0,evaluation_browser_closed,
+5b5d4756-1c01-406a-9c44-b7eb9b621db8,https://m.yahoo.co.jp/,128kbps,060114b7-e397-4f0c-bacc-01892b83d682,revisit,5,,skipped,,,,,,0,0,evaluation_browser_closed,

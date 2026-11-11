@@ -1,0 +1,5 @@
+﻿evaluation_id,url,charles_profile,revisit_count,successful_count,median_client_lcp_image_ms,viewport_successful_count,median_viewport_ms,status
+bf5d771e-9d4d-4447-bb36-34b1e5dd2944,https://www.google.com/,128kbps,5,0,,0,,incomplete
+440ad17f-21d6-4708-86b3-58c8d92c0f61,https://m.yahoo.co.jp/,128kbps,5,5,1525.7000000476837,5,1703.8999998569489,complete
+f373e9b0-4398-499c-8f7a-2b1116007a8b,https://m.youtube.com/,128kbps,5,5,2749.699999809265,5,2889.699999809265,complete
+a984eb4b-b284-4b74-8573-7a2e017fd6a0,https://news.yahoo.co.jp/,128kbps,5,4,,4,,incomplete
